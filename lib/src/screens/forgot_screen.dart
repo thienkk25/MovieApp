@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:movie_app/src/services/auth_service.dart';
+import 'package:movie_app/src/controllers/user_controller.dart';
 
 class ForgotScreen extends StatefulWidget {
   const ForgotScreen({super.key});
@@ -10,7 +10,7 @@ class ForgotScreen extends StatefulWidget {
 }
 
 class _ForgotScreenState extends State<ForgotScreen> {
-  AuthService authService = AuthService();
+  UserController userController = UserController();
   TextEditingController emailController = TextEditingController();
   TextEditingController pwController = TextEditingController();
   // Regular expression for email validation
@@ -44,7 +44,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
             height: 20,
           ),
           SizedBox(
-            width: MediaQuery.of(context).size.width / 1.5,
+            width: MediaQuery.of(context).size.width / 1.2,
             child: Form(
               key: keyForm,
               child: Column(
@@ -102,13 +102,14 @@ class _ForgotScreenState extends State<ForgotScreen> {
                     children: [
                       Text(
                         "Bạn đã có tài khoản?",
-                        style: TextStyle(color: Colors.grey[400]),
+                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: const Text(
                           "Đăng nhập",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                       ),
                     ],
@@ -130,7 +131,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
         child: CircularProgressIndicator(),
       ),
     );
-    final result = await authService.forgot(email);
+    final result = await userController.forgot(email);
     if (!mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(

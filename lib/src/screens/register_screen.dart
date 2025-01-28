@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:movie_app/src/services/auth_service.dart';
+import 'package:movie_app/src/controllers/user_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -10,11 +10,11 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  UserController userController = UserController();
   TextEditingController hvtController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController pwController = TextEditingController();
   TextEditingController rePwController = TextEditingController();
-  AuthService authService = AuthService();
   // Regular expression for email validation
   final RegExp emailRegExp = RegExp(
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
@@ -48,7 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             height: 20,
           ),
           SizedBox(
-            width: MediaQuery.of(context).size.width / 1.5,
+            width: MediaQuery.of(context).size.width / 1.2,
             child: Form(
               key: keyForm,
               child: Column(
@@ -193,13 +193,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       Text(
                         "Bạn đã có tài khoản?",
-                        style: TextStyle(color: Colors.grey[400]),
+                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: const Text(
                           "Đăng nhập",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                       ),
                     ],
@@ -221,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: CircularProgressIndicator(),
       ),
     );
-    final result = await authService.register(name, email, password);
+    final result = await userController.register(name, email, password);
     if (!mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(

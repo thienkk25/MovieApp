@@ -58,4 +58,21 @@ class AuthService {
       return "Có lỗi!";
     }
   }
+
+  Future<String> signOut() async {
+    final firebaseAuth = FirebaseAuth.instance;
+    try {
+      await firebaseAuth.signOut();
+      return "Đăng xuất thành công";
+    } catch (e) {
+      return "Có lỗi!";
+    }
+  }
+
+  bool isUser() {
+    final firebaseAuth = FirebaseAuth.instance;
+    final user = firebaseAuth.currentUser;
+    if (user != null) return true;
+    return false;
+  }
 }

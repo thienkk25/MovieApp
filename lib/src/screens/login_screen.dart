@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:movie_app/src/controllers/user_controller.dart';
 import 'package:movie_app/src/screens/forgot_screen.dart';
+import 'package:movie_app/src/screens/home_screen.dart';
 import 'package:movie_app/src/screens/register_screen.dart';
-import 'package:movie_app/src/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,7 +13,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  AuthService authService = AuthService();
+  UserController userController = UserController();
   TextEditingController emailController = TextEditingController();
   TextEditingController pwController = TextEditingController();
   // Regular expression for email validation
@@ -53,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 20,
             ),
             SizedBox(
-              width: MediaQuery.of(context).size.width / 1.5,
+              width: MediaQuery.of(context).size.width / 1.2,
               child: Form(
                 key: keyForm,
                 child: Column(
@@ -153,7 +154,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text(
                           "Bạn chưa có tài khoản?",
-                          style: TextStyle(color: Colors.grey[400]),
+                          style:
+                              TextStyle(color: Colors.grey[400], fontSize: 12),
                         ),
                         GestureDetector(
                           onTap: () => Navigator.push(
@@ -162,7 +164,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   builder: (_) => const RegisterScreen())),
                           child: const Text(
                             "Đăng ký",
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 12),
                           ),
                         ),
                       ],
@@ -185,8 +188,16 @@ class _LoginScreenState extends State<LoginScreen> {
         child: CircularProgressIndicator(),
       ),
     );
-    final result = await authService.login(email, password);
+    final result = await userController.login(email, password);
+    final isUser = userController.isUser();
     if (!mounted) return;
+    if (isUser) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+        (route) => false,
+      );
+    }
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(result),
