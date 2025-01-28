@@ -8,9 +8,8 @@ class AuthService {
       await firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
       return "Đăng nhập thành công";
-    } on FirebaseAuthException catch (e) {
-      print(e.code);
-      return "Đăng nhập thất bại";
+    } on FirebaseAuthException {
+      return "Email hoặc Mật khẩu không chính xác!";
     } catch (e) {
       return "Có lỗi!";
     }
@@ -33,7 +32,15 @@ class AuthService {
       });
       return "Đăng ký thành công";
     } on FirebaseAuthException catch (e) {
-      print(e.code);
+      if (e.code == "email-already-in-use") {
+        return "Email đã tồn tại!";
+      } else if (e.code == "invalid-email") {
+        return "Email không đúng định dạng!";
+      } else if (e.code == "weak-password") {
+        return "Mật khẩu yếu";
+      } else if (e.code == "operation-not-allowed") {
+        return "Tài khoản đã bị khoá hoặc đóng. Vui lòng liên hệ với admin!";
+      }
       return "Đăng ký thất bại";
     } catch (e) {
       return "Có lỗi!";
@@ -45,8 +52,7 @@ class AuthService {
     try {
       await firebaseAuth.sendPasswordResetEmail(email: email);
       return "Gửi thành công";
-    } on FirebaseAuthException catch (e) {
-      print(e.code);
+    } on FirebaseAuthException {
       return "Gửi thất bại";
     } catch (e) {
       return "Có lỗi!";

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:movie_app/src/services/auth_service.dart';
 
 class ForgotScreen extends StatefulWidget {
   const ForgotScreen({super.key});
@@ -9,6 +10,7 @@ class ForgotScreen extends StatefulWidget {
 }
 
 class _ForgotScreenState extends State<ForgotScreen> {
+  AuthService authService = AuthService();
   TextEditingController emailController = TextEditingController();
   TextEditingController pwController = TextEditingController();
   // Regular expression for email validation
@@ -72,8 +74,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
                   GestureDetector(
                     onTap: () {
                       if (keyForm.currentState!.validate()) {
-                        // TODO
-                        forgot();
+                        forgot(emailController.text);
                       }
                     },
                     child: Container(
@@ -121,5 +122,20 @@ class _ForgotScreenState extends State<ForgotScreen> {
     );
   }
 
-  void forgot() {}
+  Future<void> forgot(String email) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    final result = await authService.forgot(email);
+    if (!mounted) return;
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(result),
+      duration: const Duration(milliseconds: 300),
+    ));
+  }
 }

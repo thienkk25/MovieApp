@@ -164,7 +164,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   GestureDetector(
                     onTap: () {
                       if (keyForm.currentState!.validate()) {
-                        // TODO
                         register(hvtController.text, emailController.text,
                             pwController.text);
                       }
@@ -215,6 +214,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> register(String name, String email, String password) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
     final result = await authService.register(name, email, password);
+    if (!mounted) return;
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(result),
+      duration: const Duration(milliseconds: 300),
+    ));
   }
 }

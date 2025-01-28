@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:movie_app/src/screens/forgot_screen.dart';
 import 'package:movie_app/src/screens/register_screen.dart';
+import 'package:movie_app/src/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,6 +12,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  AuthService authService = AuthService();
   TextEditingController emailController = TextEditingController();
   TextEditingController pwController = TextEditingController();
   // Regular expression for email validation
@@ -123,8 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     GestureDetector(
                       onTap: () {
                         if (keyForm.currentState!.validate()) {
-                          // TODO
-                          login();
+                          login(emailController.text, pwController.text);
                         }
                       },
                       child: Container(
@@ -176,5 +177,20 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void login() {}
+  Future<void> login(String email, String password) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    final result = await authService.login(email, password);
+    if (!mounted) return;
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(result),
+      duration: const Duration(milliseconds: 300),
+    ));
+  }
 }
