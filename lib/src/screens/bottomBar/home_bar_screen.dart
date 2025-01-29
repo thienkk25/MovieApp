@@ -11,11 +11,14 @@ class HomeBarScreen extends StatefulWidget {
 
 class _HomeBarScreenState extends State<HomeBarScreen> {
   ScrollController filterScrollController = ScrollController();
-  double filterOffset = 0.0;
-  ScrollController newMovieScrollController = ScrollController();
-  double newMovieOffset = 0.0;
+  late double filterOffset;
   @override
   void initState() {
+    listenScrollControllers();
+    super.initState();
+  }
+
+  void listenScrollControllers() {
     filterScrollController.addListener(
       () {
         setState(() {
@@ -23,20 +26,12 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
         });
       },
     );
-    newMovieScrollController.addListener(
-      () {
-        setState(() {
-          newMovieOffset = newMovieScrollController.offset;
-        });
-      },
-    );
-    super.initState();
   }
 
   @override
   void dispose() {
+    filterScrollController.removeListener(listenScrollControllers);
     filterScrollController.dispose();
-    newMovieScrollController.dispose();
     super.dispose();
   }
 
@@ -47,6 +42,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
         title: const Text("Trang chủ"),
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
@@ -90,7 +86,8 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                         itemCount: 15,
                         itemBuilder: (context, index) {
                           double opacity = 1.0;
-                          if (index < filterOffset / 100 - .4) {
+                          if (index <
+                              filterScrollController.offset / 100 - .4) {
                             opacity = 0.3;
                           }
 
@@ -141,7 +138,6 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
               SizedBox(
                 height: 250,
                 child: ListView.builder(
-                  // controller: newMovieScrollController,
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true,
                   itemCount: 15,
@@ -150,11 +146,12 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                       width: 160,
                       margin: const EdgeInsets.only(right: 10),
                       decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [Color(0xff30cfd0), Color(0xff330867)])),
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xff30cfd0), Color(0xff330867)]),
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -207,43 +204,45 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
                     childAspectRatio: 4.0),
-                itemBuilder: (context, index) => Container(
-                  width: 200,
-                  decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xff30cfd0), Color(0xff330867)])),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        clipBehavior: Clip.antiAlias,
-                        borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(5),
-                            topLeft: Radius.circular(5)),
-                        child: CachedNetworkImage(
-                          imageUrl:
-                              "https://phimimg.com/upload/vod/20250128-1/ede258f75b02c54deeb80dd9f8d43565.jpg",
-                          progressIndicatorBuilder: (context, url, progress) =>
-                              const Center(
-                            child: CircularProgressIndicator(),
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 200,
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xff30cfd0), Color(0xff330867)])),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          clipBehavior: Clip.antiAlias,
+                          borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(5),
+                              topLeft: Radius.circular(5)),
+                          child: CachedNetworkImage(
+                            imageUrl:
+                                "https://phimimg.com/upload/vod/20250128-1/ede258f75b02c54deeb80dd9f8d43565.jpg",
+                            progressIndicatorBuilder:
+                                (context, url, progress) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
+                            height: 200,
+                            width: double.infinity,
+                            fit: BoxFit.fill,
                           ),
-                          errorWidget: (context, url, error) =>
-                              const Icon(Icons.error),
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.fill,
                         ),
-                      ),
-                      const Text(
-                        "Name",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
+                        const Text(
+                          "Name",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ].animate(interval: 500.ms).fadeIn(duration: 500.ms),
           ),
