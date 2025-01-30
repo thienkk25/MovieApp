@@ -72,7 +72,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                             borderRadius: BorderRadius.circular(10)),
                         itemExtent: MediaQuery.of(context).size.width / 2,
                         children: List.generate(
-                          14,
+                          6,
                           (index) => Container(
                             width: 60,
                             decoration: const BoxDecoration(
