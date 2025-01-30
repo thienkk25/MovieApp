@@ -191,6 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final result = await userController.login(email, password);
     final isUser = userController.isUser();
     if (!mounted) return;
+    Navigator.pop(context);
     if (isUser) {
       Navigator.pushAndRemoveUntil(
         context,
@@ -198,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
         (route) => false,
       );
     }
-    Navigator.pop(context);
+
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(result),
       duration: const Duration(milliseconds: 300),

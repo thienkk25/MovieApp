@@ -166,6 +166,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (keyForm.currentState!.validate()) {
                         register(hvtController.text, emailController.text,
                             pwController.text);
+                        hvtController.clear();
+                        emailController.clear();
+                        pwController.clear();
+                        rePwController.clear();
                       }
                     },
                     child: Container(

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 
 class HomeBarScreen extends StatefulWidget {
   const HomeBarScreen({super.key});
@@ -10,28 +11,13 @@ class HomeBarScreen extends StatefulWidget {
 }
 
 class _HomeBarScreenState extends State<HomeBarScreen> {
-  ScrollController filterScrollController = ScrollController();
-  late double filterOffset;
   @override
   void initState() {
-    listenScrollControllers();
     super.initState();
-  }
-
-  void listenScrollControllers() {
-    filterScrollController.addListener(
-      () {
-        setState(() {
-          filterOffset = filterScrollController.offset;
-        });
-      },
-    );
   }
 
   @override
   void dispose() {
-    filterScrollController.removeListener(listenScrollControllers);
-    filterScrollController.dispose();
     super.dispose();
   }
 
@@ -79,47 +65,31 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                   Expanded(
                     child: SizedBox(
                       height: 40,
-                      child: ListView.builder(
-                        controller: filterScrollController,
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        itemCount: 15,
-                        itemBuilder: (context, index) {
-                          double opacity = 1.0;
-                          if (index <
-                              filterScrollController.offset / 100 - .4) {
-                            opacity = 0.3;
-                          }
-
-                          return Opacity(
-                            opacity: opacity,
-                            child: Container(
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              width: 80,
-                              decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5)),
-                                  gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xff30cfd0),
-                                        Color(0xff330867)
-                                      ])),
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 10),
-                                  child: Text(
-                                    index.toString(),
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ),
+                      child: CarouselView(
+                        onTap: (value) {},
+                        elevation: 2,
+                        shape: ContinuousRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        itemExtent: MediaQuery.of(context).size.width / 2,
+                        children: List.generate(
+                          14,
+                          (index) => Container(
+                            width: 60,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Color(0xff30cfd0), Color(0xff330867)],
                               ),
                             ),
-                          );
-                        },
+                            child: Center(
+                              child: Text(
+                                index.toString(),
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -142,43 +112,55 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                   shrinkWrap: true,
                   itemCount: 15,
                   itemBuilder: (context, index) {
-                    return Container(
-                      width: 160,
-                      margin: const EdgeInsets.only(right: 10),
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [Color(0xff30cfd0), Color(0xff330867)]),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            clipBehavior: Clip.antiAlias,
-                            borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(5),
-                                topLeft: Radius.circular(5)),
-                            child: CachedNetworkImage(
-                              imageUrl:
-                                  "https://res.cloudinary.com/dksr7si4o/image/upload/v1709205846/images/hhninja-luyen-khi-muoi-van-nam-1_250x350_kprzvw.jpg",
-                              progressIndicatorBuilder:
-                                  (context, url, progress) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  const Icon(Icons.error),
-                              height: 200,
-                              width: double.infinity,
-                              fit: BoxFit.fill,
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => InforMovieScreen(),
                             ),
+                          );
+                        },
+                        child: Container(
+                          width: 160,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                            gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Color(0xff30cfd0), Color(0xff330867)]),
                           ),
-                          const Text(
-                            "Name",
-                            style: TextStyle(color: Colors.white),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                clipBehavior: Clip.antiAlias,
+                                borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(5),
+                                    topLeft: Radius.circular(5)),
+                                child: CachedNetworkImage(
+                                  imageUrl:
+                                      "https://res.cloudinary.com/dksr7si4o/image/upload/v1709205846/images/hhninja-luyen-khi-muoi-van-nam-1_250x350_kprzvw.jpg",
+                                  progressIndicatorBuilder:
+                                      (context, url, progress) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                              const Text(
+                                "Name",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     );
                   },

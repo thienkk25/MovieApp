@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:movie_app/src/controllers/user_controller.dart';
+import 'package:movie_app/src/screens/login_screen.dart';
 
 class ManageBarScreen extends StatefulWidget {
   const ManageBarScreen({super.key});
@@ -8,6 +10,7 @@ class ManageBarScreen extends StatefulWidget {
 }
 
 class _ManageBarScreenState extends State<ManageBarScreen> {
+  UserController userController = UserController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,7 +99,9 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
               children: [
                 const Divider(),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    signOut();
+                  },
                   child: const ListTile(
                     leading: Icon(Icons.exit_to_app),
                     title: Text("Đăng xuất"),
@@ -109,5 +114,28 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> signOut() async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    final result = await userController.signOut();
+    if (!mounted) return;
+    Navigator.pop(context);
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(result),
+      duration: const Duration(milliseconds: 300),
+    ));
   }
 }
