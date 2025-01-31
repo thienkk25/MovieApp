@@ -126,7 +126,26 @@ class MovieService {
     }
   }
 
-  Future<String> favoriteMovies(String slug) async {
+  Future<Map?> getFavoriteMovies() async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final fireStore = FirebaseFirestore.instance;
+      final userDoc =
+          fireStore.collection("favoriteMovies").doc(auth.currentUser!.uid);
+      final data = await userDoc.get();
+      if (data.exists &&
+          data.data() != null &&
+          data.data()!.containsKey("items")) {
+        return data.data();
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<List> addFavoriteMovies(
+      String name, String slug, String posterUrl) async {
     try {
       final auth = FirebaseAuth.instance;
       final fireStore = FirebaseFirestore.instance;
@@ -139,24 +158,29 @@ class MovieService {
           data.data()!.containsKey("items")) {
         items = List.from(data["items"]);
 
-        if (items.any((element) => element == slug)) {
-          return "Đã yêu thích rồi 😁";
+        if (items.any((element) => element['slug'] == slug)) {
+          return ["Đã yêu thích rồi 😁", false];
         }
       }
-      items.add(slug);
+      items.add({
+        "name": name,
+        "slug": slug,
+        "poster_url": posterUrl,
+        "timestamp": Timestamp.now(),
+      });
       await userDoc.set({
         "uid": auth.currentUser!.uid,
         "items": items,
-        "timestamp": Timestamp.now(),
+        "create_at": Timestamp.now()
       });
 
-      return "Yêu thích thành công 😊";
+      return ["Yêu thích thành công 😊", true];
     } catch (e) {
-      return "Thất bại!";
+      return ["Thất bại!", false];
     }
   }
 
-  Future<String> removeFavoriteMovie(String slug) async {
+  Future<List> removeFavoriteMovie(String slug) async {
     try {
       final auth = FirebaseAuth.instance;
       final fireStore = FirebaseFirestore.instance;
@@ -167,22 +191,22 @@ class MovieService {
           data.data() != null &&
           data.data()!.containsKey("items")) {
         List<dynamic> items = List.from(data["items"]);
-        if (items.any((element) => element == slug)) {
-          items.removeWhere((element) => element == slug);
+        if (items.any((element) => element['slug'] == slug)) {
+          items.removeWhere((element) => element['slug'] == slug);
           await userDoc.set({
             "items": items,
             "timestamp": Timestamp.now(),
           }, SetOptions(merge: true));
 
-          return "Xóa thành công!";
+          return ["Xóa thành công!", true];
         } else {
-          return "Không tồn tại trong dữ liệu!";
+          return ["Không tồn tại trong dữ liệu!", false];
         }
       } else {
-        return "Không tồn tại trong dữ liệu!";
+        return ["Không tồn tại trong dữ liệu!", false];
       }
     } catch (e) {
-      return "Xóa thất bại!";
+      return ["Xóa thất bại!", false];
     }
   }
 }

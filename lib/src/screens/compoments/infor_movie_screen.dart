@@ -1,26 +1,33 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/models/movie_model.dart';
+import 'package:movie_app/src/screens/compoments/watch_movie_screen.dart';
+import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:readmore/readmore.dart';
 
-class InforMovieScreen extends StatefulWidget {
+class InforMovieScreen extends ConsumerStatefulWidget {
   final String slugMovie;
   const InforMovieScreen({super.key, required this.slugMovie});
 
   @override
-  State<InforMovieScreen> createState() => _InforMovieScreenState();
+  ConsumerState<InforMovieScreen> createState() => _InforMovieScreenState();
 }
 
-class _InforMovieScreenState extends State<InforMovieScreen> {
+class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
+  bool isIconFavorite = false;
   MovieController movieController = MovieController();
   int currentPage = 0;
+  int isEpisode = -1;
   Future<MovieModel> loadData() async {
     return (await movieController.singleDetailMovies(widget.slugMovie))!;
   }
 
   @override
   Widget build(BuildContext context) {
+    List dataFavorites = ref.read(getFavoriteMoviesNotifierProvider);
+
     return FutureBuilder<MovieModel>(
       future: loadData(),
       builder: (context, snapshot) {
@@ -45,6 +52,10 @@ class _InforMovieScreenState extends State<InforMovieScreen> {
         }
 
         MovieModel movieModel = snapshot.data!;
+        if (dataFavorites
+            .any((element) => element['slug'] == movieModel.movie.slug)) {
+          isIconFavorite = true;
+        }
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -53,14 +64,32 @@ class _InforMovieScreenState extends State<InforMovieScreen> {
             ),
             centerTitle: true,
             actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: InkWell(
-                  onTap: () {
-                    favoriteMovie(movieModel.movie.slug);
-                  },
-                  child: const Icon(Icons.favorite_border),
-                ),
+              StatefulBuilder(
+                builder: (context, StateSetter stateSetter) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: isIconFavorite
+                        ? GestureDetector(
+                            onTap: () {
+                              removeFavoriteMovie(movieModel.movie.slug);
+                              stateSetter(() {
+                                isIconFavorite = false;
+                              });
+                            },
+                            child: const Icon(Icons.favorite))
+                        : GestureDetector(
+                            onTap: () {
+                              addFavoriteMovie(
+                                  movieModel.movie.name,
+                                  movieModel.movie.slug,
+                                  movieModel.movie.posterUrl);
+                              stateSetter(() {
+                                isIconFavorite = true;
+                              });
+                            },
+                            child: const Icon(Icons.favorite_border)),
+                  );
+                },
               ),
             ],
           ),
@@ -253,7 +282,16 @@ class _InforMovieScreenState extends State<InforMovieScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => WatchMovieScreen(
+                                          episode: 1,
+                                          linkMovie: movieModel.episodes[0]
+                                              .serverData[0].linkM3U8),
+                                    ));
+                              },
                               child: Container(
                                 padding: const EdgeInsets.all(10.0),
                                 decoration: BoxDecoration(
@@ -268,7 +306,22 @@ class _InforMovieScreenState extends State<InforMovieScreen> {
                               ),
                             ),
                             InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => WatchMovieScreen(
+                                          episode: movieModel.episodes[0]
+                                                  .serverData.length -
+                                              1,
+                                          linkMovie: movieModel
+                                              .episodes[0]
+                                              .serverData[movieModel.episodes[0]
+                                                      .serverData.length -
+                                                  1]
+                                              .linkM3U8),
+                                    ));
+                              },
                               child: Container(
                                 padding: const EdgeInsets.all(10.0),
                                 decoration: BoxDecoration(
@@ -292,27 +345,49 @@ class _InforMovieScreenState extends State<InforMovieScreen> {
                       const SizedBox(
                         height: 10,
                       ),
-                      GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: movieModel.episodes[0].serverData.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 5,
-                                crossAxisSpacing: 5,
-                                mainAxisSpacing: 5,
-                                mainAxisExtent: 40),
-                        itemBuilder: (context, index) => Container(
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadiusDirectional.all(
-                                Radius.circular(5)),
-                            // color: Colors.orange,
-                            color: Colors.grey[400],
-                          ),
-                          child: Center(
-                            child: Text(
-                              (index + 1).toString(),
-                              style: const TextStyle(color: Colors.white),
+                      StatefulBuilder(
+                        builder: (context, StateSetter stateSetter) =>
+                            GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: movieModel.episodes[0].serverData.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 5,
+                                  crossAxisSpacing: 5,
+                                  mainAxisSpacing: 5,
+                                  mainAxisExtent: 40),
+                          itemBuilder: (context, index) => InkWell(
+                            onTap: () {
+                              stateSetter(
+                                () {
+                                  isEpisode = index;
+                                },
+                              );
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => WatchMovieScreen(
+                                        episode: index,
+                                        linkMovie: movieModel.episodes[0]
+                                            .serverData[index].linkM3U8),
+                                  ));
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadiusDirectional.all(
+                                    Radius.circular(5)),
+                                // color: Colors.orange,
+                                color: isEpisode == index
+                                    ? Colors.orange
+                                    : Colors.grey[400],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  (index + 1).toString(),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -432,19 +507,30 @@ class _InforMovieScreenState extends State<InforMovieScreen> {
     );
   }
 
-  Future<void> favoriteMovie(String slug) async {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-    final result = await movieController.favoriteMovies(slug);
+  Future<void> addFavoriteMovie(
+      String name, String slug, String posterUrl) async {
+    final result =
+        await movieController.addFavoriteMovies(name, slug, posterUrl);
+    if (result[1]) {
+      ref
+          .read(getFavoriteMoviesNotifierProvider.notifier)
+          .addState({"name": name, "slug": slug, "poster_url": posterUrl});
+    }
     if (!mounted) return;
-    Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(result),
+      content: Text(result[0]),
+      duration: const Duration(milliseconds: 800),
+    ));
+  }
+
+  Future<void> removeFavoriteMovie(String slug) async {
+    final result = await movieController.removeFavoriteMovie(slug);
+    if (result[1]) {
+      ref.read(getFavoriteMoviesNotifierProvider.notifier).removeState(slug);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(result[0]),
       duration: const Duration(milliseconds: 800),
     ));
   }

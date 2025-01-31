@@ -146,7 +146,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
                         shrinkWrap: true,
-                        itemCount: newlyUpdatedMovies['items'].length,
+                        itemCount: newlyUpdatedMovies['items']?.length ?? 0,
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.only(right: 10),
@@ -251,7 +251,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                     return GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: dataMovies['data']['items'].length,
+                      itemCount: dataMovies['data']?['items'].length ?? 0,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
@@ -356,7 +356,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                     return GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: dataMovies['data']['items'].length,
+                      itemCount: dataMovies['data']?['items'].length ?? 0,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
@@ -461,7 +461,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                     return GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: dataMovies['data']['items'].length,
+                      itemCount: dataMovies['data']?['items'].length ?? 0,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
@@ -566,7 +566,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                     return GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: dataMovies['data']['items'].length,
+                      itemCount: dataMovies['data']?['items'].length ?? 0,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
