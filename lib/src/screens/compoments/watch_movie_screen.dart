@@ -33,6 +33,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: Text("Tập ${widget.episode + 1}"),
         centerTitle: true,
         actions: [

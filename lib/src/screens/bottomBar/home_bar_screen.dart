@@ -643,7 +643,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                   }
                 },
               ),
-            ].animate(interval: 500.ms).fadeIn(duration: 500.ms),
+            ].animate(interval: 200.ms).fadeIn(duration: 500.ms),
           ),
         ),
       ),
