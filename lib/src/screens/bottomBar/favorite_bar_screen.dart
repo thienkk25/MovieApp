@@ -34,10 +34,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
   }
 
   Future<void> loadData() async {
-    final data = await movieController.getFavoriteMovies();
-    ref
-        .read(getFavoriteMoviesNotifierProvider.notifier)
-        .initState(data!['items']);
+    await movieController.getFavoriteMovies(ref);
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
+import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
 
 class HomeBarScreen extends StatefulWidget {
   const HomeBarScreen({super.key});
@@ -433,7 +434,10 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                 height: 10,
               ),
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => ViewMoreScreen()));
+                },
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

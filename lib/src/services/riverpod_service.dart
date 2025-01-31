@@ -11,8 +11,12 @@ class GetFavoriteMoviesNotifier extends StateNotifier<List> {
   }
 
   removeState(String slug) {
-    List newData = state;
-    newData.removeWhere((element) => element['slug'] == slug);
+    List newData = [];
+    for (var element in state) {
+      if (element['slug'] != slug) {
+        newData.add(element);
+      }
+    }
     state = newData;
   }
 }
@@ -20,3 +24,18 @@ class GetFavoriteMoviesNotifier extends StateNotifier<List> {
 final getFavoriteMoviesNotifierProvider =
     StateNotifierProvider<GetFavoriteMoviesNotifier, List>(
         (ref) => GetFavoriteMoviesNotifier());
+
+class CartoonMoviesNotifier extends StateNotifier<List> {
+  CartoonMoviesNotifier() : super([]);
+  initState(List data) {
+    state = data;
+  }
+
+  addState(Map data) {
+    state = [...state, data];
+  }
+}
+
+final cartoonMoviesNotifierProvider =
+    StateNotifierProvider<CartoonMoviesNotifier, List>(
+        (ref) => CartoonMoviesNotifier());

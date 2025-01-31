@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/models/movie_model.dart';
 import 'package:movie_app/src/services/movie_service.dart';
+import 'package:movie_app/src/services/riverpod_service.dart';
 
 class MovieController {
   MovieService movieService = MovieService();
@@ -43,9 +46,11 @@ class MovieController {
     return data;
   }
 
-  Future<Map?> getFavoriteMovies() async {
+  Future<void> getFavoriteMovies(WidgetRef ref) async {
     final data = await movieService.getFavoriteMovies();
-    return data;
+    ref
+        .read(getFavoriteMoviesNotifierProvider.notifier)
+        .initState(data?['items'] ?? []);
   }
 
   Future<List> addFavoriteMovies(

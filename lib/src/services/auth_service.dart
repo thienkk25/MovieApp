@@ -75,4 +75,9 @@ class AuthService {
     if (user != null) return true;
     return false;
   }
+
+  User? user() {
+    final firebaseAuth = FirebaseAuth.instance;
+    return firebaseAuth.currentUser;
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:movie_app/src/services/auth_service.dart';
 
 class UserController {
@@ -25,5 +26,10 @@ class UserController {
   bool isUser() {
     final result = authService.isUser();
     return result;
+  }
+
+  User? user() {
+    final user = authService.user();
+    return user;
   }
 }
