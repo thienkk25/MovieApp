@@ -42,4 +42,14 @@ class MovieController {
     final data = await movieService.singleDetailMovies(nameMovie);
     return data;
   }
+
+  Future<String> favoriteMovies(String slug) async {
+    final result = await movieService.favoriteMovies(slug);
+    return result;
+  }
+
+  Future<String> removeFavoriteMovie(String slug) async {
+    final result = await movieService.removeFavoriteMovie(slug);
+    return result;
+  }
 }

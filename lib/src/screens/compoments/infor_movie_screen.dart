@@ -52,6 +52,17 @@ class _InforMovieScreenState extends State<InforMovieScreen> {
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
             centerTitle: true,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: InkWell(
+                  onTap: () {
+                    favoriteMovie(movieModel.movie.slug);
+                  },
+                  child: const Icon(Icons.favorite_border),
+                ),
+              ),
+            ],
           ),
           body: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -419,5 +430,22 @@ class _InforMovieScreenState extends State<InforMovieScreen> {
         );
       },
     );
+  }
+
+  Future<void> favoriteMovie(String slug) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    final result = await movieController.favoriteMovies(slug);
+    if (!mounted) return;
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(result),
+      duration: const Duration(milliseconds: 800),
+    ));
   }
 }

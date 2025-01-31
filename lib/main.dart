@@ -20,7 +20,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     UserController userController = UserController();
-
     Widget home =
         userController.isUser() ? const HomeScreen() : const LoginScreen();
     return MaterialApp(
