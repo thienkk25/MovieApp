@@ -53,7 +53,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                         timer?.cancel();
                       }
                       timer = Timer(
-                        const Duration(seconds: 1),
+                        const Duration(milliseconds: 300),
                         () async {
                           dataSearch =
                               await movieController.searchMovies(value, 40);
@@ -113,15 +113,8 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                               borderRadius: const BorderRadius.only(
                                   topRight: Radius.circular(5),
                                   topLeft: Radius.circular(5)),
-                              child: CachedNetworkImage(
-                                imageUrl:
-                                    "https://phimimg.com/${dataSearch['data']['items'][index]['poster_url']}",
-                                progressIndicatorBuilder:
-                                    (context, url, progress) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error),
+                              child: Image.network(
+                                "https://phimimg.com/${dataSearch['data']['items'][index]['poster_url']}",
                                 height: 200,
                                 width: double.infinity,
                                 fit: BoxFit.fill,
