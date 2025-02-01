@@ -4,7 +4,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/models/movie_model.dart';
-import 'package:movie_app/src/screens/bottomBar/home_bar_screen.dart';
 import 'package:movie_app/src/screens/compoments/watch_movie_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:readmore/readmore.dart';

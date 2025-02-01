@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/models/movie_model.dart';
 import 'package:movie_app/src/services/movie_service.dart';

@@ -119,7 +119,6 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                               title: Text("Không tìm thấy ..."),
                             )
                           ];
-                    ;
                   },
                 ),
               ),
