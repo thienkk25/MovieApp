@@ -203,6 +203,8 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                                             ['name'],
                                         style: const TextStyle(
                                             color: Colors.white),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ],
@@ -435,8 +437,18 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
               ),
               InkWell(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => ViewMoreScreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ViewMoreScreen(
+                        "Phim Hoạt Hình",
+                        pageMovie,
+                        limitMovie,
+                        () => movieController.cartoonMovies(
+                            pageMovie, limitMovie),
+                      ),
+                    ),
+                  );
                 },
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -25,8 +25,8 @@ final getFavoriteMoviesNotifierProvider =
     StateNotifierProvider<GetFavoriteMoviesNotifier, List>(
         (ref) => GetFavoriteMoviesNotifier());
 
-class CartoonMoviesNotifier extends StateNotifier<List> {
-  CartoonMoviesNotifier() : super([]);
+class ViewMoreMoviesNotifier extends StateNotifier<List> {
+  ViewMoreMoviesNotifier() : super([]);
   initState(List data) {
     state = data;
   }
@@ -36,6 +36,6 @@ class CartoonMoviesNotifier extends StateNotifier<List> {
   }
 }
 
-final cartoonMoviesNotifierProvider =
-    StateNotifierProvider<CartoonMoviesNotifier, List>(
-        (ref) => CartoonMoviesNotifier());
+final viewMoreMoviesNotifierProvider =
+    StateNotifierProvider<ViewMoreMoviesNotifier, List>(
+        (ref) => ViewMoreMoviesNotifier());

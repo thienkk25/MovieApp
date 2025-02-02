@@ -1,23 +1,52 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
+import 'package:movie_app/src/services/riverpod_service.dart';
 
-class ViewMoreScreen extends ConsumerWidget {
-  const ViewMoreScreen({super.key});
+class ViewMoreScreen extends ConsumerStatefulWidget {
+  final String name;
+  final int page;
+  final int limit;
+  final TaskCallback taskCallback;
+  const ViewMoreScreen(this.name, this.page, this.limit, this.taskCallback,
+      {super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ViewMoreScreen> createState() => _ViewMoreScreenState();
+}
+
+class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadData();
+    });
+    super.initState();
+  }
+
+  Future<void> loadData() async {
+    Map data = await widget.taskCallback();
+    ref
+        .read(viewMoreMoviesNotifierProvider.notifier)
+        .initState(data['data']?['items'] ?? []);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List dataMovies = ref.watch(viewMoreMoviesNotifierProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("data"),
+        title: Text(widget.name),
         centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: GridView.builder(
-          physics: const BouncingScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: 5,
+          itemCount: dataMovies.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisExtent: 250,
@@ -26,13 +55,12 @@ class ViewMoreScreen extends ConsumerWidget {
               childAspectRatio: 4.0),
           itemBuilder: (context, index) {
             return InkWell(
-              // onTap: () => Navigator.push(
-              //     context,
-              //     MaterialPageRoute(
-              //         builder: (_) => InforMovieScreen(
-              //               slugMovie: dataMovies['data']['items']
-              //                   [index]['slug'],
-              //             ))),
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => InforMovieScreen(
+                            slugMovie: dataMovies[index]['slug'],
+                          ))),
               child: Container(
                 decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -49,7 +77,8 @@ class ViewMoreScreen extends ConsumerWidget {
                           topRight: Radius.circular(5),
                           topLeft: Radius.circular(5)),
                       child: CachedNetworkImage(
-                        imageUrl: "",
+                        imageUrl:
+                            "https://phimimg.com/${dataMovies[index]['poster_url']}",
                         progressIndicatorBuilder: (context, url, progress) =>
                             const Center(
                           child: CircularProgressIndicator(),
@@ -64,7 +93,7 @@ class ViewMoreScreen extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Text(
-                        index.toString(),
+                        dataMovies[index]['name'],
                         style: const TextStyle(color: Colors.white),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
