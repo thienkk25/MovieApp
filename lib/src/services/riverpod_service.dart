@@ -31,8 +31,10 @@ class ViewMoreMoviesNotifier extends StateNotifier<List> {
     state = data;
   }
 
-  addState(Map data) {
-    state = [...state, data];
+  addState(List data) {
+    List newData = state;
+    newData.addAll(data);
+    state = newData;
   }
 }
 

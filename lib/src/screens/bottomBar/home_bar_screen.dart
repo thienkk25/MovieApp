@@ -176,6 +176,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                                 ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     ClipRRect(
                                       clipBehavior: Clip.antiAlias,
@@ -197,13 +198,14 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                                         fit: BoxFit.fill,
                                       ),
                                     ),
-                                    Center(
+                                    Padding(
+                                      padding: const EdgeInsets.all(10.0),
                                       child: Text(
                                         newlyUpdatedMovies['items'][index]
                                             ['name'],
                                         style: const TextStyle(
                                             color: Colors.white),
-                                        maxLines: 2,
+                                        maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -226,7 +228,18 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                 height: 10,
               ),
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ViewMoreScreen(
+                        "Phim Lẻ",
+                        pageMovie,
+                        limitMovie,
+                      ),
+                    ),
+                  );
+                },
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -331,7 +344,18 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                 height: 10,
               ),
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ViewMoreScreen(
+                        "Phim Bộ",
+                        pageMovie,
+                        limitMovie,
+                      ),
+                    ),
+                  );
+                },
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -444,8 +468,6 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                         "Phim Hoạt Hình",
                         pageMovie,
                         limitMovie,
-                        () => movieController.cartoonMovies(
-                            pageMovie, limitMovie),
                       ),
                     ),
                   );
@@ -554,7 +576,18 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                 height: 10,
               ),
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ViewMoreScreen(
+                        "Chương trình truyền hình",
+                        pageMovie,
+                        limitMovie,
+                      ),
+                    ),
+                  );
+                },
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
