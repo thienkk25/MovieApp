@@ -80,4 +80,19 @@ class AuthService {
     final firebaseAuth = FirebaseAuth.instance;
     return firebaseAuth.currentUser;
   }
+
+  Future<String> updateInforUser(String displayName,
+      PhoneAuthCredential phoneNumber, String photoURL) async {
+    final firebaseAuth = FirebaseAuth.instance;
+    final user = firebaseAuth.currentUser;
+    if (user != null) {
+      user.updateDisplayName(displayName);
+      user.updatePhoneNumber(phoneNumber);
+      user.updatePhotoURL(photoURL);
+      user.reload();
+      return "Cập nhật thành công";
+    } else {
+      return "Cập nhật thất bại";
+    }
+  }
 }
