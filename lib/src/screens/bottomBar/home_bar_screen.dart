@@ -40,99 +40,70 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: const SizedBox(
-                      height: 30,
-                      child: Row(
-                        children: [
-                          Icon(Icons.filter_alt),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text("Lọc"),
-                          SizedBox(
-                            width: 5,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                    child: VerticalDivider(
-                      width: 1,
-                    ),
-                  ),
-                  Expanded(
-                    child: SizedBox(
-                      height: 40,
-                      child: FutureBuilder(
-                        future: movieController.categoryMovies(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (snapshot.hasData) {
-                            final categoryMovies = snapshot.data!;
-                            return CarouselView(
-                              onTap: (value) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ViewMoreScreen(
-                                      categoryMovies[value]['slug'],
-                                      pageMovie,
-                                      limitMovie,
-                                    ),
-                                  ),
-                                );
-                              },
-                              elevation: 2,
-                              shape: ContinuousRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              itemExtent: MediaQuery.of(context).size.width / 2,
-                              children: List.generate(
-                                categoryMovies.length,
-                                (index) => Container(
-                                  width: 60,
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xff30cfd0),
-                                        Color(0xff330867)
-                                      ],
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      categoryMovies[index]['name'],
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
+              const Text(
+                "Thể loại",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              SizedBox(
+                height: 40,
+                child: FutureBuilder(
+                  future: movieController.categoryMovies(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasData) {
+                      final categoryMovies = snapshot.data!;
+                      return CarouselView(
+                        onTap: (value) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreScreen(
+                                categoryMovies[value]['slug'],
+                                pageMovie,
+                                limitMovie,
                               ),
-                            );
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
+                            ),
+                          );
                         },
-                      ),
-                    ),
-                  ),
-                ],
+                        elevation: 2,
+                        shape: ContinuousRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        itemExtent: MediaQuery.of(context).size.width / 3,
+                        children: List.generate(
+                          categoryMovies.length,
+                          (index) => Container(
+                            width: 60,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Color(0xff30cfd0), Color(0xff330867)],
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                categoryMovies[index]['name'],
+                                style: const TextStyle(color: Colors.white),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return const Center(
+                        child: Icon(Icons.error),
+                      );
+                    }
+                  },
+                ),
               ),
               const SizedBox(
                 height: 10,

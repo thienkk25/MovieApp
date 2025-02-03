@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
+import 'package:movie_app/src/screens/compoments/my_profile_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
 
 class ManageBarScreen extends ConsumerStatefulWidget {
@@ -71,7 +72,12 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   ],
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const MyProfileScreen()));
+                  },
                   child: const ListTile(
                     leading: Icon(Icons.contact_mail_outlined),
                     title: Text("Thông tin cá nhân"),
