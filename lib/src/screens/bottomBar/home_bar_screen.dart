@@ -81,7 +81,18 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                           } else if (snapshot.hasData) {
                             final categoryMovies = snapshot.data!;
                             return CarouselView(
-                              onTap: (value) {},
+                              onTap: (value) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ViewMoreScreen(
+                                      categoryMovies[value]['slug'],
+                                      pageMovie,
+                                      limitMovie,
+                                    ),
+                                  ),
+                                );
+                              },
                               elevation: 2,
                               shape: ContinuousRectangleBorder(
                                   borderRadius: BorderRadius.circular(10)),

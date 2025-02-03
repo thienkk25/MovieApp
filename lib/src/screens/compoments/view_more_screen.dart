@@ -6,10 +6,10 @@ import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
 class ViewMoreScreen extends ConsumerStatefulWidget {
-  final String name;
+  final String type;
   final int page;
   final int limit;
-  const ViewMoreScreen(this.name, this.page, this.limit, {super.key});
+  const ViewMoreScreen(this.type, this.page, this.limit, {super.key});
 
   @override
   ConsumerState<ViewMoreScreen> createState() => _ViewMoreScreenState();
@@ -21,6 +21,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   ScrollController scrollController = ScrollController();
   bool isLoad = false;
   late int currentPage;
+  late String titleAppBar;
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -32,10 +33,11 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   }
 
   Future<void> loadData() async {
-    Map? data = await getMovies(widget.name, widget.page, widget.limit);
+    Map? data = await getMovies(widget.type, widget.page, widget.limit);
     ref
         .read(viewMoreMoviesNotifierProvider.notifier)
         .initState(data?['data']?['items'] ?? []);
+    titleAppBar = data?['data']?['titlePage'] ?? "Không rõ";
     isView = true;
   }
 
@@ -53,7 +55,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
 
   Future<void> loadDataMore() async {
     currentPage++;
-    Map? data = await getMovies(widget.name, currentPage, widget.limit);
+    Map? data = await getMovies(widget.type, currentPage, widget.limit);
     ref
         .read(viewMoreMoviesNotifierProvider.notifier)
         .addState(data?['data']?['items'] ?? []);
@@ -62,8 +64,8 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
     });
   }
 
-  getMovies(String name, int page, int limit) {
-    switch (name) {
+  getMovies(String type, int page, int limit) {
+    switch (type) {
       case "Phim Lẻ":
         return movieController.singleMovies(page, limit);
       case "Phim Bộ":
@@ -73,7 +75,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
       case "Chương trình truyền hình":
         return movieController.tvShowsMovies(page, limit);
       default:
-        return null;
+        return movieController.categoryDetailMovies(type, page, limit);
     }
   }
 
@@ -83,7 +85,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
     return isView
         ? Scaffold(
             appBar: AppBar(
-              title: Text(widget.name),
+              title: Text(titleAppBar),
               centerTitle: true,
             ),
             body: SingleChildScrollView(

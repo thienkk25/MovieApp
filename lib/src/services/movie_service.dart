@@ -21,6 +21,21 @@ class MovieService {
     }
   }
 
+  Future<Map> categoryDetailMovies(String type, int page, int limit) async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://phimapi.com/v1/api/the-loai/$type?page=$page&limit=$limit"));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
   Future<Map> newlyUpdatedMovies() async {
     try {
       final response = await http.get(

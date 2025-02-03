@@ -10,6 +10,11 @@ class MovieController {
     return data;
   }
 
+  Future<Map> categoryDetailMovies(String type, int page, int limit) async {
+    final data = movieService.categoryDetailMovies(type, page, limit);
+    return data;
+  }
+
   Future<Map> newlyUpdatedMovies() async {
     final data = await movieService.newlyUpdatedMovies();
     return data;
