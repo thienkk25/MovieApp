@@ -6,6 +6,7 @@ import 'package:movie_app/src/controllers/user_controller.dart';
 import 'package:movie_app/src/screens/home_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,14 @@ class MyApp extends ConsumerWidget {
     UserController userController = UserController();
     Widget home =
         userController.isUser() ? const HomeScreen() : const LoginScreen();
+
+    Future<void> loadDeault() async {
+      final pref = await SharedPreferences.getInstance();
+      isDarkMode = pref.getBool("isDarkMode") ?? false;
+      ref.read(isDarkModeProvider.notifier).state = isDarkMode;
+    }
+
+    loadDeault();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Movie',
