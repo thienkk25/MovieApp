@@ -148,7 +148,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Name"),
+                const Text("Tên"),
                 SizedBox(
                   width: 150,
                   child: TextField(
@@ -172,7 +172,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Email account"),
+                const Text("Email"),
                 SizedBox(
                   width: 150,
                   child: TextField(
@@ -196,7 +196,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Mobile number"),
+                const Text("Số điện thoại"),
                 SizedBox(
                   width: 150,
                   child: TextField(
@@ -220,7 +220,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Location"),
+                const Text("Vị trí"),
                 SizedBox(
                   width: 150,
                   child: TextField(
@@ -248,7 +248,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         BorderRadiusDirectional.all(Radius.circular(5))),
                 child: const Center(
                   child: Text(
-                    "Save change",
+                    "Lưu",
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

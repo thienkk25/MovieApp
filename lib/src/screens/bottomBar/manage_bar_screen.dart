@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
 import 'package:movie_app/src/screens/compoments/my_profile_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
+import 'package:movie_app/src/services/riverpod_service.dart';
 
 class ManageBarScreen extends ConsumerStatefulWidget {
   const ManageBarScreen({super.key});
@@ -101,7 +102,38 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => SafeArea(
+                        child: Wrap(
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.light_mode),
+                              title: const Text('Giao diện sáng'),
+                              onTap: () {
+                                ref.watch(isDarkModeProvider.notifier).state =
+                                    false;
+                                Navigator.pop(context);
+                              },
+                            ),
+                            const Divider(
+                              height: 1,
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.dark_mode),
+                              title: const Text('Giao diện tối'),
+                              onTap: () {
+                                ref.watch(isDarkModeProvider.notifier).state =
+                                    true;
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                   child: const ListTile(
                     leading: Icon(Icons.mode_night),
                     title: Text("Giao diện"),

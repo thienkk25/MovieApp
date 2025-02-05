@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+final isDarkModeProvider = StateProvider((ref) => false);
+
 class GetFavoriteMoviesNotifier extends StateNotifier<List> {
   GetFavoriteMoviesNotifier() : super([]);
   initState(List data) {
