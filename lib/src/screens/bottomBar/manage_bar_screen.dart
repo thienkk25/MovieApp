@@ -86,7 +86,30 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => SafeArea(
+                        child: Wrap(
+                          children: [
+                            ListTile(
+                              title: const Text('Tắt thông báo'),
+                              onTap: () {},
+                            ),
+                            const Divider(
+                              height: 1,
+                            ),
+                            ListTile(
+                              title: const Text('Bật thông báo'),
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                   child: const ListTile(
                     leading: Icon(Icons.notifications),
                     title: Text("Thông báo"),
@@ -94,7 +117,30 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => SafeArea(
+                        child: Wrap(
+                          children: [
+                            ListTile(
+                              title: const Text('Tiếng Việt'),
+                              onTap: () {},
+                            ),
+                            const Divider(
+                              height: 1,
+                            ),
+                            ListTile(
+                              title: const Text('Tiếng Anh'),
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                   child: const ListTile(
                     leading: Icon(Icons.translate),
                     title: Text("Ngôn ngữ"),
