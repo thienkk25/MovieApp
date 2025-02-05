@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
+import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
 class ViewMoreScreen extends ConsumerStatefulWidget {
@@ -166,19 +167,22 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
                   ),
                   isLoad
                       ? const Padding(
-                          padding: EdgeInsets.only(top: 10.0),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          padding: EdgeInsets.all(10.0),
+                          child: ShimmerLoading(),
                         )
                       : const SizedBox()
                 ],
               ),
             ),
           )
-        : const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
+        : Scaffold(
+            appBar: AppBar(
+              title: const Text("Loading..."),
+              centerTitle: true,
+            ),
+            body: const Padding(
+              padding: EdgeInsets.all(10.0),
+              child: ShimmerLoading(),
             ),
           );
   }
