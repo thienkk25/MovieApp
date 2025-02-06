@@ -52,4 +52,8 @@ Your mini cinema on the go! Enjoy thousands of blockbuster movies and exciting s
 
 ### Image:
 
+<img src="assets/resultScreen/LoginScreen.jpg" width="200" height="400"> <img src="assets/resultScreen/RegisterScreen.jpg" width="200" height="400"> <img src="assets/resultScreen/ForgotScreen.jpg" width="200" height="400"> <img src="assets/resultScreen/HomeScreen.jpg" width="200" height="400"> <img src="assets/resultScreen/FavoriteScreen.jpg" width="200" height="400"> <img src="assets/resultScreen/SearchScreen.jpg" width="200" height="400"> <img src="assets/resultScreen/InforScreen.jpg" width="200" height="400"> <img src="assets/resultScreen/SettingScreen.jpg" width="200" height="400"> <img src="assets/resultScreen/ProfileScreen.jpg" width="200" height="400">
 ### Video:
+
+- [Link Cloudinary video demo](https://res.cloudinary.com/dksr7si4o/video/upload/v1738843726/flutter/video_kq/Movie-App-Demo_x5fe39.mp4)
+- [Link Youtube video demo](https://youtube.com/shorts/45lzYWR05XI?feature=share)
