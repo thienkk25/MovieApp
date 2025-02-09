@@ -288,7 +288,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => WatchMovieScreen(
-                                          episode: 1,
+                                          episode: 0,
                                           linkMovie: movieModel.episodes[0]
                                               .serverData[0].linkM3U8),
                                     ));
