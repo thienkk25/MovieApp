@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/models/movie_model.dart';
+import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
 import 'package:movie_app/src/screens/compoments/watch_movie_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:readmore/readmore.dart';
@@ -21,6 +22,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   MovieController movieController = MovieController();
   int currentPage = 0;
   int isEpisode = -1;
+  int pageMovie = 1;
+  int limitMovie = 12;
   Future<MovieModel> loadData() async {
     return (await movieController.singleDetailMovies(widget.slugMovie))!;
   }
@@ -204,7 +207,19 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                 itemBuilder: (context, index) => Padding(
                                   padding: const EdgeInsets.only(right: 5),
                                   child: InkWell(
-                                    onTap: () {},
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ViewMoreScreen(
+                                            movieModel
+                                                .movie.category[index].slug,
+                                            pageMovie,
+                                            limitMovie,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                     child: Container(
                                       padding: const EdgeInsets.all(5),
                                       decoration: const BoxDecoration(
