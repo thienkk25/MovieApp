@@ -37,17 +37,6 @@ Your mini cinema on the go! Enjoy thousands of blockbuster movies and exciting s
 ### 4. **State Management**  
 - **Riverpod**: Efficiently manage application state.
 
-## Installation and Deployment  
-1. Clone the repository:  
-   ```bash  
-   git clone https://github.com/thienkk25/MovieApp.git
-   cd MovieApp
-   ```
-2. Install dependencies:
-    After cloning the repository, open the project folder in Visual Studio Code or IDE and run the following command to install the dependencies:
-    ```bash  
-   flutter pub get
-   ```
 ## Project results
 
 ### Image:
