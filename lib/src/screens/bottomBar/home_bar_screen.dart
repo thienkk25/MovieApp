@@ -1,25 +1,45 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
 import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
+import 'package:movie_app/src/services/riverpod_service.dart';
 
-class HomeBarScreen extends StatefulWidget {
+class HomeBarScreen extends ConsumerStatefulWidget {
   const HomeBarScreen({super.key});
 
   @override
-  State<HomeBarScreen> createState() => _HomeBarScreenState();
+  ConsumerState<HomeBarScreen> createState() => _HomeBarScreenState();
 }
 
-class _HomeBarScreenState extends State<HomeBarScreen> {
+class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   MovieController movieController = MovieController();
   int pageMovie = 1;
   int limitMovie = 12;
+  final ScrollController scrollController = ScrollController();
+
+  final List<String> sections = [
+    "Trang chủ",
+    "Phim mới cập nhật",
+    "Phim Lẻ",
+    "Phim Bộ",
+    "Phim Hoạt Hình",
+    "Chương trình truyền hình",
+  ];
+
+  final Map<String, GlobalKey> keys = {};
+
   @override
   void initState() {
     super.initState();
+    for (var sec in sections) {
+      keys[sec] = GlobalKey();
+    }
+
+    scrollController.addListener(onScroll);
   }
 
   @override
@@ -27,13 +47,30 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
     super.dispose();
   }
 
+  void onScroll() {
+    for (var sec in sections) {
+      final ctx = keys[sec]?.currentContext;
+      if (ctx != null) {
+        final box = ctx.findRenderObject() as RenderBox;
+        final pos = box.localToGlobal(Offset.zero);
+        if (pos.dy <= kToolbarHeight + 20 && pos.dy > -box.size.height / 2) {
+          if (ref.read(currentTitle) != sec) {
+            ref.read(currentTitle.notifier).state = sec;
+          }
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Trang chủ"),
+        title: Consumer(
+            builder: (context, ref, child) => Text(ref.watch(currentTitle))),
       ),
       body: SingleChildScrollView(
+        controller: scrollController,
         physics: const BouncingScrollPhysics(),
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -41,9 +78,11 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "Thể loại",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                key: keys["Trang chủ"],
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(
                 height: 10,
@@ -109,9 +148,11 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
               const SizedBox(
                 height: 10,
               ),
-              const Text(
+              Text(
                 "Phim mới cập nhật",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                key: keys["Phim mới cập nhật"],
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(
                 height: 10,
@@ -211,6 +252,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                 height: 10,
               ),
               InkWell(
+                key: keys["Phim Lẻ"],
                 onTap: () {
                   Navigator.push(
                     context,
@@ -257,6 +299,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                 height: 10,
               ),
               InkWell(
+                key: keys["Phim Bộ"],
                 onTap: () {
                   Navigator.push(
                     context,
@@ -303,6 +346,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                 height: 10,
               ),
               InkWell(
+                key: keys["Phim Hoạt Hình"],
                 onTap: () {
                   Navigator.push(
                     context,
@@ -349,6 +393,7 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                 height: 10,
               ),
               InkWell(
+                key: keys["Chương trình truyền hình"],
                 onTap: () {
                   Navigator.push(
                     context,

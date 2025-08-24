@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final isDarkModeProvider = StateProvider((ref) => false);
+final isDarkModeProvider = StateProvider<bool>((ref) => false);
+final currentTitle = StateProvider<String>((ref) => "Trang chủ");
 
 class GetFavoriteMoviesNotifier extends StateNotifier<List> {
   GetFavoriteMoviesNotifier() : super([]);
