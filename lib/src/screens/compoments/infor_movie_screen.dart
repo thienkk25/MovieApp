@@ -115,20 +115,46 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                         },
                         itemCount: 1,
                         itemBuilder: (context, index) {
-                          return ClipRRect(
-                            clipBehavior: Clip.antiAlias,
-                            borderRadius: BorderRadius.circular(5),
-                            child: CachedNetworkImage(
-                              imageUrl: movieModel.movie.thumbUrl,
-                              progressIndicatorBuilder:
-                                  (context, url, progress) => const Center(
-                                child: CircularProgressIndicator(),
+                          return GestureDetector(
+                            onDoubleTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GestureDetector(
+                                    onDoubleTap: () => Navigator.pop(context),
+                                    child: Hero(
+                                      tag: movieModel.movie.id,
+                                      child: CachedNetworkImage(
+                                        imageUrl: movieModel.movie.thumbUrl,
+                                        progressIndicatorBuilder:
+                                            (context, url, progress) =>
+                                                const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                                )),
+                            child: ClipRRect(
+                              clipBehavior: Clip.antiAlias,
+                              borderRadius: BorderRadius.circular(5),
+                              child: Hero(
+                                tag: movieModel.movie.id,
+                                child: CachedNetworkImage(
+                                  imageUrl: movieModel.movie.thumbUrl,
+                                  progressIndicatorBuilder:
+                                      (context, url, progress) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.fill,
+                                ),
                               ),
-                              errorWidget: (context, url, error) =>
-                                  const Icon(Icons.error),
-                              height: 200,
-                              width: double.infinity,
-                              fit: BoxFit.fill,
                             ),
                           );
                         },
@@ -422,7 +448,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                       ),
                       FutureBuilder(
                         future: movieController.searchMovies(
-                            movieModel.movie.name.substring(1, 5), 20),
+                            movieModel.movie.name.substring(1, 5), 30),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {

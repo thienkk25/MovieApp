@@ -13,19 +13,8 @@ class SearchBarScreen extends StatefulWidget {
 
 class _SearchBarScreenState extends State<SearchBarScreen> {
   MovieController movieController = MovieController();
-  ScrollController searchScrollController = ScrollController();
   Timer? timer;
   Map dataSearch = {};
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    searchScrollController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +41,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                         timer?.cancel();
                       }
                       timer = Timer(
-                        const Duration(milliseconds: 300),
+                        const Duration(milliseconds: 200),
                         () async {
                           dataSearch =
                               await movieController.searchMovies(value, 40);
@@ -95,6 +84,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                                         [index]['slug'])));
                       },
                       child: Container(
+                        clipBehavior: Clip.antiAlias,
                         decoration: const BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(5)),
                             gradient: LinearGradient(
@@ -104,27 +94,42 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                                   Color(0xff30cfd0),
                                   Color(0xff330867)
                                 ])),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                        child: Stack(
                           children: [
-                            ClipRRect(
-                              clipBehavior: Clip.antiAlias,
-                              borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(5),
-                                  topLeft: Radius.circular(5)),
-                              child: Image.network(
-                                "https://phimimg.com/${dataSearch['data']['items'][index]['poster_url']}",
-                                height: 200,
-                                width: double.infinity,
-                                fit: BoxFit.fill,
+                            Image.network(
+                              "https://phimimg.com/${dataSearch['data']['items'][index]['poster_url']}",
+                              height: double.infinity,
+                              width: double.infinity,
+                              fit: BoxFit.fill,
+                            ),
+                            Positioned(
+                                child: Container(
+                              padding: const EdgeInsets.all(5.0),
+                              decoration: const BoxDecoration(
+                                  color: Colors.orange,
+                                  borderRadius: BorderRadius.only(
+                                      bottomRight: Radius.circular(5))),
+                              child: Text(
+                                dataSearch['data']['items'][index]['lang'],
+                                style: const TextStyle(color: Colors.white),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            Text(
-                              dataSearch['data']['items'][index]['name'],
-                              style: const TextStyle(color: Colors.white),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            )),
+                            Positioned(
+                              bottom: 0,
+                              child: Container(
+                                width: 260,
+                                padding: const EdgeInsets.all(10.0),
+                                color: Colors.black.withValues(alpha: .3),
+                                child: Text(
+                                  dataSearch['data']['items'][index]['name'],
+                                  style: const TextStyle(color: Colors.white),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            )
                           ],
                         ),
                       ),

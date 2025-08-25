@@ -18,7 +18,7 @@ class HomeBarScreen extends ConsumerStatefulWidget {
 class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   MovieController movieController = MovieController();
   int pageMovie = 1;
-  int limitMovie = 12;
+  int limitMovie = 20;
   final ScrollController scrollController = ScrollController();
 
   final List<String> sections = [
@@ -48,17 +48,26 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   }
 
   void onScroll() {
+    String? activeSec;
+    double minOffset = double.infinity;
+
     for (var sec in sections) {
       final ctx = keys[sec]?.currentContext;
       if (ctx != null) {
         final box = ctx.findRenderObject() as RenderBox;
         final pos = box.localToGlobal(Offset.zero);
-        if (pos.dy <= kToolbarHeight + 20 && pos.dy > -box.size.height / 2) {
-          if (ref.read(currentTitle) != sec) {
-            ref.read(currentTitle.notifier).state = sec;
-          }
+
+        final offset = (pos.dy - kToolbarHeight).abs();
+
+        if (pos.dy < MediaQuery.of(ctx).size.height && offset < minOffset) {
+          minOffset = offset;
+          activeSec = sec;
         }
       }
+    }
+
+    if (activeSec != null && ref.read(currentTitle) != activeSec) {
+      ref.read(currentTitle.notifier).state = activeSec;
     }
   }
 
@@ -187,6 +196,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                               },
                               child: Container(
                                 width: 160,
+                                clipBehavior: Clip.antiAlias,
                                 decoration: const BoxDecoration(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(5)),
@@ -198,41 +208,70 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                         Color(0xff330867)
                                       ]),
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                child: Stack(
                                   children: [
-                                    ClipRRect(
-                                      clipBehavior: Clip.antiAlias,
-                                      borderRadius: const BorderRadius.only(
-                                          topRight: Radius.circular(5),
-                                          topLeft: Radius.circular(5)),
-                                      child: CachedNetworkImage(
-                                        imageUrl: newlyUpdatedMovies['items']
-                                            [index]['poster_url'],
-                                        progressIndicatorBuilder:
-                                            (context, url, progress) =>
-                                                const Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(Icons.error),
-                                        height: 200,
-                                        width: double.infinity,
-                                        fit: BoxFit.fill,
+                                    CachedNetworkImage(
+                                      imageUrl: newlyUpdatedMovies['items']
+                                          [index]['poster_url'],
+                                      progressIndicatorBuilder:
+                                          (context, url, progress) =>
+                                              const Center(
+                                        child: CircularProgressIndicator(),
                                       ),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
+                                      height: double.infinity,
+                                      width: double.infinity,
+                                      fit: BoxFit.fill,
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
+                                    Positioned(
+                                        child: Container(
+                                      padding: const EdgeInsets.all(5.0),
+                                      decoration: const BoxDecoration(
+                                          color: Colors.orange,
+                                          borderRadius: BorderRadius.only(
+                                              bottomRight: Radius.circular(5))),
                                       child: Text(
                                         newlyUpdatedMovies['items'][index]
-                                            ['name'],
+                                                ['year']
+                                            .toString(),
                                         style: const TextStyle(
                                             color: Colors.white),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
+                                    )),
+                                    Positioned(
+                                        top: -5,
+                                        right: 0,
+                                        child: ClipRRect(
+                                          clipBehavior: Clip.antiAlias,
+                                          borderRadius: const BorderRadius.only(
+                                              bottomLeft: Radius.circular(50)),
+                                          child: Image.asset(
+                                            "assets/imgs/new-blinking.gif",
+                                            height: 30,
+                                            width: 30,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        )),
+                                    Positioned(
+                                      bottom: 0,
+                                      child: Container(
+                                        width: 260,
+                                        padding: const EdgeInsets.all(10.0),
+                                        color:
+                                            Colors.black.withValues(alpha: .3),
+                                        child: Text(
+                                          newlyUpdatedMovies['items'][index]
+                                              ['name'],
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    )
                                   ],
                                 ),
                               ),
@@ -460,7 +499,7 @@ class GridViewScreen extends StatelessWidget {
       itemCount: dataMovies['data']?['items'].length ?? 0,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisExtent: 250,
+          mainAxisExtent: 260,
           mainAxisSpacing: 10,
           crossAxisSpacing: 10,
           childAspectRatio: 4.0),
@@ -473,43 +512,55 @@ class GridViewScreen extends StatelessWidget {
                         slugMovie: dataMovies['data']['items'][index]['slug'],
                       ))),
           child: Container(
+            clipBehavior: Clip.antiAlias,
             decoration: const BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(5)),
                 gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [Color(0xff30cfd0), Color(0xff330867)])),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+            child: Stack(
               children: [
-                ClipRRect(
-                  clipBehavior: Clip.antiAlias,
-                  borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(5),
-                      topLeft: Radius.circular(5)),
-                  child: CachedNetworkImage(
-                    imageUrl:
-                        "https://phimimg.com/${dataMovies['data']['items'][index]['poster_url']}",
-                    progressIndicatorBuilder: (context, url, progress) =>
-                        const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.fill,
+                CachedNetworkImage(
+                  imageUrl:
+                      "https://phimimg.com/${dataMovies['data']['items'][index]['poster_url']}",
+                  progressIndicatorBuilder: (context, url, progress) =>
+                      const Center(
+                    child: CircularProgressIndicator(),
                   ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  height: double.infinity,
+                  width: double.infinity,
+                  fit: BoxFit.fill,
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
+                Positioned(
+                    child: Container(
+                  padding: const EdgeInsets.all(5.0),
+                  decoration: const BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius:
+                          BorderRadius.only(bottomRight: Radius.circular(5))),
                   child: Text(
-                    dataMovies['data']['items'][index]['name'],
+                    dataMovies['data']['items'][index]['lang'],
                     style: const TextStyle(color: Colors.white),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                )),
+                Positioned(
+                  bottom: 0,
+                  child: Container(
+                    width: 260,
+                    padding: const EdgeInsets.all(10.0),
+                    color: Colors.black.withValues(alpha: .4),
+                    child: Text(
+                      dataMovies['data']['items'][index]['name'],
+                      style: const TextStyle(color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                )
               ],
             ),
           ),

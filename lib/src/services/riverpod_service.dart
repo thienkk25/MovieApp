@@ -6,7 +6,7 @@ final currentTitle = StateProvider<String>((ref) => "Trang chủ");
 class GetFavoriteMoviesNotifier extends StateNotifier<List> {
   GetFavoriteMoviesNotifier() : super([]);
   initState(List data) {
-    state = data;
+    state = [...data];
   }
 
   addState(Map data) {
@@ -14,13 +14,7 @@ class GetFavoriteMoviesNotifier extends StateNotifier<List> {
   }
 
   removeState(String slug) {
-    List newData = [];
-    for (var element in state) {
-      if (element['slug'] != slug) {
-        newData.add(element);
-      }
-    }
-    state = newData;
+    state = state.where((element) => element['slug'] != slug).toList();
   }
 }
 
@@ -30,14 +24,13 @@ final getFavoriteMoviesNotifierProvider =
 
 class ViewMoreMoviesNotifier extends StateNotifier<List> {
   ViewMoreMoviesNotifier() : super([]);
-  initState(List data) {
-    state = data;
+
+  void initState(List data) {
+    state = [...data];
   }
 
-  addState(List data) {
-    List newData = state;
-    newData.addAll(data);
-    state = newData;
+  void addState(List data) {
+    state = [...state, ...data];
   }
 }
 

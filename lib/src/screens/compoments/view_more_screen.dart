@@ -116,6 +116,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
                                         slugMovie: dataMovies[index]['slug'],
                                       ))),
                           child: Container(
+                            clipBehavior: Clip.antiAlias,
                             decoration: const BoxDecoration(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(5)),
@@ -126,36 +127,48 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
                                       Color(0xff30cfd0),
                                       Color(0xff330867)
                                     ])),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                            child: Stack(
                               children: [
-                                ClipRRect(
-                                  clipBehavior: Clip.antiAlias,
-                                  borderRadius: const BorderRadius.only(
-                                      topRight: Radius.circular(5),
-                                      topLeft: Radius.circular(5)),
-                                  child: CachedNetworkImage(
-                                    imageUrl:
-                                        "https://phimimg.com/${dataMovies[index]['poster_url']}",
-                                    progressIndicatorBuilder:
-                                        (context, url, progress) =>
-                                            const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        const Icon(Icons.error),
-                                    height: 200,
-                                    width: double.infinity,
-                                    fit: BoxFit.fill,
+                                CachedNetworkImage(
+                                  imageUrl:
+                                      "https://phimimg.com/${dataMovies[index]['poster_url']}",
+                                  progressIndicatorBuilder:
+                                      (context, url, progress) => const Center(
+                                    child: CircularProgressIndicator(),
                                   ),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                  height: double.infinity,
+                                  width: double.infinity,
+                                  fit: BoxFit.fill,
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(10.0),
+                                Positioned(
+                                    child: Container(
+                                  padding: const EdgeInsets.all(5.0),
+                                  decoration: const BoxDecoration(
+                                      color: Colors.orange,
+                                      borderRadius: BorderRadius.only(
+                                          bottomRight: Radius.circular(5))),
                                   child: Text(
-                                    dataMovies[index]['name'],
+                                    dataMovies[index]['lang'],
                                     style: const TextStyle(color: Colors.white),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
+                                  ),
+                                )),
+                                Positioned(
+                                  bottom: 0,
+                                  child: Container(
+                                    width: 260,
+                                    padding: const EdgeInsets.all(10.0),
+                                    color: Colors.black.withValues(alpha: .4),
+                                    child: Text(
+                                      dataMovies[index]['name'],
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ),
                               ],
