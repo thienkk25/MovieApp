@@ -6,6 +6,7 @@ import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
 import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
+import 'package:movie_app/src/screens/configs/my_cache_manager.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
 class HomeBarScreen extends ConsumerStatefulWidget {
@@ -223,6 +224,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                       height: double.infinity,
                                       width: double.infinity,
                                       fit: BoxFit.fill,
+                                      cacheManager: MyCacheManager(),
                                     ),
                                     Positioned(
                                         child: Container(
@@ -532,6 +534,7 @@ class GridViewScreen extends StatelessWidget {
                   height: double.infinity,
                   width: double.infinity,
                   fit: BoxFit.fill,
+                  cacheManager: MyCacheManager(),
                 ),
                 Positioned(
                     child: Container(

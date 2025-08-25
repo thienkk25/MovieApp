@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
+import 'package:movie_app/src/screens/configs/my_cache_manager.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
 class FavoriteBarScreen extends ConsumerStatefulWidget {
@@ -104,6 +105,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                             height: 50,
                                             width: 50,
                                             fit: BoxFit.fill,
+                                            cacheManager: MyCacheManager(),
                                           ),
                                           title: Text(
                                             dataSearch[index]['name'],
@@ -201,6 +203,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                             MediaQuery.of(context).size.width /
                                                 2,
                                         fit: BoxFit.fill,
+                                        cacheManager: MyCacheManager(),
                                       ),
                                     ],
                                   ),

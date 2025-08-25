@@ -19,6 +19,7 @@ dependencies:
   shared_preferences: ^2.5.1
   shimmer: ^3.0.0
   flutter_inappwebview: ^6.1.5
+  flutter_cache_manager: ^3.4.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

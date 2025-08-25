@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
+import 'package:movie_app/src/screens/configs/my_cache_manager.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ViewMoreScreen extends ConsumerStatefulWidget {
   final String type;
@@ -20,15 +22,14 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   MovieController movieController = MovieController();
   bool isView = false;
   ScrollController scrollController = ScrollController();
-  bool isLoad = false;
   late int currentPage;
   late String titleAppBar;
   @override
   void initState() {
+    currentPage = widget.page;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadData();
       scrollController.addListener(isLoadMore);
-      currentPage = widget.page;
     });
     super.initState();
   }
@@ -43,26 +44,24 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   }
 
   void isLoadMore() {
-    if (!isLoad &&
+    if (!ref.read(isLoadingMore) &&
         scrollController.hasClients &&
         scrollController.position.pixels >=
-            scrollController.position.maxScrollExtent) {
-      setState(() {
-        isLoad = true;
-      });
+            scrollController.position.maxScrollExtent - 200) {
+      ref.read(isLoadingMore.notifier).state = true;
       loadDataMore();
     }
   }
 
   Future<void> loadDataMore() async {
+    if (!mounted) return;
     currentPage++;
     Map? data = await getMovies(widget.type, currentPage, widget.limit);
+    if (!mounted) return;
     ref
         .read(viewMoreMoviesNotifierProvider.notifier)
         .addState(data?['data']?['items'] ?? []);
-    setState(() {
-      isLoad = false;
-    });
+    ref.read(isLoadingMore.notifier).state = false;
   }
 
   getMovies(String type, int page, int limit) {
@@ -89,103 +88,30 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
               title: Text(titleAppBar),
               centerTitle: true,
             ),
-            body: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
+            body: GridView.builder(
               controller: scrollController,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: dataMovies.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisExtent: 250,
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
-                              childAspectRatio: 4.0),
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => InforMovieScreen(
-                                        slugMovie: dataMovies[index]['slug'],
-                                      ))),
-                          child: Container(
-                            clipBehavior: Clip.antiAlias,
-                            decoration: const BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5)),
-                                gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Color(0xff30cfd0),
-                                      Color(0xff330867)
-                                    ])),
-                            child: Stack(
-                              children: [
-                                CachedNetworkImage(
-                                  imageUrl:
-                                      "https://phimimg.com/${dataMovies[index]['poster_url']}",
-                                  progressIndicatorBuilder:
-                                      (context, url, progress) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
-                                  height: double.infinity,
-                                  width: double.infinity,
-                                  fit: BoxFit.fill,
-                                ),
-                                Positioned(
-                                    child: Container(
-                                  padding: const EdgeInsets.all(5.0),
-                                  decoration: const BoxDecoration(
-                                      color: Colors.orange,
-                                      borderRadius: BorderRadius.only(
-                                          bottomRight: Radius.circular(5))),
-                                  child: Text(
-                                    dataMovies[index]['lang'],
-                                    style: const TextStyle(color: Colors.white),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                )),
-                                Positioned(
-                                  bottom: 0,
-                                  child: Container(
-                                    width: 260,
-                                    padding: const EdgeInsets.all(10.0),
-                                    color: Colors.black.withValues(alpha: .4),
-                                    child: Text(
-                                      dataMovies[index]['name'],
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  isLoad
-                      ? const Padding(
-                          padding: EdgeInsets.all(10.0),
-                          child: ShimmerLoading(),
-                        )
-                      : const SizedBox()
-                ],
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(10),
+              itemCount: dataMovies.length + (ref.watch(isLoadingMore) ? 6 : 0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisExtent: 250,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
               ),
+              itemBuilder: (context, index) {
+                if (index < dataMovies.length) {
+                  return MovieItemWidget(
+                    id: dataMovies[index]['_id'],
+                    slugMovie: dataMovies[index]['slug'],
+                    imageUrl: dataMovies[index]['poster_url'],
+                    lang: dataMovies[index]['lang'],
+                    name: dataMovies[index]['name'],
+                  );
+                } else {
+                  return const SimpleLoading();
+                }
+              },
             ),
           )
         : Scaffold(
@@ -198,5 +124,137 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
               child: ShimmerLoading(),
             ),
           );
+  }
+}
+
+class SimpleLoading extends StatelessWidget {
+  const SimpleLoading({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(5),
+                  topRight: Radius.circular(5),
+                ),
+                color: Colors.grey.shade300,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.white,
+              child: Container(
+                height: 10,
+                width: MediaQuery.of(context).size.width / 3,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MovieItemWidget extends StatelessWidget {
+  final String id;
+  final String slugMovie;
+  final String imageUrl;
+  final String lang;
+  final String name;
+
+  const MovieItemWidget({
+    super.key,
+    required this.id,
+    required this.slugMovie,
+    required this.imageUrl,
+    required this.lang,
+    required this.name,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      key: ValueKey(id),
+      onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) => InforMovieScreen(
+                    slugMovie: slugMovie,
+                  ))),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xff30cfd0), Color(0xff330867)])),
+        child: Stack(
+          children: [
+            CachedNetworkImage(
+              imageUrl: "https://phimimg.com/$imageUrl",
+              progressIndicatorBuilder: (context, url, progress) =>
+                  const Center(
+                child: CircularProgressIndicator(),
+              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+              height: double.infinity,
+              width: double.infinity,
+              fit: BoxFit.fill,
+              cacheManager: MyCacheManager(),
+            ),
+            Positioned(
+                child: Container(
+              padding: const EdgeInsets.all(5.0),
+              decoration: const BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius:
+                      BorderRadius.only(bottomRight: Radius.circular(5))),
+              child: Text(
+                lang,
+                style: const TextStyle(color: Colors.white),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            )),
+            Positioned(
+              bottom: 0,
+              child: Container(
+                width: 260,
+                padding: const EdgeInsets.all(10.0),
+                color: Colors.black.withValues(alpha: .4),
+                child: Text(
+                  name,
+                  style: const TextStyle(color: Colors.white),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
