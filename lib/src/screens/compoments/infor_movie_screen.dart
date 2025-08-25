@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
-import 'package:movie_app/src/models/movie_model.dart';
 import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
 import 'package:movie_app/src/screens/compoments/watch_movie_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
@@ -24,15 +23,37 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   int isEpisode = -1;
   int pageMovie = 1;
   int limitMovie = 12;
-  Future<MovieModel> loadData() async {
+  bool isServer = true;
+
+  Future<Map?> loadData() async {
     return (await movieController.singleDetailMovies(widget.slugMovie))!;
+  }
+
+  void pushOrReplace(BuildContext context, Widget page) {
+    final count = ref.read(movieDetailOpenCount);
+
+    if (count < 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => page),
+      ).then((_) {
+        ref.read(movieDetailOpenCount.notifier).state--;
+      });
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => page),
+      );
+    }
+
+    ref.read(movieDetailOpenCount.notifier).state++;
   }
 
   @override
   Widget build(BuildContext context) {
     List dataFavorites = ref.read(getFavoriteMoviesNotifierProvider);
 
-    return FutureBuilder<MovieModel>(
+    return FutureBuilder<Map?>(
       future: loadData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -55,15 +76,15 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
           return const Scaffold(body: Center(child: Text('Không có dữ liệu')));
         }
 
-        MovieModel movieModel = snapshot.data!;
-        if (dataFavorites
-            .any((element) => element['slug'] == movieModel.movie.slug)) {
+        Map? dataInforMovie = snapshot.data;
+        if (dataFavorites.any(
+            (element) => element['slug'] == dataInforMovie?['movie']['slug'])) {
           isIconFavorite = true;
         }
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              "${movieModel.movie.name} (${movieModel.movie.originName})",
+              "${dataInforMovie?['movie']['name']} (${dataInforMovie?['movie']['origin_name']})",
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
             centerTitle: true,
@@ -75,7 +96,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                     child: isIconFavorite
                         ? GestureDetector(
                             onTap: () {
-                              removeFavoriteMovie(movieModel.movie.slug);
+                              removeFavoriteMovie(
+                                  dataInforMovie?['movie']['slug']);
                               stateSetter(() {
                                 isIconFavorite = false;
                               });
@@ -84,9 +106,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                         : GestureDetector(
                             onTap: () {
                               addFavoriteMovie(
-                                  movieModel.movie.name,
-                                  movieModel.movie.slug,
-                                  movieModel.movie.posterUrl);
+                                  dataInforMovie?['movie']['name'],
+                                  dataInforMovie?['movie']['slug'],
+                                  dataInforMovie?['movie']['poster_url']);
                               stateSetter(() {
                                 isIconFavorite = true;
                               });
@@ -122,9 +144,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   builder: (context) => GestureDetector(
                                     onDoubleTap: () => Navigator.pop(context),
                                     child: Hero(
-                                      tag: movieModel.movie.id,
+                                      tag: dataInforMovie?['movie']['_id'],
                                       child: CachedNetworkImage(
-                                        imageUrl: movieModel.movie.thumbUrl,
+                                        imageUrl: dataInforMovie?['movie']
+                                            ['thumb_url'],
                                         progressIndicatorBuilder:
                                             (context, url, progress) =>
                                                 const Center(
@@ -141,9 +164,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               clipBehavior: Clip.antiAlias,
                               borderRadius: BorderRadius.circular(5),
                               child: Hero(
-                                tag: movieModel.movie.id,
+                                tag: dataInforMovie?['movie']['_id'],
                                 child: CachedNetworkImage(
-                                  imageUrl: movieModel.movie.thumbUrl,
+                                  imageUrl: dataInforMovie?['movie']
+                                      ['thumb_url'],
                                   progressIndicatorBuilder:
                                       (context, url, progress) => const Center(
                                     child: CircularProgressIndicator(),
@@ -188,14 +212,14 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Tên phim: ${movieModel.movie.name}",
+                        "Tên phim: ${dataInforMovie?['movie']['name']}",
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(
                         height: 5,
                       ),
                       Text(
-                        "Tên gốc: ${movieModel.movie.originName}",
+                        "Tên gốc: ${dataInforMovie?['movie']['origin_name']}",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.grey,
@@ -208,14 +232,16 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Tổng số tập: ${movieModel.movie.episodeTotal}"),
-                          Text(movieModel.movie.time),
+                          Text(
+                              "Tổng số tập: ${dataInforMovie?['movie']['episode_total']}"),
+                          Text(dataInforMovie?['movie']['time']),
                         ],
                       ),
                       const SizedBox(
                         height: 5,
                       ),
-                      Text("Trạng thái: ${movieModel.movie.episodeCurrent}"),
+                      Text(
+                          "Trạng thái: ${dataInforMovie?['movie']['episode_current']}"),
                       const SizedBox(
                         height: 5,
                       ),
@@ -229,23 +255,19 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                 scrollDirection: Axis.horizontal,
                                 physics: const BouncingScrollPhysics(),
                                 shrinkWrap: true,
-                                itemCount: movieModel.movie.category.length,
+                                itemCount:
+                                    dataInforMovie?['movie']['category'].length,
                                 itemBuilder: (context, index) => Padding(
                                   padding: const EdgeInsets.only(right: 5),
                                   child: InkWell(
-                                    onTap: () {
-                                      Navigator.push(
+                                    onTap: () => pushOrReplace(
                                         context,
-                                        MaterialPageRoute(
-                                          builder: (_) => ViewMoreScreen(
-                                            movieModel
-                                                .movie.category[index].slug,
-                                            pageMovie,
-                                            limitMovie,
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                        ViewMoreScreen(
+                                          dataInforMovie?['movie']['category']
+                                              [index]['slug'],
+                                          pageMovie,
+                                          limitMovie,
+                                        )),
                                     child: Container(
                                       padding: const EdgeInsets.all(5),
                                       decoration: const BoxDecoration(
@@ -263,7 +285,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                       ),
                                       child: Center(
                                         child: Text(
-                                          movieModel.movie.category[index].name,
+                                          dataInforMovie?['movie']['category']
+                                              [index]['name'],
                                           style: const TextStyle(
                                               color: Colors.white),
                                         ),
@@ -282,8 +305,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Chất lượng: ${movieModel.movie.quality}"),
-                          Text(movieModel.movie.lang),
+                          Text(
+                              "Chất lượng: ${dataInforMovie?['movie']['quality']}"),
+                          Text(dataInforMovie?['movie']['lang']),
                         ],
                       ),
                       const SizedBox(
@@ -294,7 +318,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                         children: [
                           const Text("Phát hành:"),
                           Text(
-                              "${movieModel.movie.country[0].name} / ${movieModel.movie.year}"),
+                              "${dataInforMovie?['movie']['country'][0]['name']} / ${dataInforMovie?['movie']['year']}"),
                         ],
                       ),
                       const SizedBox(
@@ -302,13 +326,13 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                       ),
                       const Text("Nội dung:"),
                       ReadMoreText(
-                        movieModel.movie.content,
+                        dataInforMovie?['movie']['content'],
                         style: const TextStyle(color: Colors.grey),
                         trimMode: TrimMode.Line,
                         trimLines: 3,
                         colorClickableText: Colors.black,
-                        trimCollapsedText: 'Show more',
-                        trimExpandedText: 'Show less',
+                        trimCollapsedText: 'Xem thêm',
+                        trimExpandedText: 'Thu gọn',
                         moreStyle: const TextStyle(
                             color: Colors.lightBlueAccent,
                             fontWeight: FontWeight.bold),
@@ -329,9 +353,14 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => WatchMovieScreen(
-                                          episode: 0,
-                                          linkMovie: movieModel.episodes[0]
-                                              .serverData[0].linkM3U8),
+                                        episode: 0,
+                                        linkMovie: isServer
+                                            ? dataInforMovie!['episodes'][0]
+                                                ['server_data'][0]['link_m3u8']
+                                            : dataInforMovie!['episodes'][0]
+                                                    ['server_data'][0]
+                                                ['link_embed'],
+                                      ),
                                     ));
                               },
                               child: Container(
@@ -353,15 +382,17 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => WatchMovieScreen(
-                                          episode: movieModel.episodes[0]
-                                                  .serverData.length -
-                                              1,
-                                          linkMovie: movieModel
-                                              .episodes[0]
-                                              .serverData[movieModel.episodes[0]
-                                                      .serverData.length -
-                                                  1]
-                                              .linkM3U8),
+                                        episode: dataInforMovie?['episodes'][0]
+                                                    ['server_data']
+                                                .length -
+                                            1,
+                                        linkMovie: isServer
+                                            ? dataInforMovie!['episodes'][0]
+                                                ['server_data'][0]['link_m3u8']
+                                            : dataInforMovie!['episodes'][0]
+                                                    ['server_data'][0]
+                                                ['link_embed'],
+                                      ),
                                     ));
                               },
                               child: Container(
@@ -383,6 +414,71 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                       const SizedBox(
                         height: 10,
                       ),
+                      SizedBox(
+                          height: 40,
+                          child: StatefulBuilder(
+                            builder: (context, StateSetter stateSetter) {
+                              return Row(
+                                spacing: 5,
+                                children: [
+                                  const Text("Máy chủ:"),
+                                  GestureDetector(
+                                    onTap: () {
+                                      stateSetter(() {
+                                        isServer = true;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(5.0),
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            const BorderRadiusDirectional.all(
+                                                Radius.circular(5)),
+                                        // color: Colors.orange,
+                                        color: isServer
+                                            ? Colors.orange
+                                            : Colors.grey[400],
+                                      ),
+                                      child: const Center(
+                                        child: Text(
+                                          "M3u8",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      stateSetter(() {
+                                        isServer = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(5.0),
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            const BorderRadiusDirectional.all(
+                                                Radius.circular(5)),
+                                        // color: Colors.orange,
+                                        color: isServer
+                                            ? Colors.grey[400]
+                                            : Colors.orange,
+                                      ),
+                                      child: const Center(
+                                        child: Text(
+                                          "Embed",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          )),
+                      const SizedBox(
+                        height: 10,
+                      ),
                       const Text("Danh sách tập:"),
                       const SizedBox(
                         height: 10,
@@ -392,7 +488,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             GridView.builder(
                           physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
-                          itemCount: movieModel.episodes[0].serverData.length,
+                          itemCount: dataInforMovie?['episodes'][0]
+                                      ['server_data']
+                                  .length ??
+                              0,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 5,
@@ -410,9 +509,13 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => WatchMovieScreen(
-                                        episode: index,
-                                        linkMovie: movieModel.episodes[0]
-                                            .serverData[index].linkM3U8),
+                                      episode: index,
+                                      linkMovie: isServer
+                                          ? dataInforMovie!['episodes'][0]
+                                              ['server_data'][0]['link_m3u8']
+                                          : dataInforMovie!['episodes'][0]
+                                              ['server_data'][0]['link_embed'],
+                                    ),
                                   ));
                             },
                             child: Container(
@@ -448,7 +551,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                       ),
                       FutureBuilder(
                         future: movieController.searchMovies(
-                            movieModel.movie.name.substring(1, 5), 30),
+                            dataInforMovie?['movie']['name'].substring(1, 5),
+                            20),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -470,13 +574,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                       childAspectRatio: 4.0),
                               itemBuilder: (context, index) {
                                 return InkWell(
-                                  onTap: () => Navigator.push(
+                                  onTap: () => pushOrReplace(
                                       context,
-                                      MaterialPageRoute(
-                                          builder: (_) => InforMovieScreen(
-                                                slugMovie: dataMovies['data']
-                                                    ['items'][index]['slug'],
-                                              ))),
+                                      InforMovieScreen(
+                                        slugMovie: dataMovies['data']['items']
+                                            [index]['slug'],
+                                      )),
                                   child: Container(
                                     decoration: const BoxDecoration(
                                         borderRadius: BorderRadius.all(
@@ -538,7 +641,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           }
                         },
                       ),
-                    ].animate(interval: 100.ms).scale(duration: 300.ms),
+                    ].animate(interval: 50.ms).scale(duration: 200.ms),
                   ),
                 ),
               ],

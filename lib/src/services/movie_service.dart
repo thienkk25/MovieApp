@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
-import 'package:movie_app/src/models/movie_model.dart';
 
 class MovieService {
   Future<List> categoryMovies() async {
@@ -126,13 +125,13 @@ class MovieService {
     }
   }
 
-  Future<MovieModel?> singleDetailMovies(String nameMovie) async {
+  Future<Map?> singleDetailMovies(String nameMovie) async {
     try {
       final response =
           await http.get(Uri.parse("https://phimapi.com/phim/$nameMovie"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return MovieModel.fromJson(data);
+        return data;
       } else {
         return null;
       }

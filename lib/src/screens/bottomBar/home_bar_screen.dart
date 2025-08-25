@@ -541,8 +541,10 @@ class GridViewScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(5.0),
                   decoration: const BoxDecoration(
                       color: Colors.orange,
-                      borderRadius:
-                          BorderRadius.only(bottomRight: Radius.circular(5))),
+                      borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(5),
+                        bottomLeft: Radius.circular(5),
+                      )),
                   child: Text(
                     dataMovies['data']['items'][index]['lang'],
                     style: const TextStyle(color: Colors.white),
@@ -553,7 +555,7 @@ class GridViewScreen extends StatelessWidget {
                 Positioned(
                   bottom: 0,
                   child: Container(
-                    width: 260,
+                    width: 300,
                     padding: const EdgeInsets.all(10.0),
                     color: Colors.black.withValues(alpha: .4),
                     child: Text(

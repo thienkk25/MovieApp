@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:movie_app/src/models/movie_model.dart';
 import 'package:movie_app/src/services/movie_service.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
@@ -45,7 +44,7 @@ class MovieController {
     return data;
   }
 
-  Future<MovieModel?> singleDetailMovies(String nameMovie) async {
+  Future<Map?> singleDetailMovies(String nameMovie) async {
     final data = await movieService.singleDetailMovies(nameMovie);
     return data;
   }

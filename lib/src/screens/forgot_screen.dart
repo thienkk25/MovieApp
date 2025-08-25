@@ -73,6 +73,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
+                      FocusScope.of(context).requestFocus(FocusNode());
                       if (keyForm.currentState!.validate()) {
                         forgot(emailController.text);
                       }

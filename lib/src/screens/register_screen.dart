@@ -163,6 +163,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
+                      FocusScope.of(context).requestFocus(FocusNode());
                       if (keyForm.currentState!.validate()) {
                         register(hvtController.text, emailController.text,
                             pwController.text);

@@ -92,7 +92,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
               controller: scrollController,
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(10),
-              itemCount: dataMovies.length + (ref.watch(isLoadingMore) ? 6 : 0),
+              itemCount: dataMovies.length + (ref.watch(isLoadingMore) ? 4 : 0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisExtent: 250,
@@ -229,8 +229,9 @@ class MovieItemWidget extends StatelessWidget {
               padding: const EdgeInsets.all(5.0),
               decoration: const BoxDecoration(
                   color: Colors.orange,
-                  borderRadius:
-                      BorderRadius.only(bottomRight: Radius.circular(5))),
+                  borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(5),
+                      bottomLeft: Radius.circular(5))),
               child: Text(
                 lang,
                 style: const TextStyle(color: Colors.white),
@@ -241,7 +242,7 @@ class MovieItemWidget extends StatelessWidget {
             Positioned(
               bottom: 0,
               child: Container(
-                width: 260,
+                width: 300,
                 padding: const EdgeInsets.all(10.0),
                 color: Colors.black.withValues(alpha: .4),
                 child: Text(

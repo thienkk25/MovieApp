@@ -125,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
                         if (keyForm.currentState!.validate()) {
                           login(emailController.text, pwController.text);
                         }
