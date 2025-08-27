@@ -117,10 +117,11 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
         onRefresh: () => refresh(),
         child: SingleChildScrollView(
           controller: scrollController,
-          physics: const BouncingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 15),
             child: Column(
+              spacing: 10,
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -129,9 +130,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   key: keys["Trang chủ"],
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                  height: 10,
                 ),
                 SizedBox(
                   height: 40,
@@ -194,17 +192,11 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     },
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
                 Text(
                   "Phim mới cập nhật",
                   key: keys["Phim mới cập nhật"],
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                  height: 10,
                 ),
                 SizedBox(
                   height: 250,
@@ -331,9 +323,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     },
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
                 InkWell(
                   key: keys["Phim Lẻ"],
                   onTap: () {
@@ -360,9 +349,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
                 FutureBuilder(
                   future: futureSingleMovies,
                   builder: (context, snapshot) {
@@ -377,9 +363,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       );
                     }
                   },
-                ),
-                const SizedBox(
-                  height: 10,
                 ),
                 InkWell(
                   key: keys["Phim Bộ"],
@@ -407,9 +390,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
                 FutureBuilder(
                   future: futureDramaMovies,
                   builder: (context, snapshot) {
@@ -424,9 +404,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       );
                     }
                   },
-                ),
-                const SizedBox(
-                  height: 10,
                 ),
                 InkWell(
                   key: keys["Phim Hoạt Hình"],
@@ -454,9 +431,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
                 FutureBuilder(
                   future: futureCartoonMovies,
                   builder: (context, snapshot) {
@@ -471,9 +445,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       );
                     }
                   },
-                ),
-                const SizedBox(
-                  height: 10,
                 ),
                 InkWell(
                   key: keys["Chương trình truyền hình"],
@@ -500,9 +471,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       Icon(Icons.arrow_forward_ios)
                     ],
                   ),
-                ),
-                const SizedBox(
-                  height: 10,
                 ),
                 FutureBuilder(
                   future: futureTvShowsMovies,
@@ -597,12 +565,13 @@ class GridViewScreen extends StatelessWidget {
                   ),
                 )),
                 Positioned(
-                    top: 30,
+                    top: 35,
                     child: Container(
                       padding: const EdgeInsets.all(5.0),
                       decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: .4),
                           borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(5),
                             bottomRight: Radius.circular(5),
                             bottomLeft: Radius.circular(5),
                           )),

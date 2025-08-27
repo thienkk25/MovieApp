@@ -551,18 +551,20 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             );
                           } else if (snapshot.hasData) {
                             Map dataMovies = snapshot.data!;
+                            int responsiveColumnCount =
+                                MediaQuery.of(context).size.width > 600 ? 3 : 2;
                             return GridView.builder(
                               physics: const NeverScrollableScrollPhysics(),
                               shrinkWrap: true,
                               itemCount:
                                   dataMovies['data']?['items']?.length ?? 0,
                               gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      mainAxisExtent: 250,
-                                      mainAxisSpacing: 10,
-                                      crossAxisSpacing: 10,
-                                      childAspectRatio: 4.0),
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: responsiveColumnCount,
+                                mainAxisExtent: 250,
+                                mainAxisSpacing: 10,
+                                crossAxisSpacing: 10,
+                              ),
                               itemBuilder: (context, index) {
                                 return InkWell(
                                   onTap: () => Navigator.pushReplacement(

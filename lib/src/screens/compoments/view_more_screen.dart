@@ -249,12 +249,13 @@ class MovieItemWidget extends StatelessWidget {
               ),
             )),
             Positioned(
-                top: 30,
+                top: 35,
                 child: Container(
                   padding: const EdgeInsets.all(5.0),
                   decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: .4),
                       borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(5),
                         bottomRight: Radius.circular(5),
                         bottomLeft: Radius.circular(5),
                       )),

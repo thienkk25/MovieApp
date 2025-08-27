@@ -6,16 +6,17 @@ class ShimmerLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    int responsiveColumnCount = MediaQuery.of(context).size.width > 600 ? 3 : 2;
     return GridView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: 10,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisExtent: 250,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 4.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: responsiveColumnCount,
+        mainAxisExtent: 250,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+      ),
       itemBuilder: (context, index) {
         return Container(
           decoration: const BoxDecoration(
