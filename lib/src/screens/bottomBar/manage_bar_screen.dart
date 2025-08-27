@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
 import 'package:movie_app/src/screens/compoments/my_profile_screen.dart';
+import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,13 +47,16 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                           gradient: LinearGradient(
                               colors: [Color(0xff30cfd0), Color(0xff330867)])),
                     ),
-                    const Positioned(
+                    Positioned(
                       left: 10,
                       top: 25,
                       child: CircleAvatar(
-                        backgroundImage: NetworkImage(
-                            "https://res.cloudinary.com/dksr7si4o/image/upload/v1737959542/flutter/avatar/2_zqi5hz.jpg"),
                         radius: 20,
+                        child: CachedNetworkImage(
+                          imageUrl:
+                              "https://res.cloudinary.com/dksr7si4o/image/upload/v1737959542/flutter/avatar/2_zqi5hz.jpg",
+                          memCacheHeight: 100,
+                        ),
                       ),
                     ),
                     Positioned(
@@ -234,9 +239,10 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
       (route) => false,
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(result),
-      duration: const Duration(milliseconds: 300),
-    ));
+    if (result == "Đăng xuất thành công") {
+      OverlayScreen().showOverlay(context, result, Colors.green, duration: 3);
+    } else {
+      OverlayScreen().showOverlay(context, result, Colors.red, duration: 3);
+    }
   }
 }

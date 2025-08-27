@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
+import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 
 class ForgotScreen extends StatefulWidget {
   const ForgotScreen({super.key});
@@ -135,9 +136,12 @@ class _ForgotScreenState extends State<ForgotScreen> {
     final result = await userController.forgot(email);
     if (!mounted) return;
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(result),
-      duration: const Duration(milliseconds: 300),
-    ));
+    if (result == "Gửi thành công") {
+      OverlayScreen().showOverlay(context,
+          "$result, vui lòng kiểm tra thư hoặc ở thư rác", Colors.green,
+          duration: 3);
+    } else {
+      OverlayScreen().showOverlay(context, result, Colors.red, duration: 3);
+    }
   }
 }

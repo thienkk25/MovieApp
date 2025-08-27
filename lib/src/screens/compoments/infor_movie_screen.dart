@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
 import 'package:movie_app/src/screens/compoments/watch_movie_screen.dart';
+import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:readmore/readmore.dart';
 
@@ -29,26 +30,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
     return (await movieController.singleDetailMovies(widget.slugMovie))!;
   }
 
-  void pushOrReplace(BuildContext context, Widget page) {
-    final count = ref.read(movieDetailOpenCount);
-
-    if (count < 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => page),
-      ).then((_) {
-        ref.read(movieDetailOpenCount.notifier).state--;
-      });
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => page),
-      );
-    }
-
-    ref.read(movieDetailOpenCount.notifier).state++;
-  }
-
   @override
   Widget build(BuildContext context) {
     List dataFavorites = ref.read(getFavoriteMoviesNotifierProvider);
@@ -62,15 +43,20 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
         }
         if (snapshot.hasError) {
           return Scaffold(
-              appBar: AppBar(
-                title: const Icon(Icons.error),
-                centerTitle: true,
-              ),
-              body: const Center(
-                  child: Column(
+            appBar: AppBar(
+              title: const Icon(Icons.error),
+              centerTitle: true,
+            ),
+            body: const Center(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [Icon(Icons.error), Text("Phim hiện tại lỗi!")],
-              )));
+                children: [
+                  Icon(Icons.error),
+                  Text("Có lỗi, vui lòng thử lại!")
+                ],
+              ),
+            ),
+          );
         }
         if (!snapshot.hasData) {
           return const Scaffold(body: Center(child: Text('Không có dữ liệu')));
@@ -156,6 +142,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         errorWidget: (context, url, error) =>
                                             const Icon(Icons.error),
                                         fit: BoxFit.contain,
+                                        memCacheWidth: 800,
                                       ),
                                     ),
                                   ),
@@ -177,6 +164,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   height: 200,
                                   width: double.infinity,
                                   fit: BoxFit.fill,
+                                  memCacheWidth: 800,
                                 ),
                               ),
                             ),
@@ -260,14 +248,19 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                 itemBuilder: (context, index) => Padding(
                                   padding: const EdgeInsets.only(right: 5),
                                   child: InkWell(
-                                    onTap: () => pushOrReplace(
+                                    onTap: () {
+                                      Navigator.pushReplacement(
                                         context,
-                                        ViewMoreScreen(
-                                          dataInforMovie?['movie']['category']
-                                              [index]['slug'],
-                                          pageMovie,
-                                          limitMovie,
-                                        )),
+                                        MaterialPageRoute(
+                                          builder: (_) => ViewMoreScreen(
+                                            dataInforMovie?['movie']['category']
+                                                [index]['slug'],
+                                            pageMovie,
+                                            limitMovie,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                     child: Container(
                                       padding: const EdgeInsets.all(5),
                                       decoration: const BoxDecoration(
@@ -434,7 +427,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         borderRadius:
                                             const BorderRadiusDirectional.all(
                                                 Radius.circular(5)),
-                                        // color: Colors.orange,
                                         color: isServer
                                             ? Colors.orange
                                             : Colors.grey[400],
@@ -459,7 +451,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         borderRadius:
                                             const BorderRadiusDirectional.all(
                                                 Radius.circular(5)),
-                                        // color: Colors.orange,
                                         color: isServer
                                             ? Colors.grey[400]
                                             : Colors.orange,
@@ -522,7 +513,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               decoration: BoxDecoration(
                                 borderRadius: const BorderRadiusDirectional.all(
                                     Radius.circular(5)),
-                                // color: Colors.orange,
                                 color: isEpisode == index
                                     ? Colors.orange
                                     : Colors.grey[400],
@@ -564,7 +554,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             return GridView.builder(
                               physics: const NeverScrollableScrollPhysics(),
                               shrinkWrap: true,
-                              itemCount: dataMovies['data']['items'].length,
+                              itemCount:
+                                  dataMovies['data']?['items']?.length ?? 0,
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2,
@@ -574,12 +565,15 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                       childAspectRatio: 4.0),
                               itemBuilder: (context, index) {
                                 return InkWell(
-                                  onTap: () => pushOrReplace(
-                                      context,
-                                      InforMovieScreen(
+                                  onTap: () => Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => InforMovieScreen(
                                         slugMovie: dataMovies['data']['items']
                                             [index]['slug'],
-                                      )),
+                                      ),
+                                    ),
+                                  ),
                                   child: Container(
                                     decoration: const BoxDecoration(
                                         borderRadius: BorderRadius.all(
@@ -615,6 +609,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             height: 200,
                                             width: double.infinity,
                                             fit: BoxFit.fill,
+                                            memCacheHeight: 400,
                                           ),
                                         ),
                                         Padding(
@@ -662,10 +657,15 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
           .addState({"name": name, "slug": slug, "poster_url": posterUrl});
     }
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(result[0]),
-      duration: const Duration(milliseconds: 800),
-    ));
+    if (result[0] == "Yêu thích thành công") {
+      OverlayScreen()
+          .showOverlay(context, "Yêu thích", Colors.green, duration: 3);
+    } else if (result[0] == "Đã yêu thích rồi!") {
+      OverlayScreen()
+          .showOverlay(context, result[0], Colors.orange, duration: 3);
+    } else {
+      OverlayScreen().showOverlay(context, result[0], Colors.red, duration: 3);
+    }
   }
 
   Future<void> removeFavoriteMovie(String slug) async {
@@ -674,9 +674,11 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
       ref.read(getFavoriteMoviesNotifierProvider.notifier).removeState(slug);
     }
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(result[0]),
-      duration: const Duration(milliseconds: 800),
-    ));
+    if (result[0] == "Xóa thành công!") {
+      OverlayScreen()
+          .showOverlay(context, "Bỏ yêu thích", Colors.grey, duration: 3);
+    } else {
+      OverlayScreen().showOverlay(context, result[0], Colors.red, duration: 3);
+    }
   }
 }

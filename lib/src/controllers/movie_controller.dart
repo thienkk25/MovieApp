@@ -14,8 +14,8 @@ class MovieController {
     return data;
   }
 
-  Future<Map> newlyUpdatedMovies() async {
-    final data = await movieService.newlyUpdatedMovies();
+  Future<Map> newlyUpdatedMovies({int page = 1}) async {
+    final data = await movieService.newlyUpdatedMovies(page);
     return data;
   }
 

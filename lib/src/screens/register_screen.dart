@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
+import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -36,7 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
         children: [
           SizedBox(
-            height: 100,
+            height: 80,
             width: double.infinity,
             child: Center(
                 child: const Text(
@@ -230,9 +231,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final result = await userController.register(name, email, password);
     if (!mounted) return;
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(result),
-      duration: const Duration(milliseconds: 300),
-    ));
+    if (result == "Đăng ký thành công") {
+      OverlayScreen().showOverlay(context, result, Colors.green, duration: 3);
+    } else {
+      OverlayScreen().showOverlay(context, result, Colors.red, duration: 3);
+    }
   }
 }

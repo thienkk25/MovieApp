@@ -35,10 +35,10 @@ class MovieService {
     }
   }
 
-  Future<Map> newlyUpdatedMovies() async {
+  Future<Map> newlyUpdatedMovies(int page) async {
     try {
-      final response = await http.get(
-          Uri.parse("https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1"));
+      final response = await http.get(Uri.parse(
+          "https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=$page"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data;
@@ -173,7 +173,7 @@ class MovieService {
         items = List.from(data["items"]);
 
         if (items.any((element) => element['slug'] == slug)) {
-          return ["Đã yêu thích rồi 😁", false];
+          return ["Đã yêu thích rồi!", false];
         }
       }
       items.add({
@@ -188,7 +188,7 @@ class MovieService {
         "create_at": Timestamp.now()
       });
 
-      return ["Yêu thích thành công 😊", true];
+      return ["Yêu thích thành công", true];
     } catch (e) {
       return ["Thất bại!", false];
     }

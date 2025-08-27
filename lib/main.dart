@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/firebase_options.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
+import 'package:movie_app/src/screens/configs/network_listener.dart';
 import 'package:movie_app/src/screens/home_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
@@ -54,7 +55,7 @@ class MyApp extends ConsumerWidget {
         useMaterial3: true,
       ),
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: home,
+      home: NetworkListener(child: home),
     );
   }
 }

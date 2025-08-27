@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
+import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 import 'package:movie_app/src/screens/forgot_screen.dart';
 import 'package:movie_app/src/screens/home_screen.dart';
 import 'package:movie_app/src/screens/register_screen.dart';
@@ -193,17 +194,22 @@ class _LoginScreenState extends State<LoginScreen> {
     final isUser = userController.isUser();
     if (!mounted) return;
     Navigator.pop(context);
-    if (isUser) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
+    if (result == "Đăng nhập thành công") {
+      OverlayScreen().showOverlay(context, result, Colors.green, duration: 2);
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (isUser) {
+          if (!mounted) return;
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const HomeScreen(),
+            ),
+            (route) => false,
+          );
+        }
+      });
+    } else {
+      OverlayScreen().showOverlay(context, result, Colors.red, duration: 3);
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(result),
-      duration: const Duration(milliseconds: 300),
-    ));
   }
 }

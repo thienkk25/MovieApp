@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
-import 'package:movie_app/src/screens/configs/my_cache_manager.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
 class FavoriteBarScreen extends ConsumerStatefulWidget {
@@ -16,7 +15,7 @@ class FavoriteBarScreen extends ConsumerStatefulWidget {
 class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
   MovieController movieController = MovieController();
   ScrollController favoriteScrollController = ScrollController();
-  late double favoriteOffset; // late
+  late double favoriteOffset;
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
@@ -47,6 +46,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
   @override
   Widget build(BuildContext context) {
     List dataFavorites = ref.watch(getFavoriteMoviesNotifierProvider);
+    int lengthDataFavorites = dataFavorites.length - 1;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Yêu thích"),
@@ -105,7 +105,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                             height: 50,
                                             width: 50,
                                             fit: BoxFit.fill,
-                                            cacheManager: MyCacheManager(),
+                                            memCacheHeight: 100,
                                           ),
                                           title: Text(
                                             dataSearch[index]['name'],
@@ -166,8 +166,9 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (_) => InforMovieScreen(
-                                              slugMovie: dataFavorites[index]
-                                                  ['slug'])));
+                                              slugMovie: dataFavorites[
+                                                  lengthDataFavorites -
+                                                      index]['slug'])));
                                 },
                                 child: Container(
                                   height: 160,
@@ -183,13 +184,15 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          dataFavorites[index]['name'],
+                                          dataFavorites[lengthDataFavorites -
+                                              index]['name'],
                                           style: const TextStyle(
                                               color: Colors.white),
                                         ),
                                       ),
                                       CachedNetworkImage(
-                                        imageUrl: dataFavorites[index]
+                                        imageUrl: dataFavorites[
+                                                lengthDataFavorites - index]
                                             ['poster_url'],
                                         progressIndicatorBuilder:
                                             (context, url, progress) =>
@@ -203,7 +206,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                             MediaQuery.of(context).size.width /
                                                 2,
                                         fit: BoxFit.fill,
-                                        cacheManager: MyCacheManager(),
+                                        memCacheHeight: 400,
                                       ),
                                     ],
                                   ),

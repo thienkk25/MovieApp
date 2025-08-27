@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
-import 'package:movie_app/src/screens/configs/my_cache_manager.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -26,7 +25,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   late String titleAppBar;
   @override
   void initState() {
-    currentPage = widget.page;
+    currentPage = widget.page + 1;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadData();
       scrollController.addListener(isLoadMore);
@@ -35,7 +34,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   }
 
   Future<void> loadData() async {
-    Map? data = await getMovies(widget.type, widget.page, widget.limit);
+    Map? data = await getMovies(widget.type, widget.page + 1, widget.limit);
     ref
         .read(viewMoreMoviesNotifierProvider.notifier)
         .initState(data?['data']?['items'] ?? []);
@@ -75,13 +74,20 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
       case "Chương trình truyền hình":
         return movieController.tvShowsMovies(page, limit);
       default:
-        return movieController.categoryDetailMovies(type, page, limit);
+        return movieController.categoryDetailMovies(type, page - 1, limit);
     }
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     List dataMovies = ref.watch(viewMoreMoviesNotifierProvider);
+    int responsiveColumnCount = MediaQuery.of(context).size.width > 600 ? 3 : 2;
     return isView
         ? Scaffold(
             appBar: AppBar(
@@ -93,8 +99,8 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(10),
               itemCount: dataMovies.length + (ref.watch(isLoadingMore) ? 4 : 0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: responsiveColumnCount,
                 mainAxisExtent: 250,
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
@@ -107,6 +113,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
                     imageUrl: dataMovies[index]['poster_url'],
                     lang: dataMovies[index]['lang'],
                     name: dataMovies[index]['name'],
+                    episodeCurrent: dataMovies[index]['episode_current'],
                   );
                 } else {
                   return const SimpleLoading();
@@ -182,6 +189,7 @@ class MovieItemWidget extends StatelessWidget {
   final String imageUrl;
   final String lang;
   final String name;
+  final String episodeCurrent;
 
   const MovieItemWidget({
     super.key,
@@ -190,6 +198,7 @@ class MovieItemWidget extends StatelessWidget {
     required this.imageUrl,
     required this.lang,
     required this.name,
+    required this.episodeCurrent,
   });
 
   @override
@@ -222,7 +231,7 @@ class MovieItemWidget extends StatelessWidget {
               height: double.infinity,
               width: double.infinity,
               fit: BoxFit.fill,
-              cacheManager: MyCacheManager(),
+              memCacheHeight: 400,
             ),
             Positioned(
                 child: Container(
@@ -239,6 +248,23 @@ class MovieItemWidget extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             )),
+            Positioned(
+                top: 30,
+                child: Container(
+                  padding: const EdgeInsets.all(5.0),
+                  decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: .4),
+                      borderRadius: const BorderRadius.only(
+                        bottomRight: Radius.circular(5),
+                        bottomLeft: Radius.circular(5),
+                      )),
+                  child: Text(
+                    episodeCurrent,
+                    style: const TextStyle(color: Colors.white),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )),
             Positioned(
               bottom: 0,
               child: Container(

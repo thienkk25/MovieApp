@@ -77,10 +77,7 @@ class _WatchMovieScreenState extends State<WatchMovieScreen> {
         },
         onExitFullscreen: (ctrl) {
           if (!mounted) return;
-          SystemChrome.setPreferredOrientations([
-            DeviceOrientation.portraitUp,
-            DeviceOrientation.portraitDown,
-          ]);
+          SystemChrome.setPreferredOrientations(DeviceOrientation.values);
         },
       ),
     );
