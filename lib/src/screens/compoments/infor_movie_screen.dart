@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,17 +26,27 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   int pageMovie = 1;
   int limitMovie = 12;
   bool isServer = true;
+  late Future<Map?> singleDetailMovies;
+  late Future<Map?> episodeHistoryMovies;
 
-  Future<Map?> loadData() async {
-    return (await movieController.singleDetailMovies(widget.slugMovie))!;
+  @override
+  void initState() {
+    singleDetailMovies = movieController.singleDetailMovies(widget.slugMovie);
+    episodeHistoryMovies =
+        movieController.getHistoryWatchMovies(widget.slugMovie).then((data) {
+      if (data != null) {
+        ref.read(wasWatchEpisodeMovies.notifier).state = data['episode'];
+      }
+      return data;
+    });
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     List dataFavorites = ref.read(getFavoriteMoviesNotifierProvider);
-
     return FutureBuilder<Map?>(
-      future: loadData(),
+      future: singleDetailMovies,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -197,14 +208,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Column(
+                    spacing: 10,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Tên phim: ${dataInforMovie?['movie']['name']}",
                         style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(
-                        height: 5,
                       ),
                       Text(
                         "Tên gốc: ${dataInforMovie?['movie']['origin_name']}",
@@ -214,9 +223,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           fontStyle: FontStyle.italic,
                         ),
                       ),
-                      const SizedBox(
-                        height: 5,
-                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -225,14 +231,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           Text(dataInforMovie?['movie']['time']),
                         ],
                       ),
-                      const SizedBox(
-                        height: 5,
-                      ),
                       Text(
                           "Trạng thái: ${dataInforMovie?['movie']['episode_current']}"),
-                      const SizedBox(
-                        height: 5,
-                      ),
                       SizedBox(
                         height: 30,
                         child: Row(
@@ -292,9 +292,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 5,
-                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -303,9 +300,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           Text(dataInforMovie?['movie']['lang']),
                         ],
                       ),
-                      const SizedBox(
-                        height: 5,
-                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -313,9 +307,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           Text(
                               "${dataInforMovie?['movie']['country'][0]['name']} / ${dataInforMovie?['movie']['year']}"),
                         ],
-                      ),
-                      const SizedBox(
-                        height: 5,
                       ),
                       const Text("Nội dung:"),
                       ReadMoreText(
@@ -332,9 +323,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                         lessStyle: const TextStyle(
                             color: Colors.black, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(
-                        height: 5,
-                      ),
                       SizedBox(
                         height: 40,
                         child: Row(
@@ -342,6 +330,11 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           children: [
                             InkWell(
                               onTap: () {
+                                ref.read(wasWatchEpisodeMovies.notifier).state =
+                                    1;
+                                movieController.addHistoryWatchMovies(
+                                    widget.slugMovie, 1);
+
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -371,18 +364,23 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             ),
                             InkWell(
                               onTap: () {
+                                final int size = dataInforMovie!['episodes'][0]
+                                        ['server_data']
+                                    .length;
+                                ref.read(wasWatchEpisodeMovies.notifier).state =
+                                    size;
+                                movieController.addHistoryWatchMovies(
+                                    widget.slugMovie, size);
+
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => WatchMovieScreen(
-                                        episode: dataInforMovie?['episodes'][0]
-                                                    ['server_data']
-                                                .length -
-                                            1,
+                                        episode: size - 1,
                                         linkMovie: isServer
-                                            ? dataInforMovie!['episodes'][0]
+                                            ? dataInforMovie['episodes'][0]
                                                 ['server_data'][0]['link_m3u8']
-                                            : dataInforMovie!['episodes'][0]
+                                            : dataInforMovie['episodes'][0]
                                                     ['server_data'][0]
                                                 ['link_embed'],
                                       ),
@@ -403,9 +401,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(
-                        height: 10,
                       ),
                       SizedBox(
                           height: 40,
@@ -467,13 +462,22 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               );
                             },
                           )),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      FutureBuilder<Map?>(
+                          future: episodeHistoryMovies,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            }
+                            if (snapshot.hasError || !snapshot.hasData) {
+                              return const SizedBox();
+                            }
+                            return Consumer(
+                              builder: (context, ref, child) => Text(
+                                  "Lần trước xem: Tập ${ref.watch(wasWatchEpisodeMovies)}"),
+                            );
+                          }),
                       const Text("Danh sách tập:"),
-                      const SizedBox(
-                        height: 10,
-                      ),
                       StatefulBuilder(
                         builder: (context, StateSetter stateSetter) =>
                             GridView.builder(
@@ -496,6 +500,11 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   isEpisode = index;
                                 },
                               );
+                              ref.read(wasWatchEpisodeMovies.notifier).state =
+                                  index + 1;
+                              movieController.addHistoryWatchMovies(
+                                  widget.slugMovie, index + 1);
+
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -527,17 +536,11 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(
-                        height: 10,
-                      ),
                       Text(
                         "Phim khác:",
                         style: TextStyle(
                             color: Colors.grey[500],
                             fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(
-                        height: 5,
                       ),
                       FutureBuilder(
                         future: movieController.searchMovies(

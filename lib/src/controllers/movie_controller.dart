@@ -66,4 +66,13 @@ class MovieController {
     final result = await movieService.removeFavoriteMovie(slug);
     return result;
   }
+
+  Future<Map?> getHistoryWatchMovies(String slug) async {
+    final result = await movieService.getHistoryWatchMovies(slug);
+    return result;
+  }
+
+  Future<void> addHistoryWatchMovies(String slug, int episode) async {
+    await movieService.addHistoryWatchMovies(slug, episode);
+  }
 }

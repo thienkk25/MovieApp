@@ -223,4 +223,47 @@ class MovieService {
       return ["Xóa thất bại!", false];
     }
   }
+
+  Future<Map?> getHistoryWatchMovies(String slug) async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final fireStore = FirebaseFirestore.instance;
+
+      final movieDoc = fireStore
+          .collection("historyWatchMovies")
+          .doc(auth.currentUser!.uid)
+          .collection("movies")
+          .doc(slug);
+
+      final snapshot = await movieDoc.get();
+
+      if (snapshot.exists) {
+        return snapshot.data();
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> addHistoryWatchMovies(String slug, int episode) async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final fireStore = FirebaseFirestore.instance;
+
+      final movieDoc = fireStore
+          .collection("historyWatchMovies")
+          .doc(auth.currentUser!.uid)
+          .collection("movies")
+          .doc(slug);
+
+      await movieDoc.set({
+        "episode": episode,
+        "timestamp": DateTime.now(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      return;
+    }
+  }
 }
