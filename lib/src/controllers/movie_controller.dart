@@ -51,20 +51,23 @@ class MovieController {
 
   Future<void> getFavoriteMovies(WidgetRef ref) async {
     final data = await movieService.getFavoriteMovies();
-    ref
-        .read(getFavoriteMoviesNotifierProvider.notifier)
-        .initState(data?['items'] ?? []);
+    ref.read(getFavoriteMoviesNotifierProvider.notifier).initState(data);
   }
 
-  Future<List> addFavoriteMovies(
+  Future<bool> addFavoriteMovies(
       String name, String slug, String posterUrl) async {
     final result = await movieService.addFavoriteMovies(name, slug, posterUrl);
     return result;
   }
 
-  Future<List> removeFavoriteMovie(String slug) async {
+  Future<bool> removeFavoriteMovie(String slug) async {
     final result = await movieService.removeFavoriteMovie(slug);
     return result;
+  }
+
+  Future<void> historyWatchMovies(WidgetRef ref) async {
+    final data = await movieService.historyWatchMovies();
+    ref.read(historyMoviesNotifierProvider.notifier).initState(data);
   }
 
   Future<Map?> getHistoryWatchMovies(String slug) async {
@@ -72,7 +75,8 @@ class MovieController {
     return result;
   }
 
-  Future<void> addHistoryWatchMovies(String slug, int episode) async {
-    await movieService.addHistoryWatchMovies(slug, episode);
+  Future<void> addHistoryWatchMovies(
+      String name, String slug, String posterUrl, int episode) async {
+    await movieService.addHistoryWatchMovies(name, slug, posterUrl, episode);
   }
 }

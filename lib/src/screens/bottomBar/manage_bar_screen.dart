@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
+import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/my_profile_screen.dart';
 import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
@@ -18,11 +20,21 @@ class ManageBarScreen extends ConsumerStatefulWidget {
 
 class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
   UserController userController = UserController();
+  MovieController movieController = MovieController();
   late User user;
   @override
   void initState() {
     user = userController.user()!;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        loadData();
+      },
+    );
     super.initState();
+  }
+
+  Future<void> loadData() async {
+    await movieController.historyWatchMovies(ref);
   }
 
   @override
@@ -164,12 +176,12 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                               leading: const Icon(Icons.light_mode),
                               title: const Text('Giao diện sáng'),
                               onTap: () async {
-                                ref.watch(isDarkModeProvider.notifier).state =
-                                    false;
+                                ref.read(themeModeProvider.notifier).state =
+                                    ThemeMode.light;
                                 Navigator.pop(context);
                                 final pref =
                                     await SharedPreferences.getInstance();
-                                pref.setBool("isDarkMode", false);
+                                pref.setString("themeMode", "light");
                               },
                             ),
                             const Divider(
@@ -179,12 +191,27 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                               leading: const Icon(Icons.dark_mode),
                               title: const Text('Giao diện tối'),
                               onTap: () async {
-                                ref.watch(isDarkModeProvider.notifier).state =
-                                    true;
+                                ref.read(themeModeProvider.notifier).state =
+                                    ThemeMode.dark;
                                 Navigator.pop(context);
                                 final pref =
                                     await SharedPreferences.getInstance();
-                                pref.setBool("isDarkMode", true);
+                                pref.setString("themeMode", "dark");
+                              },
+                            ),
+                            const Divider(
+                              height: 1,
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.phone_android),
+                              title: const Text('Giao diện theo hệ thống'),
+                              onTap: () async {
+                                ref.read(themeModeProvider.notifier).state =
+                                    ThemeMode.system;
+                                Navigator.pop(context);
+                                final pref =
+                                    await SharedPreferences.getInstance();
+                                pref.setString("themeMode", "auto");
                               },
                             ),
                           ],
@@ -198,10 +225,70 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                     trailing: Icon(Icons.arrow_forward_ios),
                   ),
                 ),
-              ],
-            ),
-            Column(
-              children: [
+                InkWell(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) =>
+                          Consumer(builder: (context, ref, child) {
+                        List dataHistory =
+                            ref.watch(historyMoviesNotifierProvider);
+                        return SizedBox(
+                            height: MediaQuery.of(context).size.height / 2,
+                            child: SafeArea(
+                              child: ListView.builder(
+                                itemCount: dataHistory.length,
+                                itemBuilder: (context, index) => InkWell(
+                                  onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => InforMovieScreen(
+                                                slugMovie: dataHistory[index]
+                                                    ['slug'],
+                                              ))),
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(width: 1))),
+                                    child: ListTile(
+                                      leading: CachedNetworkImage(
+                                        imageUrl: dataHistory[index]
+                                            ['poster_url'],
+                                        progressIndicatorBuilder:
+                                            (context, url, progress) =>
+                                                const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                        height: 50,
+                                        width: 50,
+                                        fit: BoxFit.fill,
+                                      ),
+                                      title: Text(
+                                        dataHistory[index]['name'],
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      subtitle: Text(
+                                        "Đã từng xem: Tập ${dataHistory[index]['episode'].toString()}",
+                                      ),
+                                      trailing:
+                                          const Icon(Icons.arrow_forward_ios),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ));
+                      }),
+                    );
+                  },
+                  child: const ListTile(
+                    leading: Icon(Icons.history),
+                    title: Text("Lịch sử xem"),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                  ),
+                ),
                 const Divider(),
                 InkWell(
                   onTap: () {

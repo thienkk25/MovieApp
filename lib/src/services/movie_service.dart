@@ -140,87 +140,78 @@ class MovieService {
     }
   }
 
-  Future<Map?> getFavoriteMovies() async {
+  Future<List> getFavoriteMovies() async {
     try {
       final auth = FirebaseAuth.instance;
       final fireStore = FirebaseFirestore.instance;
-      final userDoc =
-          fireStore.collection("favoriteMovies").doc(auth.currentUser!.uid);
-      final data = await userDoc.get();
-      if (data.exists &&
-          data.data() != null &&
-          data.data()!.containsKey("items")) {
-        return data.data();
-      }
-      return null;
+      final userDoc = await fireStore
+          .collection("favoriteMovies")
+          .doc(auth.currentUser!.uid)
+          .collection("movies")
+          .orderBy("timestamp", descending: true)
+          .get();
+
+      return userDoc.docs.map((e) => e.data()).toList();
     } catch (e) {
-      return null;
+      return [];
     }
   }
 
-  Future<List> addFavoriteMovies(
+  Future<bool> addFavoriteMovies(
       String name, String slug, String posterUrl) async {
     try {
       final auth = FirebaseAuth.instance;
       final fireStore = FirebaseFirestore.instance;
-      final userDoc =
-          fireStore.collection("favoriteMovies").doc(auth.currentUser!.uid);
-      final data = await userDoc.get();
-      List<dynamic> items = [];
-      if (data.exists &&
-          data.data() != null &&
-          data.data()!.containsKey("items")) {
-        items = List.from(data["items"]);
+      final userDoc = fireStore
+          .collection("favoriteMovies")
+          .doc(auth.currentUser!.uid)
+          .collection("movies")
+          .doc(slug);
 
-        if (items.any((element) => element['slug'] == slug)) {
-          return ["Đã yêu thích rồi!", false];
-        }
-      }
-      items.add({
+      await userDoc.set({
         "name": name,
         "slug": slug,
         "poster_url": posterUrl,
-        "timestamp": Timestamp.now(),
-      });
-      await userDoc.set({
-        "uid": auth.currentUser!.uid,
-        "items": items,
-        "create_at": Timestamp.now()
-      });
+        "timestamp": DateTime.now(),
+      }, SetOptions(merge: true));
 
-      return ["Yêu thích thành công", true];
+      return true;
     } catch (e) {
-      return ["Thất bại!", false];
+      return false;
     }
   }
 
-  Future<List> removeFavoriteMovie(String slug) async {
+  Future<bool> removeFavoriteMovie(String slug) async {
     try {
       final auth = FirebaseAuth.instance;
       final fireStore = FirebaseFirestore.instance;
-      final userDoc =
-          fireStore.collection("favoriteMovies").doc(auth.currentUser!.uid);
-      final data = await userDoc.get();
-      if (data.exists &&
-          data.data() != null &&
-          data.data()!.containsKey("items")) {
-        List<dynamic> items = List.from(data["items"]);
-        if (items.any((element) => element['slug'] == slug)) {
-          items.removeWhere((element) => element['slug'] == slug);
-          await userDoc.set({
-            "items": items,
-            "timestamp": Timestamp.now(),
-          }, SetOptions(merge: true));
-
-          return ["Xóa thành công!", true];
-        } else {
-          return ["Không tồn tại trong dữ liệu!", false];
-        }
-      } else {
-        return ["Không tồn tại trong dữ liệu!", false];
-      }
+      await fireStore
+          .collection("favoriteMovies")
+          .doc(auth.currentUser!.uid)
+          .collection("movies")
+          .doc(slug)
+          .delete();
+      return true;
     } catch (e) {
-      return ["Xóa thất bại!", false];
+      return false;
+    }
+  }
+
+  Future<List> historyWatchMovies() async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final fireStore = FirebaseFirestore.instance;
+
+      final movieDoc = await fireStore
+          .collection("historyWatchMovies")
+          .doc(auth.currentUser!.uid)
+          .collection("movies")
+          .orderBy("timestamp", descending: true)
+          .get();
+
+      return movieDoc.docs.map((e) => e.data()).toList();
+    } catch (e) {
+      return [];
     }
   }
 
@@ -247,7 +238,8 @@ class MovieService {
     }
   }
 
-  Future<void> addHistoryWatchMovies(String slug, int episode) async {
+  Future<void> addHistoryWatchMovies(
+      String name, String slug, String posterUrl, int episode) async {
     try {
       final auth = FirebaseAuth.instance;
       final fireStore = FirebaseFirestore.instance;
@@ -259,6 +251,9 @@ class MovieService {
           .doc(slug);
 
       await movieDoc.set({
+        "name": name,
+        "slug": slug,
+        "poster_url": posterUrl,
         "episode": episode,
         "timestamp": DateTime.now(),
       }, SetOptions(merge: true));

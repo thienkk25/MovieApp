@@ -21,15 +21,20 @@ class MyApp extends ConsumerWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    bool isDarkMode = ref.watch(isDarkModeProvider);
     UserController userController = UserController();
     Widget home =
         userController.isUser() ? const HomeScreen() : const LoginScreen();
 
     Future<void> loadDeault() async {
       final pref = await SharedPreferences.getInstance();
-      isDarkMode = pref.getBool("isDarkMode") ?? false;
-      ref.read(isDarkModeProvider.notifier).state = isDarkMode;
+      String isThemeMode = pref.getString("themeMode") ?? "auto";
+      if (isThemeMode == "auto") {
+        ref.read(themeModeProvider.notifier).state = ThemeMode.system;
+      } else if (isThemeMode == "light") {
+        ref.read(themeModeProvider.notifier).state = ThemeMode.light;
+      } else {
+        ref.read(themeModeProvider.notifier).state = ThemeMode.dark;
+      }
     }
 
     loadDeault();
@@ -54,7 +59,7 @@ class MyApp extends ConsumerWidget {
         ),
         useMaterial3: true,
       ),
-      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      themeMode: ref.watch(themeModeProvider),
       home: NetworkListener(child: home),
     );
   }

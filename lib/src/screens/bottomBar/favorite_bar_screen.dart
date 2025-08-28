@@ -46,16 +46,13 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
   @override
   Widget build(BuildContext context) {
     List dataFavorites = ref.watch(getFavoriteMoviesNotifierProvider);
-    int lengthDataFavorites = dataFavorites.length - 1;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Yêu thích"),
       ),
       body: Column(
+        spacing: 20,
         children: [
-          const SizedBox(
-            height: 10,
-          ),
           SizedBox(
             height: 40,
             width: double.infinity,
@@ -126,9 +123,6 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
               ),
             ),
           ),
-          const SizedBox(
-            height: 20,
-          ),
           Expanded(
             child: dataFavorites.isNotEmpty
                 ? ListView.builder(
@@ -166,9 +160,8 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (_) => InforMovieScreen(
-                                              slugMovie: dataFavorites[
-                                                  lengthDataFavorites -
-                                                      index]['slug'])));
+                                              slugMovie: dataFavorites[index]
+                                                  ['slug'])));
                                 },
                                 child: Container(
                                   height: 160,
@@ -184,15 +177,13 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          dataFavorites[lengthDataFavorites -
-                                              index]['name'],
+                                          dataFavorites[index]['name'],
                                           style: const TextStyle(
                                               color: Colors.white),
                                         ),
                                       ),
                                       CachedNetworkImage(
-                                        imageUrl: dataFavorites[
-                                                lengthDataFavorites - index]
+                                        imageUrl: dataFavorites[index]
                                             ['poster_url'],
                                         progressIndicatorBuilder:
                                             (context, url, progress) =>

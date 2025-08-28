@@ -98,7 +98,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                 isIconFavorite = false;
                               });
                             },
-                            child: const Icon(Icons.favorite))
+                            child: const Icon(
+                              Icons.favorite,
+                              color: Colors.red,
+                            ))
                         : GestureDetector(
                             onTap: () {
                               addFavoriteMovie(
@@ -139,20 +142,22 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                 MaterialPageRoute(
                                   builder: (context) => GestureDetector(
                                     onDoubleTap: () => Navigator.pop(context),
-                                    child: Hero(
-                                      tag: dataInforMovie?['movie']['_id'],
-                                      child: CachedNetworkImage(
-                                        imageUrl: dataInforMovie?['movie']
-                                            ['thumb_url'],
-                                        progressIndicatorBuilder:
-                                            (context, url, progress) =>
-                                                const Center(
-                                          child: CircularProgressIndicator(),
+                                    child: InteractiveViewer(
+                                      child: Hero(
+                                        tag: dataInforMovie?['movie']['_id'],
+                                        child: CachedNetworkImage(
+                                          imageUrl: dataInforMovie?['movie']
+                                              ['thumb_url'],
+                                          progressIndicatorBuilder:
+                                              (context, url, progress) =>
+                                                  const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              const Icon(Icons.error),
+                                          fit: BoxFit.contain,
+                                          memCacheWidth: 800,
                                         ),
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(Icons.error),
-                                        fit: BoxFit.contain,
-                                        memCacheWidth: 800,
                                       ),
                                     ),
                                   ),
@@ -329,11 +334,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           children: [
                             InkWell(
                               onTap: () {
-                                ref.read(wasWatchEpisodeMovies.notifier).state =
-                                    1;
-                                movieController.addHistoryWatchMovies(
-                                    widget.slugMovie, 1);
-
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -347,6 +347,18 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                                 ['link_embed'],
                                       ),
                                     ));
+                                ref.read(wasWatchEpisodeMovies.notifier).state =
+                                    1;
+                                movieController.addHistoryWatchMovies(
+                                    dataInforMovie?['movie']['name'],
+                                    widget.slugMovie,
+                                    dataInforMovie?['movie']['poster_url'],
+                                    1);
+                                addHistoryWatchMovies(
+                                    dataInforMovie?['movie']['name'],
+                                    widget.slugMovie,
+                                    dataInforMovie?['movie']['poster_url'],
+                                    1);
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(10.0),
@@ -366,10 +378,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                 final int size = dataInforMovie!['episodes'][0]
                                         ['server_data']
                                     .length;
-                                ref.read(wasWatchEpisodeMovies.notifier).state =
-                                    size;
-                                movieController.addHistoryWatchMovies(
-                                    widget.slugMovie, size);
 
                                 Navigator.push(
                                     context,
@@ -384,6 +392,18 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                                 ['link_embed'],
                                       ),
                                     ));
+                                ref.read(wasWatchEpisodeMovies.notifier).state =
+                                    size;
+                                movieController.addHistoryWatchMovies(
+                                    dataInforMovie['movie']['name'],
+                                    widget.slugMovie,
+                                    dataInforMovie['movie']['poster_url'],
+                                    size);
+                                addHistoryWatchMovies(
+                                    dataInforMovie['movie']['name'],
+                                    widget.slugMovie,
+                                    dataInforMovie['movie']['poster_url'],
+                                    size);
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(10.0),
@@ -499,10 +519,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   isEpisode = index;
                                 },
                               );
-                              ref.read(wasWatchEpisodeMovies.notifier).state =
-                                  index + 1;
-                              movieController.addHistoryWatchMovies(
-                                  widget.slugMovie, index + 1);
 
                               Navigator.push(
                                   context,
@@ -516,6 +532,18 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                               ['server_data'][0]['link_embed'],
                                     ),
                                   ));
+                              ref.read(wasWatchEpisodeMovies.notifier).state =
+                                  index + 1;
+                              movieController.addHistoryWatchMovies(
+                                  dataInforMovie?['movie']['name'],
+                                  widget.slugMovie,
+                                  dataInforMovie?['movie']['poster_url'],
+                                  index + 1);
+                              addHistoryWatchMovies(
+                                  dataInforMovie?['movie']['name'],
+                                  widget.slugMovie,
+                                  dataInforMovie?['movie']['poster_url'],
+                                  index + 1);
                             },
                             child: Container(
                               decoration: BoxDecoration(
@@ -535,15 +563,14 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           ),
                         ),
                       ),
-                      Text(
+                      const Text(
                         "Phim khác:",
-                        style: TextStyle(
-                            color: Colors.grey[500],
-                            fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       FutureBuilder(
                         future: movieController.searchMovies(
-                            dataInforMovie?['movie']['name'].substring(1, 5),
+                            dataInforMovie?['movie']['name'].substring(1, 5) ??
+                                "",
                             20),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
@@ -589,44 +616,84 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                               Color(0xff30cfd0),
                                               Color(0xff330867)
                                             ])),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                    child: Stack(
                                       children: [
-                                        ClipRRect(
-                                          clipBehavior: Clip.antiAlias,
-                                          borderRadius: const BorderRadius.only(
-                                              topRight: Radius.circular(5),
-                                              topLeft: Radius.circular(5)),
-                                          child: CachedNetworkImage(
-                                            imageUrl:
-                                                "https://phimimg.com/${dataMovies['data']['items'][index]['poster_url']}",
-                                            progressIndicatorBuilder:
-                                                (context, url, progress) =>
-                                                    const Center(
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            ),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    const Icon(Icons.error),
-                                            height: 200,
-                                            width: double.infinity,
-                                            fit: BoxFit.fill,
-                                            memCacheHeight: 400,
+                                        CachedNetworkImage(
+                                          imageUrl:
+                                              "https://phimimg.com/${dataMovies['data']['items'][index]['poster_url']}",
+                                          progressIndicatorBuilder:
+                                              (context, url, progress) =>
+                                                  const Center(
+                                            child: CircularProgressIndicator(),
                                           ),
+                                          errorWidget: (context, url, error) =>
+                                              const Icon(Icons.error),
+                                          height: double.infinity,
+                                          width: double.infinity,
+                                          fit: BoxFit.fill,
+                                          memCacheHeight: 400,
                                         ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(10.0),
+                                        Positioned(
+                                            child: Container(
+                                          padding: const EdgeInsets.all(5.0),
+                                          decoration: const BoxDecoration(
+                                              color: Colors.orange,
+                                              borderRadius: BorderRadius.only(
+                                                bottomRight: Radius.circular(5),
+                                                bottomLeft: Radius.circular(5),
+                                              )),
                                           child: Text(
                                             dataMovies['data']['items'][index]
-                                                ['name'],
+                                                ['lang'],
                                             style: const TextStyle(
                                                 color: Colors.white),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                        ),
+                                        )),
+                                        Positioned(
+                                            top: 35,
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.all(5.0),
+                                              decoration: BoxDecoration(
+                                                  color: Colors.black
+                                                      .withValues(alpha: .4),
+                                                  borderRadius:
+                                                      const BorderRadius.only(
+                                                    topRight:
+                                                        Radius.circular(5),
+                                                    bottomRight:
+                                                        Radius.circular(5),
+                                                    bottomLeft:
+                                                        Radius.circular(5),
+                                                  )),
+                                              child: Text(
+                                                dataMovies['data']['items']
+                                                    [index]['episode_current'],
+                                                style: const TextStyle(
+                                                    color: Colors.white),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            )),
+                                        Positioned(
+                                          bottom: 0,
+                                          child: Container(
+                                            width: 300,
+                                            padding: const EdgeInsets.all(10.0),
+                                            color: Colors.black
+                                                .withValues(alpha: .4),
+                                            child: Text(
+                                              dataMovies['data']['items'][index]
+                                                  ['name'],
+                                              style: const TextStyle(
+                                                  color: Colors.white),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        )
                                       ],
                                     ),
                                   ),
@@ -655,34 +722,42 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
       String name, String slug, String posterUrl) async {
     final result =
         await movieController.addFavoriteMovies(name, slug, posterUrl);
-    if (result[1]) {
+    if (!mounted) return;
+    if (result) {
       ref
           .read(getFavoriteMoviesNotifierProvider.notifier)
           .addState({"name": name, "slug": slug, "poster_url": posterUrl});
-    }
-    if (!mounted) return;
-    if (result[0] == "Yêu thích thành công") {
       OverlayScreen()
-          .showOverlay(context, "Yêu thích", Colors.green, duration: 3);
-    } else if (result[0] == "Đã yêu thích rồi!") {
-      OverlayScreen()
-          .showOverlay(context, result[0], Colors.orange, duration: 3);
+          .showOverlay(context, "Yêu thích", Colors.orange, duration: 3);
     } else {
-      OverlayScreen().showOverlay(context, result[0], Colors.red, duration: 3);
+      OverlayScreen().showOverlay(
+          context, "Có lỗi, vui lòng thử lại!", Colors.red,
+          duration: 3);
     }
   }
 
   Future<void> removeFavoriteMovie(String slug) async {
     final result = await movieController.removeFavoriteMovie(slug);
-    if (result[1]) {
-      ref.read(getFavoriteMoviesNotifierProvider.notifier).removeState(slug);
-    }
     if (!mounted) return;
-    if (result[0] == "Xóa thành công!") {
+    if (result) {
+      ref.read(getFavoriteMoviesNotifierProvider.notifier).removeState(slug);
       OverlayScreen()
           .showOverlay(context, "Bỏ yêu thích", Colors.grey, duration: 3);
     } else {
-      OverlayScreen().showOverlay(context, result[0], Colors.red, duration: 3);
+      OverlayScreen().showOverlay(
+          context, "Có lỗi, vui lòng thử lại!", Colors.red,
+          duration: 3);
     }
+  }
+
+  Future<void> addHistoryWatchMovies(
+      String name, String slug, String posterUrl, int episode) async {
+    await movieController.addHistoryWatchMovies(name, slug, posterUrl, episode);
+    ref.read(historyMoviesNotifierProvider.notifier).addState({
+      "name": name,
+      "slug": slug,
+      "poster_url": posterUrl,
+      "episode": episode
+    });
   }
 }

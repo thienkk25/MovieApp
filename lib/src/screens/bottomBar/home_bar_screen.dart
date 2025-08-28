@@ -512,11 +512,11 @@ class GridViewScreen extends StatelessWidget {
       shrinkWrap: true,
       itemCount: dataMovies['data']?['items'].length ?? 0,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: responsiveColumnCount,
-          mainAxisExtent: 260,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 4.0),
+        crossAxisCount: responsiveColumnCount,
+        mainAxisExtent: 260,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+      ),
       itemBuilder: (context, index) {
         return InkWell(
           onTap: () => Navigator.push(

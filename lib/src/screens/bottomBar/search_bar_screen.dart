@@ -14,6 +14,7 @@ class SearchBarScreen extends StatefulWidget {
 
 class _SearchBarScreenState extends State<SearchBarScreen> {
   MovieController movieController = MovieController();
+  TextEditingController searchController = TextEditingController();
   late Future<Map> futureNewlyUpdatedMovies;
   Timer? timer;
   Map dataSearch = {};
@@ -38,10 +39,8 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
+          spacing: 10,
           children: [
-            const SizedBox(
-              height: 10,
-            ),
             SizedBox(
               height: 40,
               width: double.infinity,
@@ -49,6 +48,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width / 1.2,
                   child: SearchBar(
+                    controller: searchController,
                     onChanged: (value) {
                       if (timer?.isActive ?? false) {
                         timer?.cancel();
@@ -57,7 +57,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                         const Duration(milliseconds: 400),
                         () async {
                           dataSearch =
-                              await movieController.searchMovies(value, 30);
+                              await movieController.searchMovies(value, 24);
                           setState(() {});
                         },
                       );
@@ -68,9 +68,6 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                   ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 10,
             ),
             if (dataSearch['data']?['items'] != null &&
                 dataSearch['data']['items'].length != 0)
@@ -154,15 +151,15 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                   },
                 ),
               )
-            else if (dataSearch['data']?['items'] != null &&
-                dataSearch['data']['items'].length == 0)
+            else if (dataSearch['data'] != null &&
+                dataSearch['data']?['items'] == null)
               SizedBox(
                 height: MediaQuery.of(context).size.height / 2,
                 child: const Center(
-                  child: Text("Không tìm thấy dữ liệu"),
+                  child: Text("Không tìm thấy phim"),
                 ),
-              )
-            else
+              ),
+            if (searchController.text.isEmpty)
               FutureBuilder(
                 future: futureNewlyUpdatedMovies,
                 builder: (context, snapshot) {
