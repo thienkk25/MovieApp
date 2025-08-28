@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -6,7 +8,9 @@ import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
 import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
+import 'package:movie_app/src/screens/configs/local_notifications.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeBarScreen extends ConsumerStatefulWidget {
   const HomeBarScreen({super.key});
@@ -104,6 +108,16 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
       futureCartoonMovies,
       futureTvShowsMovies
     ]);
+  }
+
+  Future<void> scheduleNotification(
+      String title, String body, String? payload) async {
+    final pref = await SharedPreferences.getInstance();
+    bool isNotification = pref.getBool("notification") ?? true;
+    if (isNotification) {
+      LocalNotifications()
+          .scheduleNotification(title: title, body: body, payload: payload);
+    }
   }
 
   @override
@@ -209,6 +223,12 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         );
                       } else if (snapshot.hasData) {
                         Map newlyUpdatedMovies = snapshot.data!;
+                        int random = Random()
+                            .nextInt(newlyUpdatedMovies['items']?.length - 1);
+                        scheduleNotification(
+                            newlyUpdatedMovies['items'][random]['name'],
+                            "Bạn đã xem phim này chưa? 🎬. Ấn để xem ngay nào!",
+                            newlyUpdatedMovies['items'][random]['slug']);
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
                           shrinkWrap: true,

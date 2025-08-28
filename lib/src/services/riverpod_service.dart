@@ -17,7 +17,7 @@ class GetFavoriteMoviesNotifier extends StateNotifier<List> {
   }
 
   removeState(String slug) {
-    state = state.where((element) => element['slug'] != slug).toList();
+    state = [...state]..removeWhere((element) => element['slug'] == slug);
   }
 }
 
@@ -33,6 +33,10 @@ class HistoryMoviesNotifier extends StateNotifier<List> {
 
   addState(Map data) {
     state = [data, ...state];
+  }
+
+  removeState(String slug) {
+    state = [...state]..removeWhere((element) => element['slug'] == slug);
   }
 }
 

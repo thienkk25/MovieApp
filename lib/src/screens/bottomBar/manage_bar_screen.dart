@@ -6,6 +6,7 @@ import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/my_profile_screen.dart';
+import 'package:movie_app/src/screens/configs/local_notifications.dart';
 import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
@@ -22,6 +23,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
   UserController userController = UserController();
   MovieController movieController = MovieController();
   late User user;
+  late SharedPreferences pref;
+  late bool isNotification;
   @override
   void initState() {
     user = userController.user()!;
@@ -35,6 +38,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
 
   Future<void> loadData() async {
     await movieController.historyWatchMovies(ref);
+    pref = await SharedPreferences.getInstance();
+    isNotification = pref.getBool("notification") ?? true;
   }
 
   @override
@@ -107,23 +112,44 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
-                      builder: (context) => SafeArea(
-                        child: Wrap(
-                          children: [
-                            ListTile(
-                              title: const Text('Tắt thông báo'),
-                              onTap: () {},
-                            ),
-                            const Divider(
-                              height: 1,
-                            ),
-                            ListTile(
-                              title: const Text('Bật thông báo'),
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
+                      builder: (context) => StatefulBuilder(
+                        builder: (context, StateSetter stateSetter) => SafeArea(
+                          child: Wrap(
+                            children: [
+                              ListTile(
+                                title: const Text('Bật thông báo'),
+                                trailing: isNotification
+                                    ? const Icon(Icons.check)
+                                    : null,
+                                onTap: () async {
+                                  OverlayScreen().showOverlay(
+                                      context, "Bật thông báo", Colors.green,
+                                      duration: 2);
+                                  Navigator.pop(context);
+                                  pref.setBool("notification", true);
+                                  stateSetter(() => isNotification = true);
+                                },
+                              ),
+                              const Divider(
+                                height: 1,
+                              ),
+                              ListTile(
+                                title: const Text('Tắt thông báo'),
+                                trailing: isNotification
+                                    ? null
+                                    : const Icon(Icons.check),
+                                onTap: () async {
+                                  OverlayScreen().showOverlay(
+                                      context, "Tắt thông báo", Colors.grey,
+                                      duration: 2);
+                                  LocalNotifications().cancelAll();
+                                  Navigator.pop(context);
+                                  pref.setBool("notification", false);
+                                  stateSetter(() => isNotification = false);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -169,52 +195,60 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
-                      builder: (context) => SafeArea(
-                        child: Wrap(
-                          children: [
-                            ListTile(
-                              leading: const Icon(Icons.light_mode),
-                              title: const Text('Giao diện sáng'),
-                              onTap: () async {
-                                ref.read(themeModeProvider.notifier).state =
-                                    ThemeMode.light;
-                                Navigator.pop(context);
-                                final pref =
-                                    await SharedPreferences.getInstance();
-                                pref.setString("themeMode", "light");
-                              },
-                            ),
-                            const Divider(
-                              height: 1,
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.dark_mode),
-                              title: const Text('Giao diện tối'),
-                              onTap: () async {
-                                ref.read(themeModeProvider.notifier).state =
-                                    ThemeMode.dark;
-                                Navigator.pop(context);
-                                final pref =
-                                    await SharedPreferences.getInstance();
-                                pref.setString("themeMode", "dark");
-                              },
-                            ),
-                            const Divider(
-                              height: 1,
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.phone_android),
-                              title: const Text('Giao diện theo hệ thống'),
-                              onTap: () async {
-                                ref.read(themeModeProvider.notifier).state =
-                                    ThemeMode.system;
-                                Navigator.pop(context);
-                                final pref =
-                                    await SharedPreferences.getInstance();
-                                pref.setString("themeMode", "auto");
-                              },
-                            ),
-                          ],
+                      builder: (context) => Consumer(
+                        builder: (context, ref, child) => SafeArea(
+                          child: Wrap(
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.light_mode),
+                                title: const Text('Giao diện sáng'),
+                                trailing: ref.watch(themeModeProvider) ==
+                                        ThemeMode.light
+                                    ? const Icon(Icons.check)
+                                    : null,
+                                onTap: () async {
+                                  ref.read(themeModeProvider.notifier).state =
+                                      ThemeMode.light;
+                                  Navigator.pop(context);
+                                  pref.setString("themeMode", "light");
+                                },
+                              ),
+                              const Divider(
+                                height: 1,
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.dark_mode),
+                                title: const Text('Giao diện tối'),
+                                trailing: ref.watch(themeModeProvider) ==
+                                        ThemeMode.dark
+                                    ? const Icon(Icons.check)
+                                    : null,
+                                onTap: () async {
+                                  ref.read(themeModeProvider.notifier).state =
+                                      ThemeMode.dark;
+                                  Navigator.pop(context);
+                                  pref.setString("themeMode", "dark");
+                                },
+                              ),
+                              const Divider(
+                                height: 1,
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.phone_android),
+                                title: const Text('Giao diện theo hệ thống'),
+                                trailing: ref.watch(themeModeProvider) ==
+                                        ThemeMode.system
+                                    ? const Icon(Icons.check)
+                                    : null,
+                                onTap: () async {
+                                  ref.read(themeModeProvider.notifier).state =
+                                      ThemeMode.system;
+                                  Navigator.pop(context);
+                                  pref.setString("themeMode", "auto");
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -233,8 +267,14 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                           Consumer(builder: (context, ref, child) {
                         List dataHistory =
                             ref.watch(historyMoviesNotifierProvider);
-                        return SizedBox(
-                            height: MediaQuery.of(context).size.height / 2,
+                        return Container(
+                            clipBehavior: Clip.antiAlias,
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(50),
+                              topRight: Radius.circular(50),
+                            )),
+                            height: MediaQuery.of(context).size.height / 1.5,
                             child: SafeArea(
                               child: ListView.builder(
                                 itemCount: dataHistory.length,
@@ -246,6 +286,76 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                                 slugMovie: dataHistory[index]
                                                     ['slug'],
                                               ))),
+                                  onLongPress: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => Dialog(
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceAround,
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: [
+                                                  TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder: (_) =>
+                                                                    InforMovieScreen(
+                                                                      slugMovie:
+                                                                          dataHistory[index]
+                                                                              [
+                                                                              'slug'],
+                                                                    )));
+                                                      },
+                                                      child: const Text("Xem")),
+                                                  TextButton(
+                                                      onPressed: () async {
+                                                        final result =
+                                                            await movieController
+                                                                .removeHistoryWatchMovies(
+                                                                    dataHistory[
+                                                                            index]
+                                                                        [
+                                                                        'slug']);
+
+                                                        if (!context.mounted) {
+                                                          return;
+                                                        }
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                        if (result) {
+                                                          OverlayScreen()
+                                                              .showOverlay(
+                                                                  context,
+                                                                  "Xóa thành công",
+                                                                  Colors.green,
+                                                                  duration: 3);
+                                                          ref
+                                                              .read(
+                                                                  historyMoviesNotifierProvider
+                                                                      .notifier)
+                                                              .removeState(
+                                                                  dataHistory[
+                                                                          index]
+                                                                      ['slug']);
+                                                        } else {
+                                                          OverlayScreen()
+                                                              .showOverlay(
+                                                                  context,
+                                                                  "Có lỗi, vui lòng thử lại",
+                                                                  Colors.red,
+                                                                  duration: 3);
+                                                        }
+                                                      },
+                                                      child: const Text("Xóa")),
+                                                ],
+                                              ),
+                                            ));
+                                  },
                                   child: Container(
                                     decoration: const BoxDecoration(
                                         border: Border(

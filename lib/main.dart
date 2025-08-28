@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/firebase_options.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
+import 'package:movie_app/src/screens/configs/local_notifications.dart';
 import 'package:movie_app/src/screens/configs/network_listener.dart';
 import 'package:movie_app/src/screens/home_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
@@ -21,9 +22,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void notificationTapBackground(NotificationResponse response) {}
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   tz.initializeTimeZones();
   final String localTimeZone = await FlutterTimezone.getLocalTimezone();
   tz.setLocalLocation(tz.getLocation(localTimeZone));
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -35,10 +38,12 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     UserController userController = UserController();
+    LocalNotifications localNotifications = LocalNotifications();
     Widget home =
         userController.isUser() ? const HomeScreen() : const LoginScreen();
 
     Future<void> loadDeault() async {
+      localNotifications.init();
       final pref = await SharedPreferences.getInstance();
       String isThemeMode = pref.getString("themeMode") ?? "auto";
       if (isThemeMode == "auto") {
@@ -51,6 +56,7 @@ class MyApp extends ConsumerWidget {
     }
 
     loadDeault();
+
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,

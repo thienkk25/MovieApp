@@ -261,4 +261,21 @@ class MovieService {
       return;
     }
   }
+
+  Future<bool> removeHistoryWatchMovies(String slug) async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final fireStore = FirebaseFirestore.instance;
+      await fireStore
+          .collection("historyWatchMovies")
+          .doc(auth.currentUser!.uid)
+          .collection("movies")
+          .doc(slug)
+          .delete();
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

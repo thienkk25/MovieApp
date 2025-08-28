@@ -54,10 +54,10 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                         timer?.cancel();
                       }
                       timer = Timer(
-                        const Duration(milliseconds: 400),
+                        const Duration(milliseconds: 300),
                         () async {
                           dataSearch =
-                              await movieController.searchMovies(value, 24);
+                              await movieController.searchMovies(value, 18);
                           setState(() {});
                         },
                       );
@@ -106,15 +106,19 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                                 ])),
                         child: Stack(
                           children: [
-                            Image.network(
-                              "https://phimimg.com/${dataSearch['data']['items'][index]['poster_url']}",
+                            CachedNetworkImage(
+                              imageUrl:
+                                  "https://phimimg.com/${dataSearch['data']['items'][index]['poster_url']}",
+                              progressIndicatorBuilder:
+                                  (context, url, progress) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
                               height: double.infinity,
                               width: double.infinity,
                               fit: BoxFit.fill,
-                              cacheHeight: 400,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.broken_image,
-                                      color: Colors.white),
+                              memCacheHeight: 400,
                             ),
                             Positioned(
                                 child: Container(

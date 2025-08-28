@@ -79,4 +79,9 @@ class MovieController {
       String name, String slug, String posterUrl, int episode) async {
     await movieService.addHistoryWatchMovies(name, slug, posterUrl, episode);
   }
+
+  Future<bool> removeHistoryWatchMovies(String slug) async {
+    final result = await movieService.removeHistoryWatchMovies(slug);
+    return result;
+  }
 }
