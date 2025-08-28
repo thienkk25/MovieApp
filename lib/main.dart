@@ -12,7 +12,6 @@ import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:flutter_timezone/flutter_timezone.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -24,8 +23,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   tz.initializeTimeZones();
-  final String localTimeZone = await FlutterTimezone.getLocalTimezone();
-  tz.setLocalLocation(tz.getLocation(localTimeZone));
+  tz.setLocalLocation(tz.getLocation('Asia/Ho_Chi_Minh'));
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
