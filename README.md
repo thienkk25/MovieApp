@@ -46,3 +46,4 @@ Your mini cinema on the go! Enjoy thousands of blockbuster movies and exciting s
 
 - [Link Cloudinary video demo](https://res.cloudinary.com/dksr7si4o/video/upload/v1738843726/flutter/video_kq/Movie-App-Demo_x5fe39.mp4)
 - [Link Youtube video demo](https://youtube.com/shorts/45lzYWR05XI?feature=share)
+- [Link Cloudinary video demo update](https://res.cloudinary.com/dksr7si4o/video/upload/v1756388961/flutter/video_kq/lv_0_20250828191234_dhoxbn.mp4)
