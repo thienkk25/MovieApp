@@ -6,42 +6,48 @@ final currentTitle = StateProvider<String>((ref) => "Trang chủ");
 final isLoadingMore = StateProvider<bool>((ref) => false);
 final wasWatchEpisodeMovies = StateProvider<int?>((ref) => null);
 
-class GetFavoriteMoviesNotifier extends StateNotifier<List> {
-  GetFavoriteMoviesNotifier() : super([]);
-  initState(List data) {
-    state = [...data];
+class GetFavoriteMoviesNotifier extends StateNotifier<Map> {
+  GetFavoriteMoviesNotifier() : super({});
+  initState(Map data) {
+    state = data;
   }
 
   addState(Map data) {
-    state = [data, ...state];
+    String slug = data['slug'];
+    state = {slug: data, ...state};
   }
 
   removeState(String slug) {
-    state = [...state]..removeWhere((element) => element['slug'] == slug);
+    final newState = Map.from(state);
+    newState.remove(slug);
+    state = newState;
   }
 }
 
 final getFavoriteMoviesNotifierProvider =
-    StateNotifierProvider<GetFavoriteMoviesNotifier, List>(
+    StateNotifierProvider<GetFavoriteMoviesNotifier, Map>(
         (ref) => GetFavoriteMoviesNotifier());
 
-class HistoryMoviesNotifier extends StateNotifier<List> {
-  HistoryMoviesNotifier() : super([]);
-  initState(List data) {
-    state = [...data];
+class HistoryMoviesNotifier extends StateNotifier<Map> {
+  HistoryMoviesNotifier() : super({});
+  initState(Map data) {
+    state = data;
   }
 
   addState(Map data) {
-    state = [data, ...state];
+    String slug = data['slug'];
+    state = {slug: data, ...state};
   }
 
   removeState(String slug) {
-    state = [...state]..removeWhere((element) => element['slug'] == slug);
+    final newState = Map.from(state);
+    newState.remove(slug);
+    state = newState;
   }
 }
 
 final historyMoviesNotifierProvider =
-    StateNotifierProvider<HistoryMoviesNotifier, List>(
+    StateNotifierProvider<HistoryMoviesNotifier, Map>(
         (ref) => HistoryMoviesNotifier());
 
 class ViewMoreMoviesNotifier extends StateNotifier<List> {

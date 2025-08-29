@@ -15,6 +15,7 @@ class FavoriteBarScreen extends ConsumerStatefulWidget {
 class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
   MovieController movieController = MovieController();
   ScrollController favoriteScrollController = ScrollController();
+
   late double favoriteOffset;
   @override
   void initState() {
@@ -45,175 +46,182 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List dataFavorites = ref.watch(getFavoriteMoviesNotifierProvider);
+    Map data = ref.watch(getFavoriteMoviesNotifierProvider);
+    List dataFavorites = data.values.toList();
+    double sizeWidth = MediaQuery.of(context).size.width;
+
+    int responsiveColumnCount;
+
+    if (sizeWidth < 600) {
+      responsiveColumnCount = 2;
+    } else if (sizeWidth <= 800) {
+      responsiveColumnCount = 3;
+    } else if (sizeWidth <= 1200) {
+      responsiveColumnCount = 4;
+    } else {
+      responsiveColumnCount = 5;
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Yêu thích"),
       ),
-      body: Column(
-        spacing: 20,
-        children: [
-          SizedBox(
-            height: 40,
-            width: double.infinity,
-            child: Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width / 1.2,
-                child: SearchAnchor.bar(
-                  isFullScreen: false,
-                  barElevation: const WidgetStatePropertyAll(0),
-                  barHintText: "Tìm kiếm ...",
-                  suggestionsBuilder: (context, controller) {
-                    String search = controller.text.toLowerCase();
-                    List dataSearch = dataFavorites
-                        .where((element) =>
-                            element['name'].toLowerCase().contains(search))
-                        .toList();
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          spacing: 10,
+          children: [
+            SizedBox(
+              height: 40,
+              width: double.infinity,
+              child: Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width / 1.2,
+                  child: SearchAnchor.bar(
+                    isFullScreen: false,
+                    barElevation: const WidgetStatePropertyAll(0),
+                    barHintText: "Tìm kiếm ...",
+                    suggestionsBuilder: (context, controller) {
+                      String search = controller.text.toLowerCase();
+                      List dataSearch = dataFavorites
+                          .where((element) =>
+                              element['name'].toLowerCase().contains(search))
+                          .toList();
 
-                    return dataSearch.isNotEmpty
-                        ? [
-                            ...List.generate(
-                                dataSearch.length,
-                                (index) => InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (_) =>
-                                                    InforMovieScreen(
-                                                        slugMovie:
-                                                            dataSearch[index]
-                                                                ['slug'])));
-                                      },
-                                      child: Card(
-                                        child: ListTile(
-                                          leading: CachedNetworkImage(
-                                            imageUrl: dataFavorites[index]
-                                                ['poster_url'],
-                                            progressIndicatorBuilder:
-                                                (context, url, progress) =>
-                                                    const Center(
-                                              child:
-                                                  CircularProgressIndicator(),
+                      return dataSearch.isNotEmpty
+                          ? [
+                              ...List.generate(
+                                  dataSearch.length,
+                                  (index) => InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      InforMovieScreen(
+                                                          slugMovie:
+                                                              dataSearch[index]
+                                                                  ['slug'])));
+                                        },
+                                        child: Card(
+                                          child: ListTile(
+                                            leading: CachedNetworkImage(
+                                              imageUrl: dataFavorites[index]
+                                                  ['poster_url'],
+                                              progressIndicatorBuilder:
+                                                  (context, url, progress) =>
+                                                      const Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              ),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      const Icon(Icons.error),
+                                              height: 50,
+                                              width: 50,
+                                              fit: BoxFit.fill,
+                                              memCacheHeight: 100,
                                             ),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    const Icon(Icons.error),
-                                            height: 50,
-                                            width: 50,
-                                            fit: BoxFit.fill,
-                                            memCacheHeight: 100,
-                                          ),
-                                          title: Text(
-                                            dataSearch[index]['name'],
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+                                            title: Text(
+                                              dataSearch[index]['name'],
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ))
-                          ]
-                        : [
-                            const ListTile(
-                              title: Text("Không tìm thấy ..."),
-                            )
-                          ];
-                  },
+                                      ))
+                            ]
+                          : [
+                              const ListTile(
+                                title: Text("Không tìm thấy ..."),
+                              )
+                            ];
+                    },
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: dataFavorites.isNotEmpty
-                ? ListView.builder(
-                    controller: favoriteScrollController,
-                    shrinkWrap: true,
-                    itemCount: dataFavorites.length,
-                    itemBuilder: (context, index) {
-                      double height = 180;
-                      double itemY = index * height / 1.4;
-                      double difirence =
-                          favoriteScrollController.offset - itemY;
-                      double percent = 1 - difirence / height;
-                      double opacity = percent;
-                      double scale = percent;
-                      if (opacity > 1) opacity = 1.0;
-                      if (opacity < 0) opacity = 0.0;
-                      if (scale > 1) scale = 1.0;
-
-                      return Align(
-                        heightFactor: .8,
-                        child: Opacity(
-                          opacity: opacity,
-                          child: ClipRRect(
+            Expanded(
+              child: dataFavorites.isNotEmpty
+                  ? GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: dataFavorites.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: responsiveColumnCount,
+                        mainAxisExtent: 260,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                      ),
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => InforMovieScreen(
+                                        slugMovie: dataFavorites[index]['slug'],
+                                      ))),
+                          child: Container(
                             clipBehavior: Clip.antiAlias,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                            ),
-                            child: Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.identity()..scale(scale, 1.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => InforMovieScreen(
-                                              slugMovie: dataFavorites[index]
-                                                  ['slug'])));
-                                },
-                                child: Container(
-                                  height: 160,
-                                  width: MediaQuery.of(context).size.width,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                    gradient: const LinearGradient(colors: [
+                            decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5)),
+                                gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
                                       Color(0xff30cfd0),
                                       Color(0xff330867)
-                                    ]),
+                                    ])),
+                            child: Stack(
+                              children: [
+                                CachedNetworkImage(
+                                  imageUrl: dataFavorites[index]['poster_url'],
+                                  progressIndicatorBuilder:
+                                      (context, url, progress) => const Center(
+                                    child: CircularProgressIndicator(),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          dataFavorites[index]['name'],
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                      CachedNetworkImage(
-                                        imageUrl: dataFavorites[index]
-                                            ['poster_url'],
-                                        progressIndicatorBuilder:
-                                            (context, url, progress) =>
-                                                const Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(Icons.error),
-                                        height: 160,
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                2,
-                                        fit: BoxFit.fill,
-                                        memCacheHeight: 400,
-                                      ),
-                                    ],
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                  height: double.infinity,
+                                  width: double.infinity,
+                                  fit: BoxFit.fill,
+                                  memCacheHeight: 400,
+                                ),
+                                const Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: Icon(
+                                    Icons.favorite,
+                                    color: Colors.orange,
                                   ),
                                 ),
-                              ),
+                                Positioned(
+                                  bottom: 0,
+                                  child: Container(
+                                    width: 300,
+                                    padding: const EdgeInsets.all(10.0),
+                                    color: Colors.black.withValues(alpha: .4),
+                                    child: Text(
+                                      dataFavorites[index]['name'],
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                )
+                              ],
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  )
-                : const Center(
-                    child: Text("Bạn không có phim yêu thích"),
-                  ),
-          )
-        ],
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Text("Bạn không có phim yêu thích"),
+                    ),
+            )
+          ],
+        ),
       ),
     );
   }

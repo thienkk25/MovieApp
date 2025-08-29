@@ -83,11 +83,11 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            user.displayName ?? "Không có",
+                            "Xin chào, ${user.email?.split('@')[0] ?? "Không có"}",
                             style: const TextStyle(color: Colors.white),
                           ),
                           Text(
-                            user.email ?? "Không có",
+                            "Email: ${user.email ?? "Không có"}",
                             style: const TextStyle(color: Colors.white),
                           ),
                         ],
@@ -122,10 +122,10 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                     ? const Icon(Icons.check)
                                     : null,
                                 onTap: () async {
+                                  Navigator.pop(context);
                                   OverlayScreen().showOverlay(
                                       context, "Bật thông báo", Colors.green,
                                       duration: 2);
-                                  Navigator.pop(context);
                                   pref.setBool("notification", true);
                                   stateSetter(() => isNotification = true);
                                 },
@@ -139,11 +139,11 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                     ? null
                                     : const Icon(Icons.check),
                                 onTap: () async {
+                                  LocalNotifications().cancelAll();
+                                  Navigator.pop(context);
                                   OverlayScreen().showOverlay(
                                       context, "Tắt thông báo", Colors.grey,
                                       duration: 2);
-                                  LocalNotifications().cancelAll();
-                                  Navigator.pop(context);
                                   pref.setBool("notification", false);
                                   stateSetter(() => isNotification = false);
                                 },
@@ -169,7 +169,12 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                           children: [
                             ListTile(
                               title: const Text('Tiếng Việt'),
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.pop(context);
+                                OverlayScreen().showOverlay(
+                                    context, "Chưa phát hành", Colors.orange,
+                                    duration: 2);
+                              },
                             ),
                             const Divider(
                               height: 1,
@@ -178,6 +183,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                               title: const Text('Tiếng Anh'),
                               onTap: () {
                                 Navigator.pop(context);
+                                OverlayScreen().showOverlay(
+                                    context, "Chưa phát hành", Colors.orange,
+                                    duration: 2);
                               },
                             ),
                           ],
@@ -210,6 +218,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   ref.read(themeModeProvider.notifier).state =
                                       ThemeMode.light;
                                   Navigator.pop(context);
+                                  OverlayScreen().showOverlay(
+                                      context, "Sáng", Colors.blueGrey,
+                                      duration: 2);
                                   pref.setString("themeMode", "light");
                                 },
                               ),
@@ -227,6 +238,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   ref.read(themeModeProvider.notifier).state =
                                       ThemeMode.dark;
                                   Navigator.pop(context);
+                                  OverlayScreen().showOverlay(
+                                      context, "Tối", Colors.blueGrey,
+                                      duration: 2);
                                   pref.setString("themeMode", "dark");
                                 },
                               ),
@@ -244,6 +258,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   ref.read(themeModeProvider.notifier).state =
                                       ThemeMode.system;
                                   Navigator.pop(context);
+                                  OverlayScreen().showOverlay(
+                                      context, "Theo hệ thống", Colors.blueGrey,
+                                      duration: 2);
                                   pref.setString("themeMode", "auto");
                                 },
                               ),
@@ -263,134 +280,154 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
-                      builder: (context) =>
-                          Consumer(builder: (context, ref, child) {
-                        List dataHistory =
-                            ref.watch(historyMoviesNotifierProvider);
-                        return Container(
-                            clipBehavior: Clip.antiAlias,
-                            decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(50),
-                              topRight: Radius.circular(50),
-                            )),
-                            height: MediaQuery.of(context).size.height / 1.5,
-                            child: SafeArea(
-                              child: ListView.builder(
-                                itemCount: dataHistory.length,
-                                itemBuilder: (context, index) => InkWell(
-                                  onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => InforMovieScreen(
-                                                slugMovie: dataHistory[index]
-                                                    ['slug'],
-                                              ))),
-                                  onLongPress: () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) => Dialog(
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceAround,
-                                                mainAxisSize: MainAxisSize.max,
-                                                children: [
-                                                  TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                        Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder: (_) =>
-                                                                    InforMovieScreen(
-                                                                      slugMovie:
-                                                                          dataHistory[index]
-                                                                              [
-                                                                              'slug'],
-                                                                    )));
-                                                      },
-                                                      child: const Text("Xem")),
-                                                  TextButton(
-                                                      onPressed: () async {
-                                                        final result =
-                                                            await movieController
-                                                                .removeHistoryWatchMovies(
-                                                                    dataHistory[
-                                                                            index]
-                                                                        [
-                                                                        'slug']);
+                      builder: (context) => Consumer(
+                        builder: (context, ref, child) {
+                          Map data = ref.watch(historyMoviesNotifierProvider);
+                          List dataHistory = data.values.toList();
+                          return dataHistory.isNotEmpty
+                              ? Container(
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: const BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(50),
+                                    topRight: Radius.circular(50),
+                                  )),
+                                  height:
+                                      MediaQuery.of(context).size.height / 1.5,
+                                  child: SafeArea(
+                                    child: ListView.builder(
+                                      itemCount: dataHistory.length,
+                                      itemBuilder: (context, index) => InkWell(
+                                        onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) =>
+                                                    InforMovieScreen(
+                                                      slugMovie:
+                                                          dataHistory[index]
+                                                              ['slug'],
+                                                    ))),
+                                        onLongPress: () {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) => Dialog(
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      children: [
+                                                        TextButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                              Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                      builder: (_) =>
+                                                                          InforMovieScreen(
+                                                                            slugMovie:
+                                                                                dataHistory[index]['slug'],
+                                                                          )));
+                                                            },
+                                                            child: const Text(
+                                                                "Xem")),
+                                                        TextButton(
+                                                            onPressed:
+                                                                () async {
+                                                              final result = await movieController
+                                                                  .removeHistoryWatchMovies(
+                                                                      dataHistory[
+                                                                              index]
+                                                                          [
+                                                                          'slug']);
 
-                                                        if (!context.mounted) {
-                                                          return;
-                                                        }
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                        if (result) {
-                                                          OverlayScreen()
-                                                              .showOverlay(
-                                                                  context,
-                                                                  "Xóa thành công",
-                                                                  Colors.green,
-                                                                  duration: 3);
-                                                          ref
-                                                              .read(
-                                                                  historyMoviesNotifierProvider
-                                                                      .notifier)
-                                                              .removeState(
-                                                                  dataHistory[
-                                                                          index]
-                                                                      ['slug']);
-                                                        } else {
-                                                          OverlayScreen()
-                                                              .showOverlay(
-                                                                  context,
-                                                                  "Có lỗi, vui lòng thử lại",
-                                                                  Colors.red,
-                                                                  duration: 3);
-                                                        }
-                                                      },
-                                                      child: const Text("Xóa")),
-                                                ],
+                                                              if (!context
+                                                                  .mounted) {
+                                                                return;
+                                                              }
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                              if (result) {
+                                                                OverlayScreen()
+                                                                    .showOverlay(
+                                                                        context,
+                                                                        "Xóa thành công",
+                                                                        Colors
+                                                                            .green,
+                                                                        duration:
+                                                                            3);
+                                                                ref
+                                                                    .read(historyMoviesNotifierProvider
+                                                                        .notifier)
+                                                                    .removeState(
+                                                                        dataHistory[index]
+                                                                            [
+                                                                            'slug']);
+                                                              } else {
+                                                                OverlayScreen()
+                                                                    .showOverlay(
+                                                                        context,
+                                                                        "Có lỗi, vui lòng thử lại",
+                                                                        Colors
+                                                                            .red,
+                                                                        duration:
+                                                                            3);
+                                                              }
+                                                            },
+                                                            child: const Text(
+                                                                "Xóa")),
+                                                      ],
+                                                    ),
+                                                  ));
+                                        },
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                              border: Border(
+                                                  bottom:
+                                                      BorderSide(width: 1))),
+                                          child: ListTile(
+                                            leading: CachedNetworkImage(
+                                              imageUrl: dataHistory[index]
+                                                  ['poster_url'],
+                                              progressIndicatorBuilder:
+                                                  (context, url, progress) =>
+                                                      const Center(
+                                                child:
+                                                    CircularProgressIndicator(),
                                               ),
-                                            ));
-                                  },
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                        border: Border(
-                                            bottom: BorderSide(width: 1))),
-                                    child: ListTile(
-                                      leading: CachedNetworkImage(
-                                        imageUrl: dataHistory[index]
-                                            ['poster_url'],
-                                        progressIndicatorBuilder:
-                                            (context, url, progress) =>
-                                                const Center(
-                                          child: CircularProgressIndicator(),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      const Icon(Icons.error),
+                                              height: 50,
+                                              width: 50,
+                                              fit: BoxFit.fill,
+                                            ),
+                                            title: Text(
+                                              dataHistory[index]['name'],
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            subtitle: Text(
+                                              "Đã từng xem: Tập ${dataHistory[index]['episode'].toString()}",
+                                            ),
+                                            trailing: const Icon(
+                                              Icons.arrow_forward_sharp,
+                                            ),
+                                          ),
                                         ),
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(Icons.error),
-                                        height: 50,
-                                        width: 50,
-                                        fit: BoxFit.fill,
                                       ),
-                                      title: Text(
-                                        dataHistory[index]['name'],
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      subtitle: Text(
-                                        "Đã từng xem: Tập ${dataHistory[index]['episode'].toString()}",
-                                      ),
-                                      trailing:
-                                          const Icon(Icons.arrow_forward_ios),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ));
-                      }),
+                                )
+                              : const Center(
+                                  child: Text("Lịch sử trống"),
+                                );
+                        },
+                      ),
                     );
                   },
                   child: const ListTile(

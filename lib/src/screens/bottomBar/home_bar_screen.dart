@@ -111,7 +111,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   }
 
   Future<void> scheduleNotification(
-      String title, String body, String? payload) async {
+      String title, String body, String payload) async {
     final pref = await SharedPreferences.getInstance();
     bool isNotification = pref.getBool("notification") ?? true;
     if (isNotification) {
@@ -227,7 +227,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             .nextInt(newlyUpdatedMovies['items']?.length - 1);
                         scheduleNotification(
                             newlyUpdatedMovies['items'][random]['name'],
-                            "Bạn đã xem phim này chưa? 🎬. Ấn để xem ngay nào!",
+                            "Phim mới hôm nay 🎬. Vào xem ngay nào!",
                             newlyUpdatedMovies['items'][random]['slug']);
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
@@ -526,7 +526,19 @@ class GridViewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int responsiveColumnCount = MediaQuery.of(context).size.width > 600 ? 3 : 2;
+    double sizeWidth = MediaQuery.of(context).size.width;
+
+    int responsiveColumnCount;
+
+    if (sizeWidth < 600) {
+      responsiveColumnCount = 2;
+    } else if (sizeWidth <= 800) {
+      responsiveColumnCount = 3;
+    } else if (sizeWidth <= 1200) {
+      responsiveColumnCount = 4;
+    } else {
+      responsiveColumnCount = 5;
+    }
     return GridView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,

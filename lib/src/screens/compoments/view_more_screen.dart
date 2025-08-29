@@ -87,7 +87,19 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   @override
   Widget build(BuildContext context) {
     List dataMovies = ref.watch(viewMoreMoviesNotifierProvider);
-    int responsiveColumnCount = MediaQuery.of(context).size.width > 600 ? 3 : 2;
+    double sizeWidth = MediaQuery.of(context).size.width;
+
+    int responsiveColumnCount;
+
+    if (sizeWidth < 600) {
+      responsiveColumnCount = 2;
+    } else if (sizeWidth <= 800) {
+      responsiveColumnCount = 3;
+    } else if (sizeWidth <= 1200) {
+      responsiveColumnCount = 4;
+    } else {
+      responsiveColumnCount = 5;
+    }
     return isView
         ? Scaffold(
             appBar: AppBar(

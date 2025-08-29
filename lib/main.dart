@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/firebase_options.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
+import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/configs/local_notifications.dart';
 import 'package:movie_app/src/screens/configs/network_listener.dart';
 import 'package:movie_app/src/screens/home_screen.dart';
@@ -18,7 +19,11 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 @pragma('vm:entry-point')
-void notificationTapBackground(NotificationResponse response) {}
+Future<void> notificationTapBackground(NotificationResponse response) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString("notification_payload", response.payload ?? "");
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -42,6 +47,7 @@ class MyApp extends ConsumerWidget {
 
     Future<void> loadDeault() async {
       localNotifications.init();
+
       final pref = await SharedPreferences.getInstance();
       String isThemeMode = pref.getString("themeMode") ?? "auto";
       if (isThemeMode == "auto") {
@@ -50,6 +56,16 @@ class MyApp extends ConsumerWidget {
         ref.read(themeModeProvider.notifier).state = ThemeMode.light;
       } else {
         ref.read(themeModeProvider.notifier).state = ThemeMode.dark;
+      }
+
+      final payload = pref.getString("notification_payload");
+      if (payload != null && payload.isNotEmpty) {
+        await pref.remove("notification_payload");
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (_) => InforMovieScreen(slugMovie: payload),
+          ),
+        );
       }
     }
 

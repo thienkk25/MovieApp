@@ -140,7 +140,7 @@ class MovieService {
     }
   }
 
-  Future<List> getFavoriteMovies() async {
+  Future<Map> getFavoriteMovies() async {
     try {
       final auth = FirebaseAuth.instance;
       final fireStore = FirebaseFirestore.instance;
@@ -151,9 +151,12 @@ class MovieService {
           .orderBy("timestamp", descending: true)
           .get();
 
-      return userDoc.docs.map((e) => e.data()).toList();
+      if (userDoc.docs.isNotEmpty) {
+        return {for (var e in userDoc.docs) e.id: e.data()};
+      }
+      return {};
     } catch (e) {
-      return [];
+      return {};
     }
   }
 
@@ -197,7 +200,7 @@ class MovieService {
     }
   }
 
-  Future<List> historyWatchMovies() async {
+  Future<Map> historyWatchMovies() async {
     try {
       final auth = FirebaseAuth.instance;
       final fireStore = FirebaseFirestore.instance;
@@ -208,10 +211,12 @@ class MovieService {
           .collection("movies")
           .orderBy("timestamp", descending: true)
           .get();
-
-      return movieDoc.docs.map((e) => e.data()).toList();
+      if (movieDoc.docs.isNotEmpty) {
+        return {for (var e in movieDoc.docs) e.id: e.data()};
+      }
+      return {};
     } catch (e) {
-      return [];
+      return {};
     }
   }
 

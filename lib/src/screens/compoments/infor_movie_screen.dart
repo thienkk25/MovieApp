@@ -43,7 +43,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List dataFavorites = ref.read(getFavoriteMoviesNotifierProvider);
+    Map dataFavorites = ref.read(getFavoriteMoviesNotifierProvider);
     return FutureBuilder<Map?>(
       future: singleDetailMovies,
       builder: (context, snapshot) {
@@ -73,8 +73,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
         }
 
         Map? dataInforMovie = snapshot.data;
-        if (dataFavorites.any(
-            (element) => element['slug'] == dataInforMovie?['movie']['slug'])) {
+        if (dataFavorites.containsKey(widget.slugMovie)) {
           isIconFavorite = true;
         }
         return Scaffold(
@@ -100,7 +99,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             },
                             child: const Icon(
                               Icons.favorite,
-                              color: Colors.red,
+                              color: Colors.orange,
                             ))
                         : GestureDetector(
                             onTap: () {
@@ -580,8 +579,20 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             );
                           } else if (snapshot.hasData) {
                             Map dataMovies = snapshot.data!;
-                            int responsiveColumnCount =
-                                MediaQuery.of(context).size.width > 600 ? 3 : 2;
+                            double sizeWidth =
+                                MediaQuery.of(context).size.width;
+
+                            int responsiveColumnCount;
+
+                            if (sizeWidth < 600) {
+                              responsiveColumnCount = 2;
+                            } else if (sizeWidth <= 800) {
+                              responsiveColumnCount = 3;
+                            } else if (sizeWidth <= 1200) {
+                              responsiveColumnCount = 4;
+                            } else {
+                              responsiveColumnCount = 5;
+                            }
                             return GridView.builder(
                               physics: const NeverScrollableScrollPhysics(),
                               shrinkWrap: true,
@@ -753,6 +764,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   Future<void> addHistoryWatchMovies(
       String name, String slug, String posterUrl, int episode) async {
     await movieController.addHistoryWatchMovies(name, slug, posterUrl, episode);
+    ref.read(historyMoviesNotifierProvider.notifier).removeState(slug);
     ref.read(historyMoviesNotifierProvider.notifier).addState({
       "name": name,
       "slug": slug,

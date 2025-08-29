@@ -26,7 +26,7 @@ class LocalNotifications {
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        if (response.payload != null) {
+        if (response.payload != null && response.payload!.isNotEmpty) {
           UserController().isUser()
               ? navigatorKey.currentState
                   ?.push(
@@ -60,7 +60,7 @@ class LocalNotifications {
   Future<void> showNotification({
     required String title,
     required String body,
-    String? payload,
+    String payload = "",
   }) async {
     const androidDetails = AndroidNotificationDetails(
       'default_channel_id',
@@ -85,7 +85,7 @@ class LocalNotifications {
     required String title,
     required String body,
     int hoursEveryDay = 7,
-    String? payload,
+    String payload = "",
   }) async {
     final now = tz.TZDateTime.now(tz.local);
     final scheduleTime = tz.TZDateTime(
@@ -109,7 +109,7 @@ class LocalNotifications {
             priority: Priority.high,
           ),
         ),
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: payload,
         matchDateTimeComponents: DateTimeComponents.time);
   }
