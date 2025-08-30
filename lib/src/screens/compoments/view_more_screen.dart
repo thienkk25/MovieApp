@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
+import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -23,6 +24,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   ScrollController scrollController = ScrollController();
   late int currentPage;
   late String titleAppBar;
+  late final int totalPages;
   @override
   void initState() {
     currentPage = widget.page + 1;
@@ -40,6 +42,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
         .initState(data?['data']?['items'] ?? []);
     titleAppBar = data?['data']?['titlePage'] ?? "Không rõ";
     isView = true;
+    totalPages = data?['data']['params']['pagination']['totalPages'] ?? 30;
   }
 
   void isLoadMore() {
@@ -73,6 +76,12 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
         return movieController.cartoonMovies(page, limit);
       case "Chương trình truyền hình":
         return movieController.tvShowsMovies(page, limit);
+      case "Phim Vietsub":
+        return movieController.vietSubMovies(page, limit);
+      case "Phim Thuyết Minh":
+        return movieController.narratedMovies(page, limit);
+      case "Phim Lồng Tiếng":
+        return movieController.dubbedMovies(page, limit);
       default:
         return movieController.categoryDetailMovies(type, page - 1, limit);
     }
@@ -88,7 +97,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   Widget build(BuildContext context) {
     List dataMovies = ref.watch(viewMoreMoviesNotifierProvider);
     double sizeWidth = MediaQuery.of(context).size.width;
-
+    print(dataMovies);
     int responsiveColumnCount;
     int? itemCount;
 
@@ -133,8 +142,11 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
                     name: dataMovies[index]['name'],
                     episodeCurrent: dataMovies[index]['episode_current'],
                   );
-                } else {
+                } else if (currentPage < totalPages) {
                   return const SimpleLoading();
+                } else {
+                  OverlayScreen().showOverlay(context, "Hết", Colors.orange);
+                  return const SizedBox();
                 }
               },
             ),

@@ -14,6 +14,16 @@ class MovieController {
     return data;
   }
 
+  Future<Map> countryDetailMovies(String country, int page, int limit) async {
+    final data = movieService.countryDetailMovies(country, page, limit);
+    return data;
+  }
+
+  Future<Map> yearDetailMovies(String year, int page, int limit) async {
+    final data = movieService.yearDetailMovies(year, page, limit);
+    return data;
+  }
+
   Future<Map> newlyUpdatedMovies({int page = 1}) async {
     final data = await movieService.newlyUpdatedMovies(page);
     return data;
@@ -41,6 +51,21 @@ class MovieController {
 
   Future<Map> tvShowsMovies(int page, int limit) async {
     final data = await movieService.tvShowsMovies(page, limit);
+    return data;
+  }
+
+  Future<Map> vietSubMovies(int page, int limit) async {
+    final data = await movieService.vietSubMovies(page, limit);
+    return data;
+  }
+
+  Future<Map> narratedMovies(int page, int limit) async {
+    final data = await movieService.narratedMovies(page, limit);
+    return data;
+  }
+
+  Future<Map> dubbedMovies(int page, int limit) async {
+    final data = await movieService.dubbedMovies(page, limit);
     return data;
   }
 

@@ -35,6 +35,36 @@ class MovieService {
     }
   }
 
+  Future<Map> countryDetailMovies(String country, int page, int limit) async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://phimapi.com/v1/api/quoc-gia/$country?page=$page&limit=$limit"));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future<Map> yearDetailMovies(String year, int page, int limit) async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://phimapi.com/v1/api/nam/$year?page=$page&limit=$limit"));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
   Future<Map> newlyUpdatedMovies(int page) async {
     try {
       final response = await http.get(Uri.parse(
@@ -114,6 +144,51 @@ class MovieService {
     try {
       final response = await http.get(Uri.parse(
           "https://phimapi.com/v1/api/danh-sach/tv-shows?page=$page&limit=$limit"));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future<Map> vietSubMovies(int page, int limit) async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://phimapi.com/v1/api/danh-sach/phim-vietsub?page=$page&limit=$limit"));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future<Map> narratedMovies(int page, int limit) async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://phimapi.com/v1/api/danh-sach/phim-thuyet-minh?page=$page&limit=$limit"));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future<Map> dubbedMovies(int page, int limit) async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://phimapi.com/v1/api/danh-sach/phim-long-tieng?page=$page&limit=$limit"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data;

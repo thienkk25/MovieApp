@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
+import 'package:movie_app/src/controllers/series_recommendation_controller.dart';
 import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
 import 'package:movie_app/src/screens/compoments/watch_movie_screen.dart';
 import 'package:movie_app/src/screens/configs/overlay_screen.dart';
@@ -788,10 +789,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       FutureBuilder(
-                        future: movieController.searchMovies(
-                            dataInforMovie?['movie']['name'].substring(1, 5) ??
-                                "",
-                            20),
+                        future: SeriesRecommendationController()
+                            .getRecommendedParts(dataInforMovie!),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -799,7 +798,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               child: CircularProgressIndicator(),
                             );
                           } else if (snapshot.hasData) {
-                            Map dataMovies = snapshot.data!;
+                            List dataMovies = snapshot.data!;
                             double sizeWidth =
                                 MediaQuery.of(context).size.width;
 
@@ -817,8 +816,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             return GridView.builder(
                               physics: const NeverScrollableScrollPhysics(),
                               shrinkWrap: true,
-                              itemCount:
-                                  dataMovies['data']?['items']?.length ?? 0,
+                              itemCount: dataMovies.length,
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: responsiveColumnCount,
@@ -832,8 +830,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => InforMovieScreen(
-                                        slugMovie: dataMovies['data']['items']
-                                            [index]['slug'],
+                                        slugMovie: dataMovies[index]['slug'],
                                       ),
                                     ),
                                   ),
@@ -852,7 +849,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                       children: [
                                         CachedNetworkImage(
                                           imageUrl:
-                                              "https://phimimg.com/${dataMovies['data']['items'][index]['poster_url']}",
+                                              "https://phimimg.com/${dataMovies[index]['poster_url']}",
                                           progressIndicatorBuilder:
                                               (context, url, progress) =>
                                                   const Center(
@@ -875,8 +872,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                                 bottomLeft: Radius.circular(5),
                                               )),
                                           child: Text(
-                                            dataMovies['data']['items'][index]
-                                                ['lang'],
+                                            dataMovies[index]['lang'],
                                             style: const TextStyle(
                                                 color: Colors.white),
                                             maxLines: 1,
@@ -901,8 +897,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                                         Radius.circular(5),
                                                   )),
                                               child: Text(
-                                                dataMovies['data']['items']
-                                                    [index]['episode_current'],
+                                                dataMovies[index]
+                                                    ['episode_current'],
                                                 style: const TextStyle(
                                                     color: Colors.white),
                                                 maxLines: 1,
@@ -917,8 +913,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             color: Colors.black
                                                 .withValues(alpha: .4),
                                             child: Text(
-                                              dataMovies['data']['items'][index]
-                                                  ['name'],
+                                              dataMovies[index]['name'],
                                               style: const TextStyle(
                                                   color: Colors.white),
                                               maxLines: 1,

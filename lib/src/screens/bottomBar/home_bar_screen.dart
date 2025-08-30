@@ -23,8 +23,11 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   late Future<Map> futureDramaMovies;
   late Future<Map> futureCartoonMovies;
   late Future<Map> futureTvShowsMovies;
+  late Future<Map> futureVietSubMovies;
+  late Future<Map> futureNarratedMovies;
+  late Future<Map> futureDubbedMovies;
   final int pageMovie = 1;
-  final int limitMovie = 18;
+  final int limitMovie = 12;
   final ScrollController scrollController = ScrollController();
 
   final List<String> sections = [
@@ -34,6 +37,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
     "Phim Bộ",
     "Phim Hoạt Hình",
     "Chương trình truyền hình",
+    "Phim Vietsub",
+    "Phim Thuyết Minh",
+    "Phim Lồng Tiếng"
   ];
 
   final Map<String, GlobalKey> keys = {};
@@ -47,6 +53,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
     futureDramaMovies = movieController.dramaMovies(pageMovie, limitMovie);
     futureCartoonMovies = movieController.cartoonMovies(pageMovie, limitMovie);
     futureTvShowsMovies = movieController.tvShowsMovies(pageMovie, limitMovie);
+    futureVietSubMovies = movieController.vietSubMovies(pageMovie, limitMovie);
+    futureNarratedMovies =
+        movieController.narratedMovies(pageMovie, limitMovie);
+    futureDubbedMovies = movieController.dubbedMovies(pageMovie, limitMovie);
 
     for (var sec in sections) {
       keys[sec] = GlobalKey();
@@ -474,6 +484,129 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                 ),
                 FutureBuilder(
                   future: futureTvShowsMovies,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const ShimmerLoading();
+                    } else if (snapshot.hasData) {
+                      Map dataMovies = snapshot.data!;
+                      return GridViewScreen(dataMovies: dataMovies);
+                    } else {
+                      return const Center(
+                        child: Icon(Icons.error),
+                      );
+                    }
+                  },
+                ),
+                InkWell(
+                  key: keys["Phim Vietsub"],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ViewMoreScreen(
+                          "Phim Vietsub",
+                          pageMovie,
+                          limitMovie,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Phim Vietsub",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Icon(Icons.arrow_forward_ios)
+                    ],
+                  ),
+                ),
+                FutureBuilder(
+                  future: futureVietSubMovies,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const ShimmerLoading();
+                    } else if (snapshot.hasData) {
+                      Map dataMovies = snapshot.data!;
+                      return GridViewScreen(dataMovies: dataMovies);
+                    } else {
+                      return const Center(
+                        child: Icon(Icons.error),
+                      );
+                    }
+                  },
+                ),
+                InkWell(
+                  key: keys["Phim Thuyết Minh"],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ViewMoreScreen(
+                          "Phim Thuyết Minh",
+                          pageMovie,
+                          limitMovie,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Phim Thuyết Minh",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Icon(Icons.arrow_forward_ios)
+                    ],
+                  ),
+                ),
+                FutureBuilder(
+                  future: futureNarratedMovies,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const ShimmerLoading();
+                    } else if (snapshot.hasData) {
+                      Map dataMovies = snapshot.data!;
+                      return GridViewScreen(dataMovies: dataMovies);
+                    } else {
+                      return const Center(
+                        child: Icon(Icons.error),
+                      );
+                    }
+                  },
+                ),
+                InkWell(
+                  key: keys["Phim Lồng Tiếng"],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ViewMoreScreen(
+                          "Phim Lồng Tiếng",
+                          pageMovie,
+                          limitMovie,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Phim Lồng Tiếng",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Icon(Icons.arrow_forward_ios)
+                    ],
+                  ),
+                ),
+                FutureBuilder(
+                  future: futureDubbedMovies,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const ShimmerLoading();

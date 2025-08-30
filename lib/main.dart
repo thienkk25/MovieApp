@@ -90,7 +90,7 @@ Future<void> main() async {
   Workmanager().registerPeriodicTask(
     "fetchApiNewlyUpdatedMovies",
     "fetch_api_newlyUpdatedMovies",
-    frequency: const Duration(hours: 4),
+    frequency: const Duration(hours: 4, minutes: 30),
     initialDelay: const Duration(minutes: 1),
     constraints: Constraints(
       networkType: NetworkType.connected,
@@ -100,63 +100,75 @@ Future<void> main() async {
     "randomNotificationApp",
     "random_notification_app",
     frequency: const Duration(hours: 2),
-    initialDelay: const Duration(seconds: 30),
+    initialDelay: const Duration(minutes: 1),
     constraints: Constraints(
       networkType: NetworkType.connected,
     ),
   );
+  await LocalNotifications().init();
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    UserController userController = UserController();
-    LocalNotifications localNotifications = LocalNotifications();
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
 
-    Future<void> loadDeault() async {
-      localNotifications.init();
+class _MyAppState extends ConsumerState<MyApp> {
+  final UserController userController = UserController();
 
-      final pref = await SharedPreferences.getInstance();
-      String isThemeMode = pref.getString("themeMode") ?? "auto";
-      if (isThemeMode == "auto") {
-        ref.read(themeModeProvider.notifier).state = ThemeMode.system;
-      } else if (isThemeMode == "light") {
-        ref.read(themeModeProvider.notifier).state = ThemeMode.light;
-      } else {
-        ref.read(themeModeProvider.notifier).state = ThemeMode.dark;
-      }
+  @override
+  void initState() {
+    loadDeault();
+    super.initState();
+  }
 
-      final payload = pref.getString("notification_payload");
-      if (payload != null && payload.isNotEmpty) {
-        await pref.remove("notification_payload");
-        UserController().isUser()
-            ? navigatorKey.currentState
-                ?.push(
-                  MaterialPageRoute(
-                    builder: (_) => InforMovieScreen(
-                      slugMovie: payload,
-                    ),
-                  ),
-                )
-                .then(
-                  (_) => MaterialPageRoute(
-                    builder: (_) => const HomeScreen(),
-                  ),
-                )
-            : navigatorKey.currentState?.push(
-                MaterialPageRoute(
-                  builder: (_) => const LoginScreen(),
-                ),
-              );
-      }
+  Future<void> loadDeault() async {
+    final pref = await SharedPreferences.getInstance();
+    String isThemeMode = pref.getString("themeMode") ?? "auto";
+    if (isThemeMode == "auto") {
+      ref.read(themeModeProvider.notifier).state = ThemeMode.system;
+    } else if (isThemeMode == "light") {
+      ref.read(themeModeProvider.notifier).state = ThemeMode.light;
+    } else {
+      ref.read(themeModeProvider.notifier).state = ThemeMode.dark;
     }
 
-    loadDeault();
+    final payload = pref.getString("notification_payload");
+    if (payload != null && payload.isNotEmpty) {
+      await pref.remove("notification_payload");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (UserController().isUser()) {
+          navigatorKey.currentState
+              ?.push(
+            MaterialPageRoute(
+              builder: (_) => InforMovieScreen(slugMovie: payload),
+            ),
+          )
+              .then((_) {
+            navigatorKey.currentState?.pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => const HomeScreen(),
+              ),
+            );
+          });
+        } else {
+          navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (_) => const LoginScreen(),
+            ),
+          );
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     Widget home =
         userController.isUser() ? const HomeScreen() : const LoginScreen();
-
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
