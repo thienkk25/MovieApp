@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/firebase_options.dart';
+import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/configs/local_notifications.dart';
@@ -13,6 +16,7 @@ import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:workmanager/workmanager.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -24,14 +28,82 @@ Future<void> notificationTapBackground(NotificationResponse response) async {
   await prefs.setString("notification_payload", response.payload ?? "");
 }
 
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    if (task == "fetch_api_newlyUpdatedMovies") {
+      final data = await MovieController().newlyUpdatedMovies();
+
+      if (data.isNotEmpty) {
+        final title = "Phim ${data['items'][0]['name']}";
+        const body = "Phim mới cập nhật 🎬. Vào xem ngay nào!";
+
+        await LocalNotifications().showNotification(
+          title: title,
+          body: body,
+          payload: data['items'][0]['slug'] ?? "",
+        );
+      }
+    } else if (task == "random_notification_app") {
+      final List<String> titles = [
+        "🎬 Phim mới ra lò!",
+        "🍿 Giải trí cùng Movie App",
+        "🔥 Hot hot hot!",
+        "📺 Có gì mới nè",
+        "🚀 Tin tức phim nhanh nhất",
+        "❤️ Dành cho bạn",
+      ];
+
+      final List<String> bodies = [
+        "Vào xem phim đi, đừng bỏ lỡ nhé!",
+        "Phim mới cập nhật rồi, xem ngay thôi!",
+        "Nhiều phim hot đang chờ bạn đó!",
+        "Nhớ thư giãn với phim hay nào!",
+        "Hôm nay xem phim gì chưa?",
+        "Cập nhật phim nhanh như chớp, mở app ngay đi!",
+        "Phim hay đang đợi bạn khám phá!",
+      ];
+
+      final random = Random();
+      final title = titles[random.nextInt(titles.length)];
+      final body = bodies[random.nextInt(bodies.length)];
+
+      await LocalNotifications().showNotification(
+        title: title,
+        body: body,
+      );
+    }
+
+    return Future.value(true);
+  });
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Ho_Chi_Minh'));
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await Workmanager().initialize(callbackDispatcher);
+  Workmanager().registerPeriodicTask(
+    "fetchApiNewlyUpdatedMovies",
+    "fetch_api_newlyUpdatedMovies",
+    frequency: const Duration(hours: 4),
+    initialDelay: const Duration(minutes: 1),
+    constraints: Constraints(
+      networkType: NetworkType.connected,
+    ),
+  );
+  Workmanager().registerPeriodicTask(
+    "randomNotificationApp",
+    "random_notification_app",
+    frequency: const Duration(hours: 2),
+    initialDelay: const Duration(seconds: 30),
+    constraints: Constraints(
+      networkType: NetworkType.connected,
+    ),
   );
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -59,11 +131,25 @@ class MyApp extends ConsumerWidget {
       final payload = pref.getString("notification_payload");
       if (payload != null && payload.isNotEmpty) {
         await pref.remove("notification_payload");
-        navigatorKey.currentState?.push(
-          MaterialPageRoute(
-            builder: (_) => InforMovieScreen(slugMovie: payload),
-          ),
-        );
+        UserController().isUser()
+            ? navigatorKey.currentState
+                ?.push(
+                  MaterialPageRoute(
+                    builder: (_) => InforMovieScreen(
+                      slugMovie: payload,
+                    ),
+                  ),
+                )
+                .then(
+                  (_) => MaterialPageRoute(
+                    builder: (_) => const HomeScreen(),
+                  ),
+                )
+            : navigatorKey.currentState?.push(
+                MaterialPageRoute(
+                  builder: (_) => const LoginScreen(),
+                ),
+              );
       }
     }
 
