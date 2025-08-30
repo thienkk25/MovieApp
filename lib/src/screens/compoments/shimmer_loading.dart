@@ -9,20 +9,25 @@ class ShimmerLoading extends StatelessWidget {
     double sizeWidth = MediaQuery.of(context).size.width;
 
     int responsiveColumnCount;
+    int? itemCount;
 
     if (sizeWidth < 600) {
       responsiveColumnCount = 2;
+      itemCount = 4;
     } else if (sizeWidth <= 800) {
       responsiveColumnCount = 3;
+      itemCount = 6;
     } else if (sizeWidth <= 1200) {
       responsiveColumnCount = 4;
+      itemCount = 8;
     } else {
       responsiveColumnCount = 5;
+      itemCount = 10;
     }
     return GridView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: 10,
+      itemCount: itemCount,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: responsiveColumnCount,
         mainAxisExtent: 250,

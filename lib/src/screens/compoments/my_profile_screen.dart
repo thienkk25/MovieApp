@@ -14,7 +14,7 @@ class MyProfileScreen extends StatefulWidget {
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
   File? file;
-  UserController userController = UserController();
+  final UserController userController = UserController();
   late String myselftEmail;
   late String userName;
   late String profilePicture;

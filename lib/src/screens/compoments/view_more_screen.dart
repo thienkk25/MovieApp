@@ -90,15 +90,20 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
     double sizeWidth = MediaQuery.of(context).size.width;
 
     int responsiveColumnCount;
+    int? itemCount;
 
     if (sizeWidth < 600) {
       responsiveColumnCount = 2;
+      itemCount = 4;
     } else if (sizeWidth <= 800) {
       responsiveColumnCount = 3;
+      itemCount = 6;
     } else if (sizeWidth <= 1200) {
       responsiveColumnCount = 4;
+      itemCount = 8;
     } else {
       responsiveColumnCount = 5;
+      itemCount = 10;
     }
     return isView
         ? Scaffold(
@@ -110,7 +115,8 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
               controller: scrollController,
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(10),
-              itemCount: dataMovies.length + (ref.watch(isLoadingMore) ? 4 : 0),
+              itemCount: dataMovies.length +
+                  (ref.watch(isLoadingMore) ? itemCount : 0),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: responsiveColumnCount,
                 mainAxisExtent: 250,

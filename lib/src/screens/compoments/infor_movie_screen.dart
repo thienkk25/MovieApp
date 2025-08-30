@@ -22,8 +22,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   final ScrollController scrollController = ScrollController();
   bool isIconFavorite = false;
   int currentPage = 0;
-  int pageMovie = 1;
-  int limitMovie = 12;
+  final int pageMovie = 1;
+  final int limitMovie = 12;
   bool isServer = true;
   late Future<Map?> singleDetailMovies;
   late Future<Map?> episodeHistoryMovies;
@@ -184,6 +184,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             dataInforMovie['movie']
                                                 ['poster_url'],
                                             episode + 1);
+                                      } else {
+                                        OverlayScreen().showOverlay(
+                                            context,
+                                            "Đang ở tập đầu rồi",
+                                            Colors.blueGrey,
+                                            duration: 2);
                                       }
                                     },
                                     child: Container(
@@ -257,6 +263,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             dataInforMovie['movie']
                                                 ['poster_url'],
                                             episode + 1);
+                                      } else {
+                                        OverlayScreen().showOverlay(
+                                            context,
+                                            "Đang ở tập mới nhất rồi",
+                                            Colors.blueGrey,
+                                            duration: 2);
                                       }
                                     },
                                     child: Container(

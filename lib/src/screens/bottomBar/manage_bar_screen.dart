@@ -20,10 +20,10 @@ class ManageBarScreen extends ConsumerStatefulWidget {
 }
 
 class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
-  UserController userController = UserController();
-  MovieController movieController = MovieController();
+  final UserController userController = UserController();
+  final MovieController movieController = MovieController();
   late User user;
-  late SharedPreferences pref;
+  late final SharedPreferences pref;
   late bool isNotification;
   @override
   void initState() {
