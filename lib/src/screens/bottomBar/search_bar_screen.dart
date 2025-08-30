@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 
@@ -13,8 +14,8 @@ class SearchBarScreen extends StatefulWidget {
 }
 
 class _SearchBarScreenState extends State<SearchBarScreen> {
-  MovieController movieController = MovieController();
-  TextEditingController searchController = TextEditingController();
+  final MovieController movieController = MovieController();
+  final TextEditingController searchController = TextEditingController();
   late Future<Map> futureNewlyUpdatedMovies;
   Timer? timer;
   Map dataSearch = {};
@@ -62,6 +63,9 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width / 1.2,
                   child: SearchBar(
+                    onTapOutside: (event) {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                    },
                     controller: searchController,
                     onChanged: (value) {
                       if (timer?.isActive ?? false) {
@@ -155,6 +159,27 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                                     ),
                                   ),
                                 ),
+                                Positioned(
+                                    top: 35,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(5.0),
+                                      decoration: BoxDecoration(
+                                          color: Colors.black
+                                              .withValues(alpha: .4),
+                                          borderRadius: const BorderRadius.only(
+                                            topRight: Radius.circular(5),
+                                            bottomRight: Radius.circular(5),
+                                            bottomLeft: Radius.circular(5),
+                                          )),
+                                      child: Text(
+                                        dataSearch['data']['items'][index]
+                                            ['episode_current'],
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    )),
                                 Positioned(
                                   bottom: 0,
                                   child: Container(
