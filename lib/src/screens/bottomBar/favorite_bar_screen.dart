@@ -13,9 +13,8 @@ class FavoriteBarScreen extends ConsumerStatefulWidget {
 }
 
 class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
-  MovieController movieController = MovieController();
-  ScrollController favoriteScrollController = ScrollController();
-
+  final MovieController movieController = MovieController();
+  final ScrollController favoriteScrollController = ScrollController();
   late double favoriteOffset;
   @override
   void initState() {
@@ -77,6 +76,9 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width / 1.2,
                   child: SearchAnchor.bar(
+                    onClose: () {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                    },
                     isFullScreen: false,
                     barElevation: const WidgetStatePropertyAll(0),
                     barHintText: "Tìm kiếm ...",
