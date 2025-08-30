@@ -405,6 +405,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                               height: 50,
                                               width: 50,
                                               fit: BoxFit.fill,
+                                              memCacheHeight: 100,
                                             ),
                                             title: Text(
                                               dataHistory[index]['name'],

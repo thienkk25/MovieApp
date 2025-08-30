@@ -146,7 +146,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
-                  height: 40,
+                  height: 50,
                   child: FutureBuilder(
                     future: futureCategoryMovies,
                     builder: (context, snapshot) {

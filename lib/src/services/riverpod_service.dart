@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 final currentTitle = StateProvider<String>((ref) => "Trang chủ");
 final isLoadingMore = StateProvider<bool>((ref) => false);
-final wasWatchEpisodeMovies = StateProvider<int?>((ref) => null);
+final wasWatchEpisodeMovies = StateProvider<int>((ref) => -1);
+final isClickWatchEpisodeMovies = StateProvider<bool>((ref) => false);
+final isClickLWatchEpisodeLinkMovies = StateProvider<String?>((ref) => null);
 
 class GetFavoriteMoviesNotifier extends StateNotifier<Map> {
   GetFavoriteMoviesNotifier() : super({});

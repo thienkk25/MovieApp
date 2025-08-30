@@ -42,8 +42,6 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     UserController userController = UserController();
     LocalNotifications localNotifications = LocalNotifications();
-    Widget home =
-        userController.isUser() ? const HomeScreen() : const LoginScreen();
 
     Future<void> loadDeault() async {
       localNotifications.init();
@@ -70,11 +68,13 @@ class MyApp extends ConsumerWidget {
     }
 
     loadDeault();
+    Widget home =
+        userController.isUser() ? const HomeScreen() : const LoginScreen();
 
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'Movie',
+      title: 'Movie App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.white,

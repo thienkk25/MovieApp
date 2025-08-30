@@ -44,8 +44,9 @@ class MovieController {
     return data;
   }
 
-  Future<Map?> singleDetailMovies(String nameMovie) async {
+  Future<Map?> singleDetailMovies(String nameMovie, WidgetRef ref) async {
     final data = await movieService.singleDetailMovies(nameMovie);
+    ref.read(isClickWatchEpisodeMovies.notifier).state = false;
     return data;
   }
 
