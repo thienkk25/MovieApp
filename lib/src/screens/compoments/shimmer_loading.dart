@@ -13,16 +13,16 @@ class ShimmerLoading extends StatelessWidget {
 
     if (sizeWidth < 600) {
       responsiveColumnCount = 2;
-      itemCount = 4;
+      itemCount = 6;
     } else if (sizeWidth <= 800) {
       responsiveColumnCount = 3;
-      itemCount = 6;
+      itemCount = 9;
     } else if (sizeWidth <= 1200) {
       responsiveColumnCount = 4;
-      itemCount = 8;
+      itemCount = 12;
     } else {
       responsiveColumnCount = 5;
-      itemCount = 10;
+      itemCount = 15;
     }
     return GridView.builder(
       physics: const NeverScrollableScrollPhysics(),

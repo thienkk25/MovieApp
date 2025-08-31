@@ -10,6 +10,7 @@ import 'package:movie_app/src/controllers/user_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/configs/local_notifications.dart';
 import 'package:movie_app/src/screens/configs/network_listener.dart';
+import 'package:movie_app/src/screens/configs/workmanager_task.dart';
 import 'package:movie_app/src/screens/home_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
@@ -33,7 +34,6 @@ void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     if (task == "fetch_api_newlyUpdatedMovies") {
       final data = await MovieController().newlyUpdatedMovies();
-      final pref = await SharedPreferences.getInstance();
 
       if (data.isNotEmpty) {
         final title = "Phim ${data['items'][0]['name']}";
@@ -44,8 +44,6 @@ void callbackDispatcher() {
           body: body,
           payload: data['items'][0]['slug'] ?? "",
         );
-        await pref.setString(
-            "notification_payload", data['items'][0]['slug'] ?? "");
       }
     } else if (task == "random_notification_app") {
       final List<String> titles = [
@@ -90,24 +88,11 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await Workmanager().initialize(callbackDispatcher);
-  Workmanager().registerPeriodicTask(
-    "fetchApiNewlyUpdatedMovies",
-    "fetch_api_newlyUpdatedMovies",
-    frequency: const Duration(hours: 4),
-    initialDelay: const Duration(minutes: 1),
-    constraints: Constraints(
-      networkType: NetworkType.connected,
-    ),
-  );
-  Workmanager().registerPeriodicTask(
-    "randomNotificationApp",
-    "random_notification_app",
-    frequency: const Duration(hours: 2, minutes: 1),
-    initialDelay: const Duration(minutes: 1),
-    constraints: Constraints(
-      networkType: NetworkType.connected,
-    ),
-  );
+  final pref = await SharedPreferences.getInstance();
+  final isNotificationEnabled = pref.getBool("notification_enabled") ?? true;
+  if (isNotificationEnabled) {
+    await WorkmanagerTask.registerNotificationTasks();
+  }
   await LocalNotifications().init();
   runApp(const ProviderScope(child: MyApp()));
 }

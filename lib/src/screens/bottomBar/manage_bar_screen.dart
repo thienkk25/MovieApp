@@ -6,8 +6,8 @@ import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/my_profile_screen.dart';
-import 'package:movie_app/src/screens/configs/local_notifications.dart';
 import 'package:movie_app/src/screens/configs/overlay_screen.dart';
+import 'package:movie_app/src/screens/configs/workmanager_task.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -126,7 +126,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   OverlayScreen().showOverlay(
                                       context, "Bật thông báo", Colors.green,
                                       duration: 2);
-                                  pref.setBool("notification", true);
+                                  pref.setBool("notification_enabled", true);
                                   stateSetter(() => isNotification = true);
                                 },
                               ),
@@ -139,12 +139,13 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                     ? null
                                     : const Icon(Icons.check),
                                 onTap: () async {
-                                  LocalNotifications().cancelAll();
                                   Navigator.pop(context);
                                   OverlayScreen().showOverlay(
                                       context, "Tắt thông báo", Colors.grey,
                                       duration: 2);
-                                  pref.setBool("notification", false);
+                                  pref.setBool("notification_enabled", false);
+                                  await WorkmanagerTask
+                                      .cancelNotificationTasks();
                                   stateSetter(() => isNotification = false);
                                 },
                               ),
