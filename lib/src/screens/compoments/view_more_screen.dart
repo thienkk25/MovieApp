@@ -97,7 +97,6 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   Widget build(BuildContext context) {
     List dataMovies = ref.watch(viewMoreMoviesNotifierProvider);
     double sizeWidth = MediaQuery.of(context).size.width;
-    print(dataMovies);
     int responsiveColumnCount;
     int? itemCount;
 

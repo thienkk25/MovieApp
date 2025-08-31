@@ -105,6 +105,11 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
           movieController.cartoonMovies(pageMovie, limitMovie);
       futureTvShowsMovies =
           movieController.tvShowsMovies(pageMovie, limitMovie);
+      futureVietSubMovies =
+          movieController.vietSubMovies(pageMovie, limitMovie);
+      futureNarratedMovies =
+          movieController.narratedMovies(pageMovie, limitMovie);
+      futureDubbedMovies = movieController.dubbedMovies(pageMovie, limitMovie);
     });
     Future.wait([
       futureCategoryMovies,
@@ -112,7 +117,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
       futureSingleMovies,
       futureDramaMovies,
       futureCartoonMovies,
-      futureTvShowsMovies
+      futureTvShowsMovies,
+      futureVietSubMovies,
+      futureNarratedMovies,
+      futureDubbedMovies
     ]);
   }
 

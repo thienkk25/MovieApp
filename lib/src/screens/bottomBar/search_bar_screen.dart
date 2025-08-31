@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 

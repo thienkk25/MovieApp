@@ -799,6 +799,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             );
                           } else if (snapshot.hasData) {
                             List dataMovies = snapshot.data!;
+
                             double sizeWidth =
                                 MediaQuery.of(context).size.width;
 
