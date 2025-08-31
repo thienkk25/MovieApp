@@ -18,47 +18,68 @@ class SeriesRecommendationController {
   }
 
   List uniqueList(List list) {
-    var counts = <dynamic, int>{};
+    final seen = <dynamic>{};
+    final uniqueObjects = <dynamic>[];
 
     for (var e in list) {
-      counts[e['_id']] = (counts[e['_id']] ?? 0) + 1;
+      if (!seen.contains(e['_id'])) {
+        seen.add(e['_id']);
+        uniqueObjects.add(e);
+      }
     }
-
-    List uniqueObjects = [];
-    for (var e in list) {
-      if (counts[e['_id']] == 1) uniqueObjects.add(e);
-    }
-
     return uniqueObjects;
   }
 
   Future<List> getRecommendedParts(Map movie) async {
     final MovieService movieService = MovieService();
     final String movieId = movie['movie']['_id'];
-    final String baseOriginName = getBaseName(movie['movie']['name']);
-    final Map dataSearch = await movieService.searchMovies(baseOriginName, 20);
-    List dataItemsSearch = dataSearch['data']['items'];
-    List seriesMoviesSearch = dataItemsSearch
-        .where((e) =>
-            getBaseName(e['name']) == baseOriginName && e['_id'] != movieId)
-        .toList();
+    final String baseOriginName = getBaseName(movie['movie']['origin_name']);
+    final String baseName = getBaseName(movie['movie']['name']);
 
-    final dataSearchOriginNameTwoSpace = await movieService.searchMovies(
+    final Map dataSearchOriginName =
+        await movieService.searchMovies(baseOriginName, 20);
+    List seriesMoviesSearchOriginName =
+        (dataSearchOriginName['data']['items'] as List)
+            .where((e) => e['_id'] != movieId)
+            .toList();
+
+    final Map dataSearchOriginNameTwoSpace = await movieService.searchMovies(
         RegExp(r'^(.+?\s.+?)\b')
                 .firstMatch(movie['movie']['origin_name'])
                 ?.group(1)
                 ?.trim() ??
             movie['movie']['origin_name'].trim(),
-        20);
+        10);
     final seriesMoviesOriginNameTwoSpace =
         (dataSearchOriginNameTwoSpace['data']['items'] as List)
             .where((e) => e['_id'] != movieId)
             .toList();
 
-    seriesMoviesSearch =
-        uniqueList([...seriesMoviesSearch, ...seriesMoviesOriginNameTwoSpace]);
+    final Map dataSearchName = await movieService.searchMovies(baseName, 20);
+    List seriesMoviesSearchName = (dataSearchName['data']['items'] as List)
+        .where((e) => e['_id'] != movieId)
+        .toList();
 
-    if (seriesMoviesSearch.length <= 18) {
+    final Map dataSearchNameTwoSpace = await movieService.searchMovies(
+        RegExp(r'^(.+?\s.+?)\b')
+                .firstMatch(movie['movie']['name'])
+                ?.group(1)
+                ?.trim() ??
+            movie['movie']['name'].trim(),
+        10);
+    final seriesMoviesNameTwoSpace =
+        (dataSearchNameTwoSpace['data']['items'] as List)
+            .where((e) => e['_id'] != movieId)
+            .toList();
+
+    seriesMoviesSearchOriginName = uniqueList([
+      ...seriesMoviesSearchName,
+      ...seriesMoviesNameTwoSpace,
+      ...seriesMoviesSearchOriginName,
+      ...seriesMoviesOriginNameTwoSpace,
+    ]);
+
+    if (seriesMoviesSearchOriginName.length < 10) {
       final futures = [
         movieService.categoryDetailMovies(
             movie['movie']['category'][0]['slug'], 5, 10),
@@ -103,10 +124,11 @@ class SeriesRecommendationController {
         ...seriesMoviesYear
       ]);
       allData.shuffle();
-      allData = uniqueList([...seriesMoviesSearch, ...allData.take(12)]);
+      allData =
+          uniqueList([...seriesMoviesSearchOriginName, ...allData.take(12)]);
 
       return allData;
     }
-    return seriesMoviesSearch;
+    return seriesMoviesSearchOriginName;
   }
 }
