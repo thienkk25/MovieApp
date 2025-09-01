@@ -20,10 +20,11 @@ class MovieService {
     }
   }
 
-  Future<Map> categoryDetailMovies(String type, int page, int limit) async {
+  Future<Map> categoryDetailMovies(String type, int page, int limit,
+      String sortType, String country, int year) async {
     try {
       final response = await http.get(Uri.parse(
-          "https://phimapi.com/v1/api/the-loai/$type?page=$page&limit=$limit"));
+          "https://phimapi.com/v1/api/the-loai/$type?page=$page&sort_type=$sortType&country=$country&year=$year&limit=$limit"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data;
@@ -32,6 +33,21 @@ class MovieService {
       }
     } catch (e) {
       return {};
+    }
+  }
+
+  Future<List> countryMovies() async {
+    try {
+      final response =
+          await http.get(Uri.parse("https://phimapi.com/quoc-gia"));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
     }
   }
 

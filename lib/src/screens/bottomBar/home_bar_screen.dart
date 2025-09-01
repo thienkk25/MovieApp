@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
+import 'package:movie_app/src/screens/compoments/filter_sidebar_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
 import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
@@ -28,6 +29,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   late Future<Map> futureDubbedMovies;
   final int pageMovie = 1;
   final int limitMovie = 12;
+  final String sortType = "desc";
+  final String country = "";
+  final int year = 0;
   final ScrollController scrollController = ScrollController();
 
   final List<String> sections = [
@@ -143,11 +147,41 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Thể loại",
-                  key: keys["Trang chủ"],
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Thể loại",
+                      key: keys["Trang chủ"],
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        showGeneralDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          barrierLabel: "Filter",
+                          pageBuilder: (context, anim1, anim2) {
+                            return FilterSidebarMovieScreen(
+                              futureCategoryMovies: futureCategoryMovies,
+                              pageMovie: pageMovie,
+                              limitMovie: limitMovie,
+                            );
+                          },
+                          transitionBuilder: (context, anim1, anim2, child) {
+                            final offsetAnimation = Tween<Offset>(
+                              begin: const Offset(1, 0),
+                              end: Offset.zero,
+                            ).animate(anim1);
+                            return SlideTransition(
+                                position: offsetAnimation, child: child);
+                          },
+                        );
+                      },
+                      child: const Icon(Icons.filter_list_alt),
+                    )
+                  ],
                 ),
                 SizedBox(
                   height: 50,
@@ -166,10 +200,12 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) => ViewMoreScreen(
-                                  categoryMovies[value]['slug'],
-                                  pageMovie,
-                                  limitMovie,
-                                ),
+                                    categoryMovies[value]['slug'],
+                                    pageMovie,
+                                    limitMovie,
+                                    sortType,
+                                    country,
+                                    year),
                               ),
                             );
                           },
@@ -347,11 +383,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen(
-                          "Phim Lẻ",
-                          pageMovie,
-                          limitMovie,
-                        ),
+                        builder: (_) => ViewMoreScreen("Phim Lẻ", pageMovie,
+                            limitMovie, sortType, country, year),
                       ),
                     );
                   },
@@ -388,11 +421,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen(
-                          "Phim Bộ",
-                          pageMovie,
-                          limitMovie,
-                        ),
+                        builder: (_) => ViewMoreScreen("Phim Bộ", pageMovie,
+                            limitMovie, sortType, country, year),
                       ),
                     );
                   },
@@ -429,11 +459,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen(
-                          "Phim Hoạt Hình",
-                          pageMovie,
-                          limitMovie,
-                        ),
+                        builder: (_) => ViewMoreScreen("Phim Hoạt Hình",
+                            pageMovie, limitMovie, sortType, country, year),
                       ),
                     );
                   },
@@ -471,10 +498,12 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (_) => ViewMoreScreen(
-                          "Chương trình truyền hình",
-                          pageMovie,
-                          limitMovie,
-                        ),
+                            "Chương trình truyền hình",
+                            pageMovie,
+                            limitMovie,
+                            sortType,
+                            country,
+                            year),
                       ),
                     );
                   },
@@ -511,11 +540,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen(
-                          "Phim Vietsub",
-                          pageMovie,
-                          limitMovie,
-                        ),
+                        builder: (_) => ViewMoreScreen("Phim Vietsub",
+                            pageMovie, limitMovie, sortType, country, year),
                       ),
                     );
                   },
@@ -552,11 +578,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen(
-                          "Phim Thuyết Minh",
-                          pageMovie,
-                          limitMovie,
-                        ),
+                        builder: (_) => ViewMoreScreen("Phim Thuyết Minh",
+                            pageMovie, limitMovie, sortType, country, year),
                       ),
                     );
                   },
@@ -593,11 +616,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen(
-                          "Phim Lồng Tiếng",
-                          pageMovie,
-                          limitMovie,
-                        ),
+                        builder: (_) => ViewMoreScreen("Phim Lồng Tiếng",
+                            pageMovie, limitMovie, sortType, country, year),
                       ),
                     );
                   },

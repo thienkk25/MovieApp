@@ -1,4 +1,4 @@
-import 'package:movie_app/src/services/movie_service.dart';
+import 'package:movie_app/src/controllers/movie_controller.dart';
 
 class SeriesRecommendationController {
   String getBaseName(String name) {
@@ -31,7 +31,7 @@ class SeriesRecommendationController {
   }
 
   Future<List> getRecommendedParts(Map movie) async {
-    final MovieService movieService = MovieService();
+    final MovieController movieService = MovieController();
     final String movieId = movie['movie']['_id'];
     final String baseOriginName = getBaseName(movie['movie']['origin_name']);
     final String baseName = getBaseName(movie['movie']['name']);

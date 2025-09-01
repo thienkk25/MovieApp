@@ -25,6 +25,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   int currentPage = 0;
   final int pageMovie = 1;
   final int limitMovie = 12;
+  final String sortType = "desc";
+  final String country = "";
+  final int year = 0;
   bool isServer = true;
   late Future<Map?> singleDetailMovies;
   late Future<Map?> episodeHistoryMovies;
@@ -533,11 +536,13 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (_) => ViewMoreScreen(
-                                            dataInforMovie?['movie']['category']
-                                                [index]['slug'],
-                                            pageMovie,
-                                            limitMovie,
-                                          ),
+                                              dataInforMovie?['movie']
+                                                  ['category'][index]['slug'],
+                                              pageMovie,
+                                              limitMovie,
+                                              sortType,
+                                              country,
+                                              year),
                                         ),
                                       );
                                     },

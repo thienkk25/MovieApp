@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
@@ -64,16 +65,16 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                           gradient: LinearGradient(
                               colors: [Color(0xff30cfd0), Color(0xff330867)])),
                     ),
-                    Positioned(
+                    const Positioned(
                       left: 10,
                       top: 25,
                       child: CircleAvatar(
                         radius: 20,
-                        child: CachedNetworkImage(
-                          imageUrl:
-                              "https://res.cloudinary.com/dksr7si4o/image/upload/v1737959542/flutter/avatar/2_zqi5hz.jpg",
-                          memCacheHeight: 100,
-                        ),
+                        // child: CachedNetworkImage(
+                        //   imageUrl:
+                        //       "https://res.cloudinary.com/dksr7si4o/image/upload/v1737959542/flutter/avatar/2_zqi5hz.jpg",
+                        //   memCacheHeight: 100,
+                        // ),
                       ),
                     ),
                     Positioned(
@@ -294,7 +295,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                     topRight: Radius.circular(50),
                                   )),
                                   height:
-                                      MediaQuery.of(context).size.height / 1.5,
+                                      MediaQuery.of(context).size.height / 2,
                                   child: SafeArea(
                                     child: ListView.builder(
                                       itemCount: dataHistory.length,
@@ -441,7 +442,24 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 const Divider(),
                 InkWell(
                   onTap: () {
-                    signOut();
+                    showCupertinoDialog(
+                      context: context,
+                      builder: (context) {
+                        return CupertinoAlertDialog(
+                          title: const Text("Thông báo"),
+                          content:
+                              const Text("Bạn có chắc muốn đăng xuất không?"),
+                          actions: [
+                            CupertinoDialogAction(
+                                child: const Text("Hủy"),
+                                onPressed: () => Navigator.pop(context)),
+                            CupertinoDialogAction(
+                                child: const Text("OK"),
+                                onPressed: () => signOut()),
+                          ],
+                        );
+                      },
+                    );
                   },
                   child: const ListTile(
                     leading: Icon(Icons.exit_to_app),

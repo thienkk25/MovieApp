@@ -9,8 +9,21 @@ class MovieController {
     return data;
   }
 
-  Future<Map> categoryDetailMovies(String type, int page, int limit) async {
-    final data = movieService.categoryDetailMovies(type, page, limit);
+  Future<Map> categoryDetailMovies(
+    String type,
+    int page,
+    int limit, {
+    String sortType = "desc",
+    String country = "",
+    int year = 0,
+  }) async {
+    final data = movieService.categoryDetailMovies(
+        type, page, limit, sortType, country, year);
+    return data;
+  }
+
+  Future<List> countryMovies() async {
+    final data = movieService.countryMovies();
     return data;
   }
 

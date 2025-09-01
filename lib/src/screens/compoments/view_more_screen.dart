@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
-import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -12,7 +11,12 @@ class ViewMoreScreen extends ConsumerStatefulWidget {
   final String type;
   final int page;
   final int limit;
-  const ViewMoreScreen(this.type, this.page, this.limit, {super.key});
+  final String sortType;
+  final String country;
+  final int year;
+  const ViewMoreScreen(
+      this.type, this.page, this.limit, this.sortType, this.country, this.year,
+      {super.key});
 
   @override
   ConsumerState<ViewMoreScreen> createState() => _ViewMoreScreenState();
@@ -36,13 +40,14 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   }
 
   Future<void> loadData() async {
-    Map? data = await getMovies(widget.type, widget.page + 1, widget.limit);
+    Map? data = await getMovies(widget.type, widget.page + 1, widget.limit,
+        widget.sortType, widget.country, widget.year);
     ref
         .read(viewMoreMoviesNotifierProvider.notifier)
         .initState(data?['data']?['items'] ?? []);
     titleAppBar = data?['data']?['titlePage'] ?? "Không rõ";
     isView = true;
-    totalPages = data?['data']['params']['pagination']['totalPages'] ?? 30;
+    totalPages = data?['data']?['params']?['pagination']?['totalPages'] ?? 30;
   }
 
   void isLoadMore() {
@@ -58,7 +63,8 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   Future<void> loadDataMore() async {
     if (!mounted) return;
     currentPage++;
-    Map? data = await getMovies(widget.type, currentPage, widget.limit);
+    Map? data = await getMovies(widget.type, currentPage, widget.limit,
+        widget.sortType, widget.country, widget.year);
     if (!mounted) return;
     ref
         .read(viewMoreMoviesNotifierProvider.notifier)
@@ -66,7 +72,12 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
     ref.read(isLoadingMore.notifier).state = false;
   }
 
-  getMovies(String type, int page, int limit) {
+  getMovies(String type, int page, int limit, String sortType, String country,
+      int year) {
+    if (sortType != "desc" || country.isNotEmpty || year != 0) {
+      return movieController.categoryDetailMovies(type, page - 1, limit,
+          country: country, sortType: sortType, year: year);
+    }
     switch (type) {
       case "Phim Lẻ":
         return movieController.singleMovies(page, limit);
@@ -141,12 +152,10 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
                     name: dataMovies[index]['name'],
                     episodeCurrent: dataMovies[index]['episode_current'],
                   );
-                } else if (currentPage < totalPages) {
+                } else if (currentPage <= totalPages) {
                   return const SimpleLoading();
-                } else {
-                  OverlayScreen().showOverlay(context, "Hết", Colors.orange);
-                  return const SizedBox();
                 }
+                return null;
               },
             ),
           )
