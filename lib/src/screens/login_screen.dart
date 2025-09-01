@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
@@ -59,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Form(
                 key: keyForm,
                 child: Column(
+                  spacing: 10,
                   children: [
                     TextFormField(
                       controller: emailController,
@@ -78,9 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderSide: const BorderSide(width: 1),
                         ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 20,
                     ),
                     TextFormField(
                       controller: pwController,
@@ -121,9 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   builder: (_) => const ForgotScreen())),
                           child: const Text("Quên mật khẩu")),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
                     GestureDetector(
                       onTap: () {
                         FocusScope.of(context).requestFocus(FocusNode());
@@ -148,9 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -171,6 +165,88 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ],
+                    ),
+                    const Row(
+                      children: [
+                        Expanded(
+                          child: Divider(),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text("Hoặc"),
+                        ),
+                        Expanded(
+                          child: Divider(),
+                        ),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        signInWithGoogle();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        height: 40,
+                        width: 230,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: Colors.white,
+                          border:
+                              Border.all(width: 1, color: Colors.grey.shade400),
+                        ),
+                        child: Row(
+                          spacing: 10,
+                          children: [
+                            Image.asset(
+                              "assets/imgs/logo_google.png",
+                              height: 20,
+                              width: 20,
+                            ),
+                            const Text(
+                              "Đăng nhập bằng Google",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        signInWithFacebook();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        height: 40,
+                        width: 230,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: const Color(0xFF1877F2), // Facebook Blue
+                          border: Border.all(
+                              width: 1, color: const Color(0xFF1877F2)),
+                        ),
+                        child: Row(
+                          spacing: 10,
+                          children: [
+                            Image.asset(
+                              "assets/imgs/logo_facebook.png",
+                              width: 20,
+                              height: 20,
+                            ),
+                            const Text(
+                              "Đăng nhập bằng Facebook",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ].animate(interval: 300.ms).scaleX(duration: 300.ms),
                 ),
@@ -210,6 +286,64 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     } else {
       OverlayScreen().showOverlay(context, result, Colors.red, duration: 3);
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    final result = await userController.signInWithGoogle();
+    final isUser = userController.isUser();
+    if (!mounted) return;
+    Navigator.pop(context);
+    if (result && isUser) {
+      OverlayScreen().showOverlay(context, "Đăng nhập thành công", Colors.green,
+          duration: 2);
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const HomeScreen(),
+        ),
+        (route) => false,
+      );
+    } else {
+      OverlayScreen()
+          .showOverlay(context, "Đăng nhập thất bại!", Colors.red, duration: 3);
+    }
+  }
+
+  Future<void> signInWithFacebook() async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    final result = await userController.signInWithFacebook();
+    final isUser = userController.isUser();
+    if (!mounted) return;
+    Navigator.pop(context);
+    if (result && isUser) {
+      OverlayScreen().showOverlay(context, "Đăng nhập thành công", Colors.green,
+          duration: 2);
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const HomeScreen(),
+        ),
+        (route) => false,
+      );
+    } else {
+      OverlayScreen()
+          .showOverlay(context, "Đăng nhập thất bại!", Colors.red, duration: 3);
     }
   }
 }

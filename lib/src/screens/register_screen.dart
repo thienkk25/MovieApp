@@ -53,6 +53,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Form(
               key: keyForm,
               child: Column(
+                spacing: 10,
                 children: [
                   TextFormField(
                     controller: hvtController,
@@ -70,9 +71,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderSide: const BorderSide(width: 1),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
                   ),
                   TextFormField(
                     controller: emailController,
@@ -92,9 +90,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderSide: const BorderSide(width: 1),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
                   ),
                   TextFormField(
                     controller: pwController,
@@ -124,9 +119,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderSide: const BorderSide(width: 1),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
                   ),
                   TextFormField(
                     controller: rePwController,
@@ -159,9 +151,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
                   GestureDetector(
                     onTap: () {
                       FocusScope.of(context).requestFocus(FocusNode());
@@ -190,9 +179,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

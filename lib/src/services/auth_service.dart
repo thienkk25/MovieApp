@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   Future<String> login(String email, String password) async {
@@ -93,6 +95,37 @@ class AuthService {
       return "Cập nhật thành công";
     } else {
       return "Cập nhật thất bại";
+    }
+  }
+
+  Future<bool> signInWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+      googleSignIn.initialize(serverClientId: "");
+      final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> signInWithFacebook() async {
+    try {
+      final LoginResult result = await FacebookAuth.instance.login();
+      if (result.status == LoginStatus.success) {
+        final OAuthCredential credential =
+            FacebookAuthProvider.credential(result.accessToken!.tokenString);
+        await FirebaseAuth.instance.signInWithCredential(credential);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 }

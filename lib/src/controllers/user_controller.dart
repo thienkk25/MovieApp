@@ -32,4 +32,14 @@ class UserController {
     final user = authService.user();
     return user;
   }
+
+  Future<bool> signInWithGoogle() async {
+    final result = await authService.signInWithGoogle();
+    return result;
+  }
+
+  Future<bool> signInWithFacebook() async {
+    final result = await authService.signInWithFacebook();
+    return result;
+  }
 }
