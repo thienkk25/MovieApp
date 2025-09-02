@@ -1,0 +1,86 @@
+{
+    "app": {
+        "title": "Movie App",
+        "home": "Home",
+        "movies": "Movies",
+        "history": "History",
+        "favorites": "Favorites",
+        "search": "Search",
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Logout",
+        "language": "Language"
+    },
+    "loginScreen": {
+        "title": "Login",
+        "email": "Email",
+        "password": "Password",
+        "loginButton": "Login",
+        "forgotPassword": "Forgot Password?",
+        "noAccount": "Don't have an account? Register",
+        "loginWith": "Login with {}"
+    },
+    "registerScreen": {
+        "title": "Register",
+        "name": "Full Name",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "registerButton": "Register",
+        "haveAccount": "Already have an account? Login"
+    },
+    "forgotPasswordScreen": {
+        "title": "Forgot Password",
+        "email": "Email",
+        "sendButton": "Send Reset Link",
+        "backToLogin": "Back to Login"
+    },
+    "profileScreen": {
+        "title": "Profile",
+        "editProfile": "Edit Profile",
+        "changePassword": "Change Password",
+        "logout": "Logout"
+    },
+    "settingsScreen": {
+        "title": "Settings",
+        "language": "Language",
+        "notifications": "Notifications",
+        "about": "About"
+    },
+    "favoritesScreen": {
+        "title": "Favorites",
+        "emptyMessage": "You have no favorite movies"
+    },
+    "historyScreen": {
+        "title": "History",
+        "emptyMessage": "You have not watched any movies yet"
+    },
+    "movie": {
+        "newlyUpdated": "Newly Updated Movie",
+        "drama": "Drama Movie",
+        "cartoon": "Cartoon Movie",
+        "tvShows": "TV Shows",
+        "vietsub": "Vietsub Movie",
+        "narrated": "Narrated Movie",
+        "dubbed": "Dubbed Movie",
+        "trailer": "Trailer",
+        "rating": "Rating",
+        "releaseDate": "Release Date",
+        "duration": "Duration",
+        "genre": "Genre",
+        "director": "Director",
+        "cast": "Cast",
+        "description": "Description",
+        "watchNow": "Watch Now",
+        "continueWatching": "Continue Watching",
+        "recommended": "Recommended",
+        "topRated": "Top Rated"
+    },
+    "errors": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Email is invalid",
+        "passwordRequired": "Password is required",
+        "passwordTooShort": "Password must be at least 6 characters",
+        "confirmPasswordMismatch": "Passwords do not match"
+    }
+}
