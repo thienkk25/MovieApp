@@ -9,7 +9,52 @@
         "profile": "Profile",
         "settings": "Settings",
         "logout": "Logout",
-        "language": "Language"
+        "language": "Language",
+        "account": "Account",
+        "information": "Information",
+        "or": "Or",
+        "hi": "Hi, {}",
+        "email": "Email: {}",
+        "name": "Name: {}",
+        "del": "Delete",
+        "watch": "Watch"
+    },
+    "navigation": {
+        "cancel": "Cancel",
+        "exit": "Exit",
+        "ok": "OK",
+        "confirm": "Confirm"
+    },
+    "dialog": {
+        "confirmLogout": "Are you sure you want to log out?"
+    },
+    "filter": {
+        "title": "Filter",
+        "filter": "Filter",
+        "apply": "Apply",
+        "reset": "Reset",
+        "clear": "Clear filter",
+        "sortBy": "Sort",
+        "category": "Category",
+        "genre": "Movie genre",
+        "year": "Year",
+        "country": "Country",
+        "language": "Language",
+        "subtitle": "Subtitle",
+        "status": "Status",
+        "type": "Movie type",
+        "quality": "Quality",
+        "duration": "Duration",
+        "rating": "Rating",
+        "popularity": "Popularity",
+        "latest": "Latest",
+        "oldest": "Oldest",
+        "aToZ": "Name A → Z",
+        "zToA": "Name Z → A",
+        "pleaseSelectGenre": "Please select a genre:",
+        "pleaseSelectCountry": "Please select a country:",
+        "required": "(Required)",
+        "genreRequired": "Genre selection is required"
     },
     "loginScreen": {
         "title": "Login",
@@ -17,7 +62,7 @@
         "password": "Password",
         "loginButton": "Login",
         "forgotPassword": "Forgot Password?",
-        "noAccount": "Don't have an account? Register",
+        "noAccount": "Don't have an account?",
         "loginWith": "Login with {}"
     },
     "registerScreen": {
@@ -27,24 +72,40 @@
         "password": "Password",
         "confirmPassword": "Confirm Password",
         "registerButton": "Register",
-        "haveAccount": "Already have an account? Login"
+        "haveAccount": "Already have an account?"
     },
     "forgotPasswordScreen": {
         "title": "Forgot Password",
         "email": "Email",
-        "sendButton": "Send Reset Link",
+        "sendButton": "Send",
         "backToLogin": "Back to Login"
     },
     "profileScreen": {
         "title": "Profile",
         "editProfile": "Edit Profile",
+        "name": "Name",
+        "email": "Email",
         "changePassword": "Change Password",
         "logout": "Logout"
     },
     "settingsScreen": {
         "title": "Settings",
-        "language": "Language",
-        "notifications": "Notifications",
+        "language": {
+            "title": "Language",
+            "en": "English",
+            "vi": "Vietnamese"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "on": "On notifications",
+            "off": "Off notifications"
+        },
+        "theme": {
+            "title": "Theme",
+            "dark": "Dark",
+            "light": "Light",
+            "system": "System theme"
+        },
         "about": "About"
     },
     "favoritesScreen": {
@@ -53,11 +114,19 @@
     },
     "historyScreen": {
         "title": "History",
-        "emptyMessage": "You have not watched any movies yet"
+        "emptyMessage": "You have not watched any movies yet",
+        "viewedHistory": "Viewed history",
+        "watchedEpisode": "Watched episode: {}"
     },
     "movie": {
+        "episode": {
+            "zero": "There are no episodes yet",
+            "one": "Episode {}",
+            "other": "Episode {}"
+        },
         "newlyUpdated": "Newly Updated Movie",
         "drama": "Drama Movie",
+        "single": "Single Movie",
         "cartoon": "Cartoon Movie",
         "tvShows": "TV Shows",
         "vietsub": "Vietsub Movie",
@@ -76,11 +145,88 @@
         "recommended": "Recommended",
         "topRated": "Top Rated"
     },
+    "movieDetail": {
+        "title": {
+            "main": "Title:",
+            "original": "Original title:"
+        },
+        "genre": "Genre:",
+        "director": "Director:",
+        "actors": "Actors:",
+        "duration": "Duration:",
+        "status": "Status:",
+        "language": "Language:",
+        "subtitle": "Subtitle:",
+        "country": "Country:",
+        "quality": "Quality:",
+        "release": "Release:",
+        "description": "Description:",
+        "seeMore": "See more",
+        "seeLess": "See less",
+        "watchFromStart": "Watch oldest",
+        "watchLatest": "Watch latest",
+        "episodeList": "Episode list:",
+        "relatedMovies": "Related movies",
+        "rating": "Rating:",
+        "reviews": "Reviews",
+        "trailer": "Trailer",
+        "favorite": "Favorite",
+        "addToWatchlist": "Add to watchlist",
+        "totalEpisodes": "Total episodes:"
+    },
+    "search": {
+        "title": "Search",
+        "hint": "Search movies ...",
+        "recent": "Recent searches",
+        "clearRecent": "Clear recent searches",
+        "noResult": "No results found",
+        "resultCount": "@:movie found: {count}",
+        "popular": "Popular searches",
+        "loading": "Searching..."
+    },
+    "player": {
+        "alreadyFirstEpisode": "Already at the first episode",
+        "previousEpisode": "Prev episode",
+        "alreadyLatestEpisode": "Already at the latest episode",
+        "nextEpisode": "Next episode",
+        "server": "Server:"
+    },
     "errors": {
         "emailRequired": "Email is required",
         "emailInvalid": "Email is invalid",
         "passwordRequired": "Password is required",
         "passwordTooShort": "Password must be at least 6 characters",
-        "confirmPasswordMismatch": "Passwords do not match"
+        "confirmPasswordMismatch": "Passwords do not match",
+        "login": "Login failed",
+        "register": "Registration failed. Please try again",
+        "logout": "Logout failed. Please try again",
+        "update": "Update failed. Please try again",
+        "delete": "Delete failed. Please try again",
+        "passwordChanged": "Password change failed",
+        "resetPassword": "Password reset failed",
+        "addFavorite": "Failed to add to favorites",
+        "removeFavorite": "Failed to remove from favorites",
+        "purchase": "Purchase failed",
+        "comment": "Failed to post comment",
+        "network": "Network error. Please check your connection",
+        "server": "Server error. Please try again later",
+        "noData": "No data available",
+        "generic": "An error occurred, please try again!",
+        "timeout": "Request timed out. Please try again!",
+        "notFound": "Data not found",
+        "unauthorized": "You are not logged in or your session has expired"
+    },
+    "success": {
+        "login": "Login successful",
+        "register": "Registration successful",
+        "logout": "Logout successful",
+        "update": "Update successful",
+        "delete": "Deleted successfully",
+        "passwordChanged": "Password changed successfully",
+        "resetPassword": "Password reset link has been sent",
+        "addFavorite": "Added to favorites",
+        "removeFavorite": "Removed from favorites",
+        "purchase": "Purchase completed successfully",
+        "comment": "Comment posted successfully"
     }
 }

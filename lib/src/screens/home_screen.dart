@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_app/src/screens/bottomBar/favorite_bar_screen.dart';
 import 'package:movie_app/src/screens/bottomBar/home_bar_screen.dart';
@@ -33,12 +34,16 @@ class _HomeScreenState extends State<HomeScreen> {
         onDestinationSelected: (value) => setState(() {
           selectedIndex = value;
         }),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: "Trang chủ"),
-          NavigationDestination(icon: Icon(Icons.favorite), label: "Yêu thích"),
-          NavigationDestination(icon: Icon(Icons.search), label: "Tìm kiếm"),
+        destinations: [
           NavigationDestination(
-              icon: Icon(Icons.manage_accounts), label: "Tài khoản"),
+              icon: const Icon(Icons.home), label: 'app.home'.tr()),
+          NavigationDestination(
+              icon: const Icon(Icons.favorite), label: 'app.favorites'.tr()),
+          NavigationDestination(
+              icon: const Icon(Icons.search), label: 'app.search'.tr()),
+          NavigationDestination(
+              icon: const Icon(Icons.manage_accounts),
+              label: 'app.account'.tr()),
         ],
       ),
     );

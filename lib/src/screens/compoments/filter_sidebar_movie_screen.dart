@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
@@ -51,7 +52,7 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
             padding: const EdgeInsets.only(left: 10, right: 10),
             width: MediaQuery.of(context).size.width * 0.8,
             height: double.infinity,
-            color: Colors.white,
+            color: Theme.of(context).appBarTheme.backgroundColor,
             child: Stack(
               children: [
                 Column(
@@ -59,20 +60,20 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
                   spacing: 10,
                   children: [
                     AppBar(
-                      title: const Text("Bộ lọc"),
+                      title: const Text('filter.title').tr(),
                       centerTitle: true,
                       automaticallyImplyLeading: false,
                     ),
                     RichText(
-                      text: const TextSpan(
-                        text: 'Vui lòng chọn thể loại: ',
-                        style: TextStyle(
+                      text: TextSpan(
+                        text: 'filter.pleaseSelectGenre'.tr(),
+                        style: const TextStyle(
                           color: Colors.black,
                         ),
                         children: [
                           TextSpan(
-                            text: '(Bắt buộc)',
-                            style: TextStyle(
+                            text: 'filter.required'.tr(),
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.red,
                             ),
@@ -131,7 +132,7 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
                         },
                       ),
                     ),
-                    const Text("Vui lòng chọn quốc gia:"),
+                    const Text('filter.pleaseSelectCountry').tr(),
                     SizedBox(
                       height: 50,
                       child: FutureBuilder(
@@ -201,9 +202,9 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
                               FilteringTextInputFormatter.digitsOnly,
                               LengthLimitingTextInputFormatter(4),
                             ],
-                            decoration: const InputDecoration(
-                              labelText: "Năm",
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: 'filter.year'.tr(),
+                              border: const OutlineInputBorder(),
                             ),
                             onChanged: (value) {
                               if (value.isNotEmpty) {
@@ -217,19 +218,19 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
                         SizedBox(
                           width: 140,
                           child: DropdownButtonFormField(
-                            decoration: const InputDecoration(
-                              labelText: "Sắp xếp",
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: 'filter.sortBy'.tr(),
+                              border: const OutlineInputBorder(),
                             ),
                             value: sortType,
-                            items: const [
+                            items: [
                               DropdownMenuItem(
                                 value: "desc",
-                                child: Text("Mới nhất"),
+                                child: const Text('filter.latest').tr(),
                               ),
                               DropdownMenuItem(
                                 value: "asc",
-                                child: Text("Cũ nhất"),
+                                child: const Text('filter.oldest').tr(),
                               ),
                             ],
                             onChanged: (value) {
@@ -256,9 +257,9 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
                               borderRadius: BorderRadius.circular(5),
                             ),
                             width: 80,
-                            child: const Text(
-                              "Thoát",
-                              style: TextStyle(color: Colors.white),
+                            child: Text(
+                              'navigation.exit'.tr(),
+                              style: const TextStyle(color: Colors.white),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -280,8 +281,8 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
                                 ),
                               );
                             } else {
-                              OverlayScreen().showOverlay(
-                                  context, "Bắt buộc chọn thể loại", Colors.red,
+                              OverlayScreen().showOverlay(context,
+                                  'filter.genreRequired'.tr(), Colors.red,
                                   duration: 2);
                             }
                           },
@@ -292,9 +293,9 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
                               borderRadius: BorderRadius.circular(5),
                             ),
                             width: 80,
-                            child: const Text(
-                              "Lọc",
-                              style: TextStyle(color: Colors.white),
+                            child: Text(
+                              'filter.apply'.tr(),
+                              style: const TextStyle(color: Colors.white),
                               textAlign: TextAlign.center,
                             ),
                           ),

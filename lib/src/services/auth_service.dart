@@ -4,20 +4,18 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
-  Future<String> login(String email, String password) async {
+  Future<bool> login(String email, String password) async {
     final firebaseAuth = FirebaseAuth.instance;
     try {
       await firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
-      return "Đăng nhập thành công";
-    } on FirebaseAuthException {
-      return "Email hoặc Mật khẩu không chính xác!";
+      return true;
     } catch (e) {
-      return "Có lỗi!";
+      return false;
     }
   }
 
-  Future<String> register(String name, String email, String password) async {
+  Future<bool> register(String email, String password) async {
     final firebaseAuth = FirebaseAuth.instance;
     final firebaseFirestore = FirebaseFirestore.instance;
     try {
@@ -28,46 +26,32 @@ class AuthService {
           .doc(firebaseAuth.currentUser!.uid)
           .set({
         "uid": firebaseAuth.currentUser!.uid,
-        "name": name,
         "email": email,
         "timestampt": Timestamp.now()
       });
-      return "Đăng ký thành công";
-    } on FirebaseAuthException catch (e) {
-      if (e.code == "email-already-in-use") {
-        return "Email đã tồn tại!";
-      } else if (e.code == "invalid-email") {
-        return "Email không đúng định dạng!";
-      } else if (e.code == "weak-password") {
-        return "Mật khẩu yếu";
-      } else if (e.code == "operation-not-allowed") {
-        return "Tài khoản đã bị khoá hoặc đóng. Vui lòng liên hệ với admin!";
-      }
-      return "Đăng ký thất bại";
+      return true;
     } catch (e) {
-      return "Có lỗi!";
+      return false;
     }
   }
 
-  Future<String> forgot(String email) async {
+  Future<bool> forgot(String email) async {
     final firebaseAuth = FirebaseAuth.instance;
     try {
       await firebaseAuth.sendPasswordResetEmail(email: email);
-      return "Gửi thành công";
-    } on FirebaseAuthException {
-      return "Gửi thất bại";
+      return true;
     } catch (e) {
-      return "Có lỗi!";
+      return false;
     }
   }
 
-  Future<String> signOut() async {
+  Future<bool> signOut() async {
     final firebaseAuth = FirebaseAuth.instance;
     try {
       await firebaseAuth.signOut();
-      return "Đăng xuất thành công";
+      return true;
     } catch (e) {
-      return "Có lỗi!";
+      return false;
     }
   }
 
@@ -101,7 +85,7 @@ class AuthService {
   Future<bool> signInWithGoogle() async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-      googleSignIn.initialize(serverClientId: "");
+      googleSignIn.initialize();
       final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -116,7 +100,9 @@ class AuthService {
 
   Future<bool> signInWithFacebook() async {
     try {
-      final LoginResult result = await FacebookAuth.instance.login();
+      final LoginResult result = await FacebookAuth.instance.login(
+          permissions: ['email', 'public_profile'],
+          loginBehavior: LoginBehavior.webOnly);
       if (result.status == LoginStatus.success) {
         final OAuthCredential credential =
             FacebookAuthProvider.credential(result.accessToken!.tokenString);

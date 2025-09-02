@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,15 +36,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   final ScrollController scrollController = ScrollController();
 
   final List<String> sections = [
-    "Trang chủ",
-    "Phim mới cập nhật",
-    "Phim Lẻ",
-    "Phim Bộ",
-    "Phim Hoạt Hình",
-    "Chương trình truyền hình",
-    "Phim Vietsub",
-    "Phim Thuyết Minh",
-    "Phim Lồng Tiếng"
+    'app.title'.tr(),
+    'movie.newlyUpdated'.tr(),
+    'movie.single'.tr(),
+    'movie.drama'.tr(),
+    'movie.cartoon'.tr(),
+    'movie.tvShows'.tr(),
+    'movie.vietsub'.tr(),
+    'movie.narrated'.tr(),
+    'movie.dubbed'.tr(),
   ];
 
   final Map<String, GlobalKey> keys = {};
@@ -61,11 +62,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
     futureNarratedMovies =
         movieController.narratedMovies(pageMovie, limitMovie);
     futureDubbedMovies = movieController.dubbedMovies(pageMovie, limitMovie);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        ref.read(currentTitle.notifier).state = 'app.home'.tr();
+      },
+    );
 
     for (var sec in sections) {
       keys[sec] = GlobalKey();
     }
-
     scrollController.addListener(onScroll);
   }
 
@@ -131,6 +136,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: ValueKey(ref.watch(isLanguageProvider)),
       appBar: AppBar(
         title: Consumer(
             builder: (context, ref, child) => Text(ref.watch(currentTitle))),
@@ -147,41 +153,39 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Thể loại",
-                      key: keys["Trang chủ"],
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        showGeneralDialog(
-                          context: context,
-                          barrierDismissible: true,
-                          barrierLabel: "Filter",
-                          pageBuilder: (context, anim1, anim2) {
-                            return FilterSidebarMovieScreen(
-                              futureCategoryMovies: futureCategoryMovies,
-                              pageMovie: pageMovie,
-                              limitMovie: limitMovie,
-                            );
-                          },
-                          transitionBuilder: (context, anim1, anim2, child) {
-                            final offsetAnimation = Tween<Offset>(
-                              begin: const Offset(1, 0),
-                              end: Offset.zero,
-                            ).animate(anim1);
-                            return SlideTransition(
-                                position: offsetAnimation, child: child);
-                          },
-                        );
-                      },
-                      child: const Icon(Icons.filter_list_alt),
-                    )
-                  ],
+                InkWell(
+                  onTap: () => showGeneralDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    barrierLabel: "Filter",
+                    pageBuilder: (context, anim1, anim2) {
+                      return FilterSidebarMovieScreen(
+                        futureCategoryMovies: futureCategoryMovies,
+                        pageMovie: pageMovie,
+                        limitMovie: limitMovie,
+                      );
+                    },
+                    transitionBuilder: (context, anim1, anim2, child) {
+                      final offsetAnimation = Tween<Offset>(
+                        begin: const Offset(1, 0),
+                        end: Offset.zero,
+                      ).animate(anim1);
+                      return SlideTransition(
+                          position: offsetAnimation, child: child);
+                    },
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'movie.genre'.tr(),
+                        key: keys['app.title'.tr()],
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const Icon(Icons.filter_list_alt)
+                    ],
+                  ),
                 ),
                 SizedBox(
                   height: 50,
@@ -247,8 +251,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   ),
                 ),
                 Text(
-                  "Phim mới cập nhật",
-                  key: keys["Phim mới cập nhật"],
+                  'movie.newlyUpdated'.tr(),
+                  key: keys['movie.newlyUpdated'.tr()],
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -378,7 +382,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   ),
                 ),
                 InkWell(
-                  key: keys["Phim Lẻ"],
+                  key: keys['movie.single'.tr()],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -388,15 +392,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       ),
                     );
                   },
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Phim Lẻ",
-                        style: TextStyle(
+                        'movie.single'.tr(),
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      Icon(Icons.arrow_forward_ios)
+                      const Icon(Icons.arrow_forward_ios)
                     ],
                   ),
                 ),
@@ -416,7 +420,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys["Phim Bộ"],
+                  key: keys['movie.drama'.tr()],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -426,15 +430,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       ),
                     );
                   },
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Phim Bộ",
-                        style: TextStyle(
+                        'movie.drama'.tr(),
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      Icon(Icons.arrow_forward_ios)
+                      const Icon(Icons.arrow_forward_ios)
                     ],
                   ),
                 ),
@@ -454,7 +458,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys["Phim Hoạt Hình"],
+                  key: keys['movie.cartoon'.tr()],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -464,15 +468,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       ),
                     );
                   },
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Phim Hoạt Hình",
-                        style: TextStyle(
+                        'movie.cartoon'.tr(),
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      Icon(Icons.arrow_forward_ios)
+                      const Icon(Icons.arrow_forward_ios)
                     ],
                   ),
                 ),
@@ -492,7 +496,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys["Chương trình truyền hình"],
+                  key: keys['movie.tvShows'.tr()],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -507,15 +511,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       ),
                     );
                   },
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Chương trình truyền hình",
-                        style: TextStyle(
+                        'movie.tvShows'.tr(),
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      Icon(Icons.arrow_forward_ios)
+                      const Icon(Icons.arrow_forward_ios)
                     ],
                   ),
                 ),
@@ -535,7 +539,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys["Phim Vietsub"],
+                  key: keys['movie.vietsub'.tr()],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -545,15 +549,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       ),
                     );
                   },
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Phim Vietsub",
-                        style: TextStyle(
+                        'movie.vietsub'.tr(),
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      Icon(Icons.arrow_forward_ios)
+                      const Icon(Icons.arrow_forward_ios)
                     ],
                   ),
                 ),
@@ -573,7 +577,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys["Phim Thuyết Minh"],
+                  key: keys['movie.narrated'.tr()],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -583,15 +587,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       ),
                     );
                   },
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Phim Thuyết Minh",
-                        style: TextStyle(
+                        'movie.narrated'.tr(),
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      Icon(Icons.arrow_forward_ios)
+                      const Icon(Icons.arrow_forward_ios)
                     ],
                   ),
                 ),
@@ -611,7 +615,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys["Phim Lồng Tiếng"],
+                  key: keys['movie.dubbed'.tr()],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -621,15 +625,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       ),
                     );
                   },
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Phim Lồng Tiếng",
-                        style: TextStyle(
+                        'movie.dubbed'.tr(),
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      Icon(Icons.arrow_forward_ios)
+                      const Icon(Icons.arrow_forward_ios)
                     ],
                   ),
                 ),

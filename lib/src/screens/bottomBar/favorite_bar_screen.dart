@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
@@ -61,8 +62,9 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
       responsiveColumnCount = 5;
     }
     return Scaffold(
+      key: ValueKey(ref.watch(isLanguageProvider)),
       appBar: AppBar(
-        title: const Text("Yêu thích"),
+        title: const Text('favoritesScreen.title').tr(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -81,7 +83,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                     },
                     isFullScreen: false,
                     barElevation: const WidgetStatePropertyAll(0),
-                    barHintText: "Tìm kiếm ...",
+                    barHintText: 'search.hint'.tr(),
                     suggestionsBuilder: (context, controller) {
                       String search = controller.text.toLowerCase();
                       List dataSearch = dataFavorites
@@ -133,8 +135,8 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                       ))
                             ]
                           : [
-                              const ListTile(
-                                title: Text("Không tìm thấy ..."),
+                              ListTile(
+                                title: const Text('search.noResult').tr(),
                               )
                             ];
                     },
@@ -218,8 +220,8 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                         );
                       },
                     )
-                  : const Center(
-                      child: Text("Bạn không có phim yêu thích"),
+                  : Center(
+                      child: const Text('favoritesScreen.emptyMessage').tr(),
                     ),
             )
           ],

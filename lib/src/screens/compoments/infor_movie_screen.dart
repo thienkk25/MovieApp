@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,19 +69,20 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
               title: const Icon(Icons.error),
               centerTitle: true,
             ),
-            body: const Center(
+            body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error),
-                  Text("Có lỗi, vui lòng thử lại!")
+                  const Icon(Icons.error),
+                  const Text('errors.generic').tr(),
                 ],
               ),
             ),
           );
         }
         if (!snapshot.hasData) {
-          return const Scaffold(body: Center(child: Text('Không có dữ liệu')));
+          return Scaffold(
+              body: Center(child: const Text('errors.notFound').tr()));
         }
 
         Map? dataInforMovie = snapshot.data;
@@ -191,7 +193,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                       } else {
                                         OverlayScreen().showOverlay(
                                             context,
-                                            "Đang ở tập đầu rồi",
+                                            'player.alreadyFirstEpisode'.tr(),
                                             Colors.blueGrey,
                                             duration: 2);
                                       }
@@ -202,27 +204,28 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                           color: Colors.lightBlue,
                                           borderRadius:
                                               BorderRadius.circular(5)),
-                                      child: const Row(
+                                      child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Icon(
+                                          const Icon(
                                             Icons.arrow_back_ios,
                                             size: 14,
                                             color: Colors.white,
                                           ),
                                           Text(
-                                            "Tập trước",
-                                            style:
-                                                TextStyle(color: Colors.white),
+                                            'player.previousEpisode'.tr(),
+                                            style: const TextStyle(
+                                                color: Colors.white),
                                           )
                                         ],
                                       ),
                                     ),
                                   ),
                                   Text(
-                                    "Tập ${ref.watch(wasWatchEpisodeMovies)}",
+                                    'movie.episode'.plural(
+                                        ref.watch(wasWatchEpisodeMovies)),
                                     style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500),
@@ -270,7 +273,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                       } else {
                                         OverlayScreen().showOverlay(
                                             context,
-                                            "Đang ở tập mới nhất rồi",
+                                            'player.alreadyLatestEpisode'.tr(),
                                             Colors.blueGrey,
                                             duration: 2);
                                       }
@@ -281,17 +284,17 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                           color: Colors.lightBlue,
                                           borderRadius:
                                               BorderRadius.circular(5)),
-                                      child: const Row(
+                                      child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            "Tập sau",
-                                            style:
-                                                TextStyle(color: Colors.white),
+                                            'player.nextEpisode'.tr(),
+                                            style: const TextStyle(
+                                                color: Colors.white),
                                           ),
-                                          Icon(
+                                          const Icon(
                                             Icons.arrow_forward_ios,
                                             size: 14,
                                             color: Colors.white,
@@ -312,7 +315,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   return Row(
                                     spacing: 5,
                                     children: [
-                                      const Text("Máy chủ:"),
+                                      const Text('player.server').tr(),
                                       GestureDetector(
                                         onTap: () {
                                           stateSetter(() {
@@ -495,11 +498,11 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Tên phim: ${dataInforMovie?['movie']['name']}",
+                        "${'movieDetail.title.main'.tr()} ${dataInforMovie?['movie']['name']}",
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        "Tên gốc: ${dataInforMovie?['movie']['origin_name']}",
+                        "${'movieDetail.title.original'.tr()} ${dataInforMovie?['movie']['origin_name']}",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.grey,
@@ -510,17 +513,18 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                              "Tổng số tập: ${dataInforMovie?['movie']['episode_total']}"),
+                              "${'movieDetail.totalEpisodes'.tr()} ${dataInforMovie?['movie']['episode_total']}"),
                           Text(dataInforMovie?['movie']['time']),
                         ],
                       ),
                       Text(
-                          "Trạng thái: ${dataInforMovie?['movie']['episode_current']}"),
+                          "${'movieDetail.status'.tr()} ${dataInforMovie?['movie']['episode_current']}"),
                       SizedBox(
                         height: 30,
                         child: Row(
+                          spacing: 5,
                           children: [
-                            const Text("Thể loại: "),
+                            const Text('movieDetail.genre').tr(),
                             Expanded(
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
@@ -581,27 +585,27 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                              "Chất lượng: ${dataInforMovie?['movie']['quality']}"),
+                              "${'movieDetail.quality'.tr()} ${dataInforMovie?['movie']['quality']}"),
                           Text(dataInforMovie?['movie']['lang']),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Phát hành:"),
+                          const Text('movieDetail.release').tr(),
                           Text(
                               "${dataInforMovie?['movie']['country'][0]['name']} / ${dataInforMovie?['movie']['year']}"),
                         ],
                       ),
-                      const Text("Nội dung:"),
+                      const Text('movieDetail.description').tr(),
                       ReadMoreText(
                         dataInforMovie?['movie']['content'],
                         style: const TextStyle(color: Colors.grey),
                         trimMode: TrimMode.Line,
                         trimLines: 3,
                         colorClickableText: Colors.black,
-                        trimCollapsedText: 'Xem thêm',
-                        trimExpandedText: 'Thu gọn',
+                        trimCollapsedText: 'movieDetail.seeMore'.tr(),
+                        trimExpandedText: 'movieDetail.seeLess'.tr(),
                         moreStyle: const TextStyle(
                             color: Colors.lightBlueAccent,
                             fontWeight: FontWeight.bold),
@@ -650,10 +654,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                 decoration: BoxDecoration(
                                     color: Colors.lightBlue,
                                     borderRadius: BorderRadius.circular(5)),
-                                child: const Center(
+                                child: Center(
                                   child: Text(
-                                    "Xem từ đầu",
-                                    style: TextStyle(color: Colors.white),
+                                    'movieDetail.watchFromStart'.tr(),
+                                    style: const TextStyle(color: Colors.white),
                                   ),
                                 ),
                               ),
@@ -699,10 +703,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                 decoration: BoxDecoration(
                                     color: Colors.lightBlue,
                                     borderRadius: BorderRadius.circular(5)),
-                                child: const Center(
+                                child: Center(
                                   child: Text(
-                                    "Xem mới nhất",
-                                    style: TextStyle(color: Colors.white),
+                                    'movieDetail.watchLatest'.tr(),
+                                    style: const TextStyle(color: Colors.white),
                                   ),
                                 ),
                               ),
@@ -722,10 +726,13 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             }
                             return Consumer(
                               builder: (context, ref, child) => Text(
-                                  "Lần trước xem: Tập ${ref.watch(wasWatchEpisodeMovies)}"),
+                                  'historyScreen.watchedEpisode'.tr(args: [
+                                'movie.episode'
+                                    .plural(ref.watch(wasWatchEpisodeMovies))
+                              ])),
                             );
                           }),
-                      const Text("Danh sách tập:"),
+                      const Text('movieDetail.episodeList').tr(),
                       Consumer(
                         builder: (context, ref, child) => GridView.builder(
                           physics: const NeverScrollableScrollPhysics(),
@@ -789,9 +796,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           ),
                         ),
                       ),
-                      const Text(
-                        "Phim khác:",
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Text(
+                        'movieDetail.relatedMovies'.tr(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       FutureBuilder(
                         future: SeriesRecommendationController()
@@ -960,12 +967,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
       ref
           .read(getFavoriteMoviesNotifierProvider.notifier)
           .addState({"name": name, "slug": slug, "poster_url": posterUrl});
-      OverlayScreen()
-          .showOverlay(context, "Yêu thích", Colors.orange, duration: 3);
-    } else {
       OverlayScreen().showOverlay(
-          context, "Có lỗi, vui lòng thử lại!", Colors.red,
+          context, 'success.addFavorite'.tr(), Colors.orange,
           duration: 3);
+    } else {
+      OverlayScreen()
+          .showOverlay(context, 'errors.generic'.tr(), Colors.red, duration: 3);
     }
   }
 
@@ -974,12 +981,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
     if (!mounted) return;
     if (result) {
       ref.read(getFavoriteMoviesNotifierProvider.notifier).removeState(slug);
-      OverlayScreen()
-          .showOverlay(context, "Bỏ yêu thích", Colors.grey, duration: 3);
-    } else {
       OverlayScreen().showOverlay(
-          context, "Có lỗi, vui lòng thử lại!", Colors.red,
+          context, 'errors.addFavorite'.tr(), Colors.grey,
           duration: 3);
+    } else {
+      OverlayScreen()
+          .showOverlay(context, 'errors.generic'.tr(), Colors.red, duration: 3);
     }
   }
 

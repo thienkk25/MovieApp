@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
-final currentTitle = StateProvider<String>((ref) => "Trang chủ");
+final isLanguageProvider =
+    StateProvider<Locale?>((ref) => const Locale('vi', ''));
+final currentTitle = StateProvider<String>((ref) => "");
 final isLoadingMore = StateProvider<bool>((ref) => false);
 final wasWatchEpisodeMovies = StateProvider<int>((ref) => -1);
 final isClickWatchEpisodeMovies = StateProvider<bool>((ref) => false);

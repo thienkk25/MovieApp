@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +24,19 @@ class ManageBarScreen extends ConsumerStatefulWidget {
 class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
   final UserController userController = UserController();
   final MovieController movieController = MovieController();
-  late User user;
+  late final User? user;
+  late final String myselftEmail;
+  late final String userName;
+  late final String profilePicture;
   late final SharedPreferences pref;
   late bool isNotification;
   @override
   void initState() {
     user = userController.user()!;
+    myselftEmail = user?.email ?? "";
+    userName = user?.displayName ?? "";
+    profilePicture = user?.photoURL ??
+        "https://res.cloudinary.com/dksr7si4o/image/upload/v1737961456/flutter/avatar/6_cnm2fb.jpg";
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
         loadData();
@@ -47,7 +55,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Thông tin"),
+        title: const Text('app.information').tr(),
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -56,45 +64,41 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
           children: [
             Column(
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      height: 100,
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                              colors: [Color(0xff30cfd0), Color(0xff330867)])),
-                    ),
-                    const Positioned(
-                      left: 10,
-                      top: 25,
-                      child: CircleAvatar(
-                        radius: 20,
-                        // child: CachedNetworkImage(
-                        //   imageUrl:
-                        //       "https://res.cloudinary.com/dksr7si4o/image/upload/v1737959542/flutter/avatar/2_zqi5hz.jpg",
-                        //   memCacheHeight: 100,
-                        // ),
+                Container(
+                  height: 100,
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10.0),
+                  decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                          colors: [Color(0xff30cfd0), Color(0xff330867)])),
+                  child: Row(
+                    spacing: 10,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: CachedNetworkImage(
+                          imageUrl: profilePicture,
+                          height: 50,
+                          width: 50,
+                          memCacheHeight: 100,
+                        ),
                       ),
-                    ),
-                    Positioned(
-                      left: 60,
-                      top: 25,
-                      child: Column(
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Xin chào, ${user.email?.split('@')[0] ?? "Không có"}",
+                            'app.hi'.tr(args: [userName]),
                             style: const TextStyle(color: Colors.white),
                           ),
                           Text(
-                            "Email: ${user.email ?? "Không có"}",
+                            'app.email'.tr(args: [myselftEmail]),
                             style: const TextStyle(color: Colors.white),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 InkWell(
                   onTap: () {
@@ -103,10 +107,10 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                         MaterialPageRoute(
                             builder: (_) => const MyProfileScreen()));
                   },
-                  child: const ListTile(
-                    leading: Icon(Icons.contact_mail_outlined),
-                    title: Text("Thông tin cá nhân"),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                  child: ListTile(
+                    leading: const Icon(Icons.contact_mail_outlined),
+                    title: const Text('profileScreen.title').tr(),
+                    trailing: const Icon(Icons.arrow_forward_ios),
                   ),
                 ),
                 InkWell(
@@ -118,14 +122,18 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                           child: Wrap(
                             children: [
                               ListTile(
-                                title: const Text('Bật thông báo'),
+                                title: const Text(
+                                        'settingsScreen.notifications.on')
+                                    .tr(),
                                 trailing: isNotification
                                     ? const Icon(Icons.check)
                                     : null,
                                 onTap: () async {
                                   Navigator.pop(context);
                                   OverlayScreen().showOverlay(
-                                      context, "Bật thông báo", Colors.green,
+                                      context,
+                                      'settingsScreen.notifications.on'.tr(),
+                                      Colors.green,
                                       duration: 2);
                                   pref.setBool("notification_enabled", true);
                                   stateSetter(() => isNotification = true);
@@ -135,14 +143,17 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                 height: 1,
                               ),
                               ListTile(
-                                title: const Text('Tắt thông báo'),
+                                title: Text(
+                                    'settingsScreen.notifications.off'.tr()),
                                 trailing: isNotification
                                     ? null
                                     : const Icon(Icons.check),
                                 onTap: () async {
                                   Navigator.pop(context);
                                   OverlayScreen().showOverlay(
-                                      context, "Tắt thông báo", Colors.grey,
+                                      context,
+                                      'settingsScreen.notifications.off'.tr(),
+                                      Colors.grey,
                                       duration: 2);
                                   pref.setBool("notification_enabled", false);
                                   await WorkmanagerTask
@@ -156,49 +167,72 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                       ),
                     );
                   },
-                  child: const ListTile(
-                    leading: Icon(Icons.notifications),
-                    title: Text("Thông báo"),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                  child: ListTile(
+                    leading: const Icon(Icons.notifications),
+                    title:
+                        const Text('settingsScreen.notifications.title').tr(),
+                    trailing: const Icon(Icons.arrow_forward_ios),
                   ),
                 ),
                 InkWell(
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
-                      builder: (context) => SafeArea(
-                        child: Wrap(
-                          children: [
-                            ListTile(
-                              title: const Text('Tiếng Việt'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                OverlayScreen().showOverlay(
-                                    context, "Chưa phát hành", Colors.orange,
-                                    duration: 2);
-                              },
-                            ),
-                            const Divider(
-                              height: 1,
-                            ),
-                            ListTile(
-                              title: const Text('Tiếng Anh'),
-                              onTap: () {
-                                Navigator.pop(context);
-                                OverlayScreen().showOverlay(
-                                    context, "Chưa phát hành", Colors.orange,
-                                    duration: 2);
-                              },
-                            ),
-                          ],
+                      builder: (context) => Consumer(
+                        builder: (context, ref, child) => SafeArea(
+                          child: Wrap(
+                            children: [
+                              ListTile(
+                                title: const Text('settingsScreen.language.vi')
+                                    .tr(),
+                                trailing: ref.watch(isLanguageProvider) ==
+                                        const Locale('vi', '')
+                                    ? const Icon(Icons.check)
+                                    : null,
+                                onTap: () async {
+                                  context.setLocale(const Locale('vi', ''));
+                                  OverlayScreen().showOverlay(
+                                      context,
+                                      'settingsScreen.language.vi'.tr(),
+                                      Colors.blueGrey,
+                                      duration: 2);
+                                  ref.read(isLanguageProvider.notifier).state =
+                                      const Locale('vi', '');
+                                  await pref.setInt("language", 0);
+                                },
+                              ),
+                              const Divider(
+                                height: 1,
+                              ),
+                              ListTile(
+                                title: const Text('settingsScreen.language.en')
+                                    .tr(),
+                                trailing: ref.watch(isLanguageProvider) ==
+                                        const Locale('en', '')
+                                    ? const Icon(Icons.check)
+                                    : null,
+                                onTap: () async {
+                                  context.setLocale(const Locale('en', ''));
+                                  OverlayScreen().showOverlay(
+                                      context,
+                                      'settingsScreen.language.en'.tr(),
+                                      Colors.blueGrey,
+                                      duration: 2);
+                                  ref.read(isLanguageProvider.notifier).state =
+                                      const Locale('en', '');
+                                  await pref.setInt("language", 1);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
                   },
-                  child: const ListTile(
-                    leading: Icon(Icons.translate),
-                    title: Text("Ngôn ngữ"),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                  child: ListTile(
+                    leading: const Icon(Icons.translate),
+                    title: const Text('app.language').tr(),
+                    trailing: const Icon(Icons.arrow_forward_ios),
                   ),
                 ),
                 InkWell(
@@ -211,7 +245,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                             children: [
                               ListTile(
                                 leading: const Icon(Icons.light_mode),
-                                title: const Text('Giao diện sáng'),
+                                title: const Text('settingsScreen.theme.light')
+                                    .tr(),
                                 trailing: ref.watch(themeModeProvider) ==
                                         ThemeMode.light
                                     ? const Icon(Icons.check)
@@ -221,7 +256,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                       ThemeMode.light;
                                   Navigator.pop(context);
                                   OverlayScreen().showOverlay(
-                                      context, "Sáng", Colors.blueGrey,
+                                      context,
+                                      'settingsScreen.theme.light'.tr(),
+                                      Colors.blueGrey,
                                       duration: 2);
                                   pref.setString("themeMode", "light");
                                 },
@@ -231,7 +268,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                               ),
                               ListTile(
                                 leading: const Icon(Icons.dark_mode),
-                                title: const Text('Giao diện tối'),
+                                title: const Text('settingsScreen.theme.dark')
+                                    .tr(),
                                 trailing: ref.watch(themeModeProvider) ==
                                         ThemeMode.dark
                                     ? const Icon(Icons.check)
@@ -241,7 +279,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                       ThemeMode.dark;
                                   Navigator.pop(context);
                                   OverlayScreen().showOverlay(
-                                      context, "Tối", Colors.blueGrey,
+                                      context,
+                                      'settingsScreen.theme.dark'.tr(),
+                                      Colors.blueGrey,
                                       duration: 2);
                                   pref.setString("themeMode", "dark");
                                 },
@@ -251,7 +291,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                               ),
                               ListTile(
                                 leading: const Icon(Icons.phone_android),
-                                title: const Text('Giao diện theo hệ thống'),
+                                title: const Text('settingsScreen.theme.system')
+                                    .tr(),
                                 trailing: ref.watch(themeModeProvider) ==
                                         ThemeMode.system
                                     ? const Icon(Icons.check)
@@ -261,7 +302,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                       ThemeMode.system;
                                   Navigator.pop(context);
                                   OverlayScreen().showOverlay(
-                                      context, "Theo hệ thống", Colors.blueGrey,
+                                      context,
+                                      'settingsScreen.theme.system'.tr(),
+                                      Colors.blueGrey,
                                       duration: 2);
                                   pref.setString("themeMode", "auto");
                                 },
@@ -272,10 +315,10 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                       ),
                     );
                   },
-                  child: const ListTile(
-                    leading: Icon(Icons.mode_night),
-                    title: Text("Giao diện"),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                  child: ListTile(
+                    leading: const Icon(Icons.mode_night),
+                    title: const Text('settingsScreen.theme.title').tr(),
+                    trailing: const Icon(Icons.arrow_forward_ios),
                   ),
                 ),
                 InkWell(
@@ -335,7 +378,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                                                           )));
                                                             },
                                                             child: const Text(
-                                                                "Xem")),
+                                                                    'app.watch')
+                                                                .tr()),
                                                         TextButton(
                                                             onPressed:
                                                                 () async {
@@ -357,7 +401,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                                                 OverlayScreen()
                                                                     .showOverlay(
                                                                         context,
-                                                                        "Xóa thành công",
+                                                                        'success.delete'
+                                                                            .tr(),
                                                                         Colors
                                                                             .green,
                                                                         duration:
@@ -373,7 +418,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                                                 OverlayScreen()
                                                                     .showOverlay(
                                                                         context,
-                                                                        "Có lỗi, vui lòng thử lại",
+                                                                        'errors.delete'
+                                                                            .tr(),
                                                                         Colors
                                                                             .red,
                                                                         duration:
@@ -381,7 +427,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                                               }
                                                             },
                                                             child: const Text(
-                                                                "Xóa")),
+                                                                    'app.del')
+                                                                .tr()),
                                                       ],
                                                     ),
                                                   ));
@@ -415,7 +462,13 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                             subtitle: Text(
-                                              "Đã từng xem: Tập ${dataHistory[index]['episode'].toString()}",
+                                              'historyScreen.watchedEpisode'.tr(
+                                                args: [
+                                                  'movie.episode'.plural(
+                                                      dataHistory[index]
+                                                          ['episode'])
+                                                ],
+                                              ),
                                             ),
                                             trailing: const Icon(
                                               Icons.arrow_forward_sharp,
@@ -426,17 +479,18 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                     ),
                                   ),
                                 )
-                              : const Center(
-                                  child: Text("Lịch sử trống"),
+                              : Center(
+                                  child:
+                                      Text('historyScreen.emptyMessage'.tr()),
                                 );
                         },
                       ),
                     );
                   },
-                  child: const ListTile(
-                    leading: Icon(Icons.history),
-                    title: Text("Lịch sử xem"),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                  child: ListTile(
+                    leading: const Icon(Icons.history),
+                    title: const Text('historyScreen.title').tr(),
+                    trailing: const Icon(Icons.arrow_forward_ios),
                   ),
                 ),
                 const Divider(),
@@ -446,25 +500,26 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                       context: context,
                       builder: (context) {
                         return CupertinoAlertDialog(
-                          title: const Text("Thông báo"),
-                          content:
-                              const Text("Bạn có chắc muốn đăng xuất không?"),
+                          title:
+                              const Text('settingsScreen.notifications.title')
+                                  .tr(),
+                          content: const Text('dialog.confirmLogout').tr(),
                           actions: [
                             CupertinoDialogAction(
-                                child: const Text("Hủy"),
+                                child: const Text('navigation.cancel').tr(),
                                 onPressed: () => Navigator.pop(context)),
                             CupertinoDialogAction(
-                                child: const Text("OK"),
+                                child: const Text('navigation.ok').tr(),
                                 onPressed: () => signOut()),
                           ],
                         );
                       },
                     );
                   },
-                  child: const ListTile(
-                    leading: Icon(Icons.exit_to_app),
-                    title: Text("Đăng xuất"),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                  child: ListTile(
+                    leading: const Icon(Icons.exit_to_app),
+                    title: const Text('profileScreen.logout').tr(),
+                    trailing: const Icon(Icons.arrow_forward_ios),
                   ),
                 ),
               ],
@@ -493,10 +548,12 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
       (route) => false,
     );
 
-    if (result == "Đăng xuất thành công") {
-      OverlayScreen().showOverlay(context, result, Colors.green, duration: 3);
+    if (result) {
+      OverlayScreen().showOverlay(context, 'success.logout'.tr(), Colors.green,
+          duration: 3);
     } else {
-      OverlayScreen().showOverlay(context, result, Colors.red, duration: 3);
+      OverlayScreen()
+          .showOverlay(context, 'errors.logout'.tr(), Colors.red, duration: 3);
     }
   }
 }

@@ -1,130 +1,42 @@
-import 'dart:io';
-
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
-import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 
-class MyProfileScreen extends StatefulWidget {
+class MyProfileScreen extends StatelessWidget {
   const MyProfileScreen({super.key});
 
   @override
-  State<MyProfileScreen> createState() => _MyProfileScreenState();
-}
-
-class _MyProfileScreenState extends State<MyProfileScreen> {
-  File? file;
-  final UserController userController = UserController();
-  late String myselftEmail;
-  late String userName;
-  late String profilePicture;
-  late String phoneNumber;
-  @override
-  void initState() {
-    load();
-    super.initState();
-  }
-
-  Future<void> load() async {
-    final user = userController.user();
-    myselftEmail = user?.email ?? "Trống";
-    userName = user?.displayName ?? "Trống";
-    profilePicture = user?.photoURL ??
-        "https://res.cloudinary.com/dksr7si4o/image/upload/v1737961456/flutter/avatar/6_cnm2fb.jpg";
-    phoneNumber = user?.phoneNumber ?? "Add number";
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Future<void> getFileData(ImageSource source) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: source);
-    if (image == null) return;
-
-    file = File(image.path);
-    setState(() {});
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final User? user = UserController().user();
+    final String uid = user?.uid ?? "";
+    final String myselftEmail = user?.email ?? "";
+    final String userName = user?.displayName ?? "";
+    final String profilePicture = user?.photoURL ??
+        "https://res.cloudinary.com/dksr7si4o/image/upload/v1737961456/flutter/avatar/6_cnm2fb.jpg";
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text("Thông tin cá nhân"),
+        title: const Text('profileScreen.title').tr(),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 20,
           children: [
             Row(
+              spacing: 10,
               children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: file == null
-                          ? NetworkImage(profilePicture)
-                          : FileImage(file!),
-                      radius: 30,
-                    ),
-                    InkWell(
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (context) => SafeArea(
-                              child: Wrap(
-                                children: [
-                                  ListTile(
-                                    leading: const Icon(Icons.photo_library),
-                                    title: const Text('Chọn từ thư viện'),
-                                    onTap: () {
-                                      getFileData(ImageSource.gallery);
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                  const Divider(
-                                    height: 1,
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.camera_alt),
-                                    title: const Text('Chụp ảnh'),
-                                    onTap: () {
-                                      getFileData(ImageSource.camera);
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        child: Opacity(
-                          opacity: .6,
-                          child: Container(
-                            height: 30,
-                            width: 30,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border:
-                                  Border.all(width: 1, color: Colors.lightBlue),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.photo_camera,
-                              color: Colors.lightBlue,
-                              size: 20,
-                            ),
-                          ),
-                        ))
-                  ],
-                ),
-                const SizedBox(
-                  width: 10,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: CachedNetworkImage(
+                    imageUrl: profilePicture,
+                    height: 50,
+                    width: 50,
+                    memCacheHeight: 100,
+                  ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +53,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 )
               ],
             ),
-            const SizedBox(height: 10),
             Divider(
               height: 1,
               color: Colors.grey[400],
@@ -149,23 +60,13 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Tên"),
-                SizedBox(
-                  width: 150,
-                  child: TextField(
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    cursorColor: Colors.lightGreen,
-                    decoration: InputDecoration(
-                        border: const OutlineInputBorder(
-                            borderSide: BorderSide.none),
-                        hintText: userName,
-                        hintStyle: TextStyle(color: Colors.grey[400])),
-                  ),
+                const Text("UID"),
+                Text(
+                  uid,
+                  style: TextStyle(color: Colors.grey[400]),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
             Divider(
               height: 1,
               color: Colors.grey[400],
@@ -173,23 +74,13 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Email"),
-                SizedBox(
-                  width: 150,
-                  child: TextField(
-                    enabled: false,
-                    controller: TextEditingController(text: myselftEmail),
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    cursorColor: Colors.lightGreen,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  ),
+                const Text('profileScreen.name').tr(),
+                Text(
+                  userName,
+                  style: TextStyle(color: Colors.grey[400]),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
             Divider(
               height: 1,
               color: Colors.grey[400],
@@ -197,68 +88,16 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Số điện thoại"),
-                SizedBox(
-                  width: 150,
-                  child: TextField(
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    cursorColor: Colors.lightGreen,
-                    decoration: InputDecoration(
-                        border: const OutlineInputBorder(
-                            borderSide: BorderSide.none),
-                        hintText: phoneNumber,
-                        hintStyle: TextStyle(color: Colors.grey[400])),
-                  ),
+                const Text('profileScreen.email').tr(),
+                Text(
+                  myselftEmail,
+                  style: TextStyle(color: Colors.grey[400]),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
             Divider(
               height: 1,
               color: Colors.grey[400],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Vị trí"),
-                SizedBox(
-                  width: 150,
-                  child: TextField(
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    cursorColor: Colors.lightGreen,
-                    decoration: InputDecoration(
-                        border: const OutlineInputBorder(
-                            borderSide: BorderSide.none),
-                        hintText: "VN",
-                        hintStyle: TextStyle(color: Colors.grey[400])),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            InkWell(
-              onTap: () {
-                Navigator.pop(context);
-                OverlayScreen().showOverlay(
-                    context, "Chưa phát hành", Colors.orange,
-                    duration: 2);
-              },
-              child: Container(
-                height: 35,
-                width: 100,
-                decoration: const BoxDecoration(
-                    color: Colors.blueAccent,
-                    borderRadius:
-                        BorderRadiusDirectional.all(Radius.circular(5))),
-                child: const Center(
-                  child: Text(
-                    "Lưu",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
             ),
           ],
         ),

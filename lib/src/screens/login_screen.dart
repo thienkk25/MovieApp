@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
@@ -47,9 +48,9 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 100,
               width: double.infinity,
               child: Center(
-                child: const Text(
-                  "Đăng nhập",
-                  style: TextStyle(fontSize: 24),
+                child: Text(
+                  'loginScreen.title'.tr(),
+                  style: const TextStyle(fontSize: 24),
                 ).animate().scaleXY(duration: 1.seconds),
               ),
             ),
@@ -67,9 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: emailController,
                       validator: (value) {
                         if (value == null || value == "") {
-                          return "Vui lòng không để trống!";
+                          return 'errors.emailRequired'.tr();
                         } else if (!emailRegExp.hasMatch(value)) {
-                          return "Email không đúng định dạng!";
+                          return 'errors.emailInvalid'.tr();
                         }
                         return null;
                       },
@@ -86,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: pwController,
                       validator: (value) {
                         if (value == null || value == "") {
-                          return "Vui lòng không để trống!";
+                          return 'errors.passwordRequired'.tr();
                         }
                         return null;
                       },
@@ -105,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       obscureText = !obscureText;
                                     }),
                                 child: const Icon(Icons.visibility_outlined)),
-                        labelText: "Mật khẩu",
+                        labelText: 'loginScreen.password'.tr(),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5),
                           borderSide: const BorderSide(width: 1),
@@ -119,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (_) => const ForgotScreen())),
-                          child: const Text("Quên mật khẩu")),
+                          child: const Text('loginScreen.forgotPassword').tr()),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -137,10 +138,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Colors.lightBlue,
                             border:
                                 Border.all(width: 1, color: Colors.lightBlue)),
-                        child: const Center(
+                        child: Center(
                           child: Text(
-                            "Đăng nhập",
-                            style: TextStyle(color: Colors.white),
+                            'loginScreen.title'.tr(),
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
@@ -149,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Bạn chưa có tài khoản?",
+                          'loginScreen.noAccount'.tr(),
                           style:
                               TextStyle(color: Colors.grey[400], fontSize: 12),
                         ),
@@ -158,24 +159,24 @@ class _LoginScreenState extends State<LoginScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (_) => const RegisterScreen())),
-                          child: const Text(
-                            "Đăng ký",
-                            style: TextStyle(
+                          child: Text(
+                            'registerScreen.title'.tr(),
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 12),
                           ),
                         ),
                       ],
                     ),
-                    const Row(
+                    Row(
                       children: [
-                        Expanded(
+                        const Expanded(
                           child: Divider(),
                         ),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text("Hoặc"),
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: const Text('app.or').tr(),
                         ),
-                        Expanded(
+                        const Expanded(
                           child: Divider(),
                         ),
                       ],
@@ -187,8 +188,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: Container(
                         padding: const EdgeInsets.all(10),
-                        height: 40,
-                        width: 230,
+                        height: 50,
+                        width: 250,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           color: Colors.white,
@@ -203,9 +204,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               height: 20,
                               width: 20,
                             ),
-                            const Text(
-                              "Đăng nhập bằng Google",
-                              style: TextStyle(
+                            Text(
+                              'loginScreen.loginWith'.tr(args: ["Google"]),
+                              style: const TextStyle(
                                 color: Colors.black87,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -221,8 +222,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: Container(
                         padding: const EdgeInsets.all(10),
-                        height: 40,
-                        width: 230,
+                        height: 50,
+                        width: 250,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           color: const Color(0xFF1877F2), // Facebook Blue
@@ -237,9 +238,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: 20,
                               height: 20,
                             ),
-                            const Text(
-                              "Đăng nhập bằng Facebook",
-                              style: TextStyle(
+                            Text(
+                              'loginScreen.loginWith'.tr(args: ["Facebook"]),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -270,8 +271,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final isUser = userController.isUser();
     if (!mounted) return;
     Navigator.pop(context);
-    if (result == "Đăng nhập thành công") {
-      OverlayScreen().showOverlay(context, result, Colors.green, duration: 2);
+    if (result) {
+      OverlayScreen().showOverlay(context, 'success.login'.tr(), Colors.green,
+          duration: 2);
       Future.delayed(const Duration(milliseconds: 300), () {
         if (isUser) {
           if (!mounted) return;
@@ -285,7 +287,8 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       });
     } else {
-      OverlayScreen().showOverlay(context, result, Colors.red, duration: 3);
+      OverlayScreen()
+          .showOverlay(context, 'errors.login'.tr(), Colors.red, duration: 3);
     }
   }
 
@@ -302,7 +305,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     Navigator.pop(context);
     if (result && isUser) {
-      OverlayScreen().showOverlay(context, "Đăng nhập thành công", Colors.green,
+      OverlayScreen().showOverlay(context, 'success.login'.tr(), Colors.green,
           duration: 2);
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
@@ -314,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       OverlayScreen()
-          .showOverlay(context, "Đăng nhập thất bại!", Colors.red, duration: 3);
+          .showOverlay(context, 'errors.login'.tr(), Colors.red, duration: 3);
     }
   }
 
@@ -331,7 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     Navigator.pop(context);
     if (result && isUser) {
-      OverlayScreen().showOverlay(context, "Đăng nhập thành công", Colors.green,
+      OverlayScreen().showOverlay(context, 'success.login'.tr(), Colors.green,
           duration: 2);
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
@@ -343,7 +346,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       OverlayScreen()
-          .showOverlay(context, "Đăng nhập thất bại!", Colors.red, duration: 3);
+          .showOverlay(context, 'errors.login'.tr(), Colors.red, duration: 3);
     }
   }
 }

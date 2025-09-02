@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
@@ -31,32 +32,31 @@ class _ForgotScreenState extends State<ForgotScreen> {
       resizeToAvoidBottomInset: false,
       body: SafeArea(
           child: Column(
+        spacing: 20,
         children: [
           SizedBox(
             height: 100,
             width: double.infinity,
             child: Center(
-                child: const Text(
-              "Quên mật khẩu",
-              style: TextStyle(fontSize: 24),
+                child: Text(
+              'forgotPasswordScreen.title'.tr(),
+              style: const TextStyle(fontSize: 24),
             ).animate().scaleXY(duration: 1.seconds)),
-          ),
-          const SizedBox(
-            height: 20,
           ),
           SizedBox(
             width: MediaQuery.of(context).size.width / 1.2,
             child: Form(
               key: keyForm,
               child: Column(
+                spacing: 20,
                 children: [
                   TextFormField(
                     controller: emailController,
                     validator: (value) {
                       if (value == null || value == "") {
-                        return "Vui lòng không để trống!";
+                        return 'errors.emailRequired'.tr();
                       } else if (!emailRegExp.hasMatch(value)) {
-                        return "Email không đúng định dạng!";
+                        return 'errors.emailInvalid'.tr();
                       }
                       return null;
                     },
@@ -68,9 +68,6 @@ class _ForgotScreenState extends State<ForgotScreen> {
                         borderSide: const BorderSide(width: 1),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
                   ),
                   GestureDetector(
                     onTap: () {
@@ -88,29 +85,26 @@ class _ForgotScreenState extends State<ForgotScreen> {
                           color: Colors.lightBlue,
                           border:
                               Border.all(width: 1, color: Colors.lightBlue)),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          "Gửi",
-                          style: TextStyle(color: Colors.white),
+                          'forgotPasswordScreen.sendButton'.tr(),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Bạn đã có tài khoản?",
+                        'registerScreen.haveAccount'.tr(),
                         style: TextStyle(color: Colors.grey[400], fontSize: 12),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Text(
-                          "Đăng nhập",
-                          style: TextStyle(
+                        child: Text(
+                          'loginScreen.title'.tr(),
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                       ),
@@ -136,12 +130,14 @@ class _ForgotScreenState extends State<ForgotScreen> {
     final result = await userController.forgot(email);
     if (!mounted) return;
     Navigator.pop(context);
-    if (result == "Gửi thành công") {
-      OverlayScreen().showOverlay(context,
-          "$result, vui lòng kiểm tra thư hoặc ở thư rác", Colors.green,
+    if (result) {
+      OverlayScreen().showOverlay(
+          context, 'success.resetPassword'.tr(), Colors.green,
           duration: 3);
     } else {
-      OverlayScreen().showOverlay(context, result, Colors.red, duration: 3);
+      OverlayScreen().showOverlay(
+          context, 'errors.resetPassword'.tr(), Colors.red,
+          duration: 3);
     }
   }
 }

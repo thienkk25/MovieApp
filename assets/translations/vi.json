@@ -9,7 +9,52 @@
         "profile": "Hồ sơ",
         "settings": "Cài đặt",
         "logout": "Đăng xuất",
-        "language": "Ngôn ngữ"
+        "language": "Ngôn ngữ",
+        "account": "Tài khoản",
+        "information": "Thông tin",
+        "or": "Hoặc",
+        "hi": "Xin chào, {}",
+        "email": "Email: {}",
+        "name": "Tên: {}",
+        "del": "Xóa",
+        "watch": "Xem"
+    },
+    "navigation": {
+        "cancel": "Hủy",
+        "exit": "Thoát",
+        "ok": "OK",
+        "confirm": "Đồng ý"
+    },
+    "dialog": {
+        "confirmLogout": "Bạn có chắc muốn đăng xuất không?"
+    },
+    "filter": {
+        "title": "Bộ lọc",
+        "filter": "Lọc",
+        "apply": "Áp dụng",
+        "reset": "Đặt lại",
+        "clear": "Xóa bộ lọc",
+        "sortBy": "Sắp xếp",
+        "category": "Thể loại",
+        "genre": "Thể loại phim",
+        "year": "Năm",
+        "country": "Quốc gia",
+        "language": "Ngôn ngữ",
+        "subtitle": "Phụ đề",
+        "status": "Trạng thái",
+        "type": "Loại phim",
+        "quality": "Chất lượng",
+        "duration": "Thời lượng",
+        "rating": "Đánh giá",
+        "popularity": "Phổ biến",
+        "latest": "Mới nhất",
+        "oldest": "Cũ nhất",
+        "aToZ": "Tên A → Z",
+        "zToA": "Tên Z → A",
+        "pleaseSelectGenre": "Vui lòng chọn thể loại:",
+        "pleaseSelectCountry": "Vui lòng chọn quốc gia:",
+        "required": "(Bắt buộc)",
+        "genreRequired": "Bắt buộc chọn thể loại"
     },
     "loginScreen": {
         "title": "Đăng nhập",
@@ -17,7 +62,7 @@
         "password": "Mật khẩu",
         "loginButton": "Đăng nhập",
         "forgotPassword": "Quên mật khẩu?",
-        "noAccount": "Chưa có tài khoản? Đăng ký",
+        "noAccount": "Chưa có tài khoản?",
         "loginWith": "Đăng nhập bằng {}"
     },
     "registerScreen": {
@@ -27,24 +72,40 @@
         "password": "Mật khẩu",
         "confirmPassword": "Xác nhận mật khẩu",
         "registerButton": "Đăng ký",
-        "haveAccount": "Đã có tài khoản? Đăng nhập"
+        "haveAccount": "Đã có tài khoản?"
     },
     "forgotPasswordScreen": {
         "title": "Quên mật khẩu",
         "email": "Email",
-        "sendButton": "Gửi link đặt lại",
+        "sendButton": "Gửi",
         "backToLogin": "Quay lại đăng nhập"
     },
     "profileScreen": {
-        "title": "Hồ sơ",
+        "title": "Thông tin cá nhân",
         "editProfile": "Chỉnh sửa hồ sơ",
+        "name": "Tên",
+        "email": "Email",
         "changePassword": "Đổi mật khẩu",
         "logout": "Đăng xuất"
     },
     "settingsScreen": {
         "title": "Cài đặt",
-        "language": "Ngôn ngữ",
-        "notifications": "Thông báo",
+        "language": {
+            "title": "Ngôn ngữ",
+            "en": "Tiếng Anh",
+            "vi": "Tiếng Việt"
+        },
+        "notifications": {
+            "title": "Thông báo",
+            "on": "Mở thông báo",
+            "off": "Tắt thông báo"
+        },
+        "theme": {
+            "title": "Giao diện",
+            "dark": "Giao diện tối",
+            "light": "Giao diện sáng",
+            "system": "Giao diện theo hệ thống"
+        },
         "about": "Giới thiệu"
     },
     "favoritesScreen": {
@@ -53,11 +114,19 @@
     },
     "historyScreen": {
         "title": "Lịch sử",
-        "emptyMessage": "Bạn chưa xem phim nào"
+        "emptyMessage": "Bạn chưa xem phim nào",
+        "viewedHistory": "Lịch sử đã xem",
+        "watchedEpisode": "Đã từng xem gần đây: {}"
     },
     "movie": {
+        "episode": {
+            "zero": "Chưa có tập nào",
+            "one": "Tập {}",
+            "other": "Tập {}"
+        },
         "newlyUpdated": "Phim Mới Cập Nhật",
-        "drama": "Phim Chính Kịch",
+        "drama": "Phim Bộ",
+        "single": "Phim lẻ",
         "cartoon": "Phim Hoạt Hình",
         "tvShows": "Chương trình TV",
         "vietsub": "Phim Vietsub",
@@ -76,11 +145,88 @@
         "recommended": "Gợi ý",
         "topRated": "Phim hay nhất"
     },
+    "movieDetail": {
+        "title": {
+            "main": "Tên phim:",
+            "original": "Tên gốc:"
+        },
+        "genre": "Thể loại:",
+        "director": "Đạo diễn:",
+        "actors": "Diễn viên:",
+        "duration": "Thời lượng:",
+        "status": "Trạng thái:",
+        "language": "Ngôn ngữ:",
+        "subtitle": "Phụ đề:",
+        "country": "Quốc gia:",
+        "quality": "Chất lượng:",
+        "release": "Phát hành:",
+        "description": "Nội dung:",
+        "seeMore": "Xem thêm",
+        "seeLess": "Thu gọn",
+        "watchFromStart": "Xem từ đầu",
+        "watchLatest": "Xem mới nhất",
+        "episodeList": "Danh sách tập:",
+        "relatedMovies": "Phim liên quan",
+        "rating": "Đánh giá:",
+        "reviews": "Bình luận",
+        "trailer": "Trailer",
+        "favorite": "Yêu thích",
+        "addToWatchlist": "Thêm vào danh sách xem",
+        "totalEpisodes": "Tổng số tập:"
+    },
+    "player": {
+        "alreadyFirstEpisode": "Đang ở tập đầu rồi",
+        "previousEpisode": "Tập trước",
+        "alreadyLatestEpisode": "Đang ở tập mới nhất rồi",
+        "nextEpisode": "Tập sau",
+        "server": "Máy chủ:"
+    },
+    "search": {
+        "title": "Tìm kiếm",
+        "hint": "Tìm phim ...",
+        "recent": "Tìm kiếm gần đây",
+        "clearRecent": "Xóa tìm kiếm gần đây",
+        "noResult": "Không tìm thấy kết quả nào",
+        "resultCount": "Đã tìm thấy @:movie: {count}",
+        "popular": "Tìm kiếm phổ biến",
+        "loading": "Đang tìm kiếm..."
+    },
     "errors": {
         "emailRequired": "Email là bắt buộc",
         "emailInvalid": "Email không hợp lệ",
         "passwordRequired": "Mật khẩu là bắt buộc",
         "passwordTooShort": "Mật khẩu phải có ít nhất 6 ký tự",
-        "confirmPasswordMismatch": "Mật khẩu xác nhận không khớp"
+        "confirmPasswordMismatch": "Mật khẩu xác nhận không khớp",
+        "login": "Đăng nhập thất bại",
+        "register": "Đăng ký thất bại. Vui lòng thử lại",
+        "logout": "Đăng xuất thất bại. Vui lòng thử lại",
+        "update": "Cập nhật thất bại. Vui lòng thử lại",
+        "delete": "Xóa thất bại. Vui lòng thử lại",
+        "passwordChanged": "Đổi mật khẩu thất bại",
+        "resetPassword": "Đặt lại mật khẩu thất bại",
+        "addFavorite": "Thêm vào danh sách yêu thích thất bại",
+        "removeFavorite": "Xóa khỏi danh sách yêu thích thất bại",
+        "purchase": "Thanh toán thất bại",
+        "comment": "Đăng bình luận thất bại",
+        "network": "Lỗi mạng. Vui lòng kiểm tra kết nối",
+        "server": "Lỗi máy chủ. Vui lòng thử lại sau",
+        "noData": "Không có dữ liệu",
+        "generic": "Có lỗi, vui lòng thử lại!",
+        "timeout": "Hết thời gian chờ. Vui lòng thử lại!",
+        "notFound": "Không tìm thấy dữ liệu",
+        "unauthorized": "Bạn chưa đăng nhập hoặc phiên đã hết hạn"
+    },
+    "success": {
+        "login": "Đăng nhập thành công",
+        "register": "Đăng ký thành công",
+        "logout": "Đăng xuất thành công",
+        "update": "Cập nhật thành công",
+        "delete": "Xóa thành công",
+        "passwordChanged": "Đổi mật khẩu thành công",
+        "resetPassword": "Đã gửi liên kết đặt lại mật khẩu",
+        "addFavorite": "Đã thêm vào danh sách yêu thích",
+        "removeFavorite": "Đã xóa khỏi danh sách yêu thích",
+        "purchase": "Mua hàng thành công",
+        "comment": "Bình luận đã được đăng"
     }
 }

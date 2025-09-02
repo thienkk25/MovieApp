@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -57,11 +58,11 @@ void callbackDispatcher() {
 
       final List<String> bodies = [
         "Vào xem phim đi, đừng bỏ lỡ nhé!",
-        "Phim mới cập nhật rồi, xem ngay thôi!",
+        "Phim mới cập nhật rồi, xem ngay thôi nào!",
         "Nhiều phim hot đang chờ bạn đó!",
         "Nhớ thư giãn với phim hay nào!",
-        "Hôm nay xem phim gì chưa?",
-        "Cập nhật phim nhanh như chớp, mở app ngay đi!",
+        "Hôm nay người đẹp xem phim gì chưa?",
+        "Cập nhật phim nhanh như chớp, mở app xem ngay đi thôi!",
         "Phim hay đang đợi bạn khám phá!",
       ];
 
@@ -81,6 +82,7 @@ void callbackDispatcher() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Ho_Chi_Minh'));
 
@@ -94,7 +96,16 @@ Future<void> main() async {
     await WorkmanagerTask.registerNotificationTasks();
   }
   await LocalNotifications().init();
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    ProviderScope(
+      child: EasyLocalization(
+        supportedLocales: const [Locale('vi', ''), Locale('en', '')],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('vi', ''),
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends ConsumerStatefulWidget {
@@ -109,13 +120,27 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   void initState() {
-    loadDeault();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        loadDeault();
+      },
+    );
     super.initState();
+  }
+
+  void onTranslatedLanguage(Locale? locale) {
+    setState(() {});
   }
 
   Future<void> loadDeault() async {
     final pref = await SharedPreferences.getInstance();
     String isThemeMode = pref.getString("themeMode") ?? "auto";
+    int isLanguage = pref.getInt("language") ?? 0;
+    if (isLanguage == 0) {
+      ref.read(isLanguageProvider.notifier).state = const Locale('vi', '');
+    } else {
+      ref.read(isLanguageProvider.notifier).state = const Locale('en', '');
+    }
     if (isThemeMode == "auto") {
       ref.read(themeModeProvider.notifier).state = ThemeMode.system;
     } else if (isThemeMode == "light") {
@@ -160,7 +185,10 @@ class _MyAppState extends ConsumerState<MyApp> {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'Movie App',
+      title: 'app.title'.tr(),
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: ref.watch(isLanguageProvider),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.white,

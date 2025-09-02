@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
@@ -12,7 +13,6 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   UserController userController = UserController();
-  TextEditingController hvtController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController pwController = TextEditingController();
   TextEditingController rePwController = TextEditingController();
@@ -40,9 +40,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             height: 80,
             width: double.infinity,
             child: Center(
-                child: const Text(
-              "Đăng ký",
-              style: TextStyle(fontSize: 24),
+                child: Text(
+              'registerScreen.title'.tr(),
+              style: const TextStyle(fontSize: 24),
             ).animate().scaleXY(duration: 1.seconds)),
           ),
           const SizedBox(
@@ -56,29 +56,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 spacing: 10,
                 children: [
                   TextFormField(
-                    controller: hvtController,
-                    validator: (value) {
-                      if (value == null || value == "") {
-                        return "Vui lòng không để trống";
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.contact_mail_outlined),
-                      labelText: "Họ và Tên",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
-                        borderSide: const BorderSide(width: 1),
-                      ),
-                    ),
-                  ),
-                  TextFormField(
                     controller: emailController,
                     validator: (value) {
                       if (value == null || value == "") {
-                        return "Vui lòng không để trống!";
+                        return 'errors.emailRequired'.tr();
                       } else if (!emailRegExp.hasMatch(value)) {
-                        return "Email không đúng định dạng!";
+                        return 'errors.emailInvalid'.tr();
                       }
                       return null;
                     },
@@ -95,7 +78,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: pwController,
                     validator: (value) {
                       if (value == null || value == "") {
-                        return "Vui lòng không để trống!";
+                        return 'errors.passwordRequired'.tr();
+                      } else if (value.length < 6) {
+                        return 'errors.passwordTooShort'.tr();
                       }
                       return null;
                     },
@@ -113,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     obscureText = !obscureText;
                                   }),
                               child: const Icon(Icons.visibility_outlined)),
-                      labelText: "Mật khẩu",
+                      labelText: 'registerScreen.password'.tr(),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: const BorderSide(width: 1),
@@ -124,9 +109,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: rePwController,
                     validator: (value) {
                       if (value == null || value == "") {
-                        return "Vui lòng không để trống!";
+                        return 'errors.passwordRequired'.tr();
                       } else if (value != pwController.text) {
-                        return "Mật khẩu không khớp!";
+                        return 'errors.confirmPasswordMismatch'.tr();
                       }
                       return null;
                     },
@@ -144,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     obscureText = !obscureText;
                                   }),
                               child: const Icon(Icons.visibility_outlined)),
-                      labelText: "Nhập lại mật khẩu",
+                      labelText: 'registerScreen.confirmPassword'.tr(),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: const BorderSide(width: 1),
@@ -155,9 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onTap: () {
                       FocusScope.of(context).requestFocus(FocusNode());
                       if (keyForm.currentState!.validate()) {
-                        register(hvtController.text, emailController.text,
-                            pwController.text);
-                        hvtController.clear();
+                        register(emailController.text, pwController.text);
                         emailController.clear();
                         pwController.clear();
                         rePwController.clear();
@@ -172,10 +155,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: Colors.lightBlue,
                           border:
                               Border.all(width: 1, color: Colors.lightBlue)),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          "Đăng ký",
-                          style: TextStyle(color: Colors.white),
+                          'registerScreen.title'.tr(),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
@@ -184,14 +167,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Bạn đã có tài khoản?",
+                        'registerScreen.haveAccount'.tr(),
                         style: TextStyle(color: Colors.grey[400], fontSize: 12),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Text(
-                          "Đăng nhập",
-                          style: TextStyle(
+                        child: Text(
+                          'loginScreen.title'.tr(),
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                       ),
@@ -206,7 +189,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Future<void> register(String name, String email, String password) async {
+  Future<void> register(String email, String password) async {
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -214,13 +197,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: CircularProgressIndicator(),
       ),
     );
-    final result = await userController.register(name, email, password);
+    final result = await userController.register(email, password);
     if (!mounted) return;
     Navigator.pop(context);
-    if (result == "Đăng ký thành công") {
-      OverlayScreen().showOverlay(context, result, Colors.green, duration: 3);
+    if (result) {
+      OverlayScreen().showOverlay(
+          context, 'success.register'.tr(), Colors.green,
+          duration: 3);
     } else {
-      OverlayScreen().showOverlay(context, result, Colors.red, duration: 3);
+      OverlayScreen().showOverlay(context, 'errors.register'.tr(), Colors.red,
+          duration: 3);
     }
   }
 }

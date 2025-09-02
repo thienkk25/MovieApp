@@ -55,6 +55,13 @@
 				</array>
 			</dict>
 		</array>
+
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>vi</string>
+			<string>en</string>
+		</array>
+
 		<key></key>
 		<string>APP-ID</string>
 		<key>FacebookClientToken</key>

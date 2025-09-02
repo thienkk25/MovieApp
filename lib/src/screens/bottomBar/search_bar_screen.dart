@@ -1,18 +1,21 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
+import 'package:movie_app/src/services/riverpod_service.dart';
 
-class SearchBarScreen extends StatefulWidget {
+class SearchBarScreen extends ConsumerStatefulWidget {
   const SearchBarScreen({super.key});
 
   @override
-  State<SearchBarScreen> createState() => _SearchBarScreenState();
+  ConsumerState<SearchBarScreen> createState() => _SearchBarScreenState();
 }
 
-class _SearchBarScreenState extends State<SearchBarScreen> {
+class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
   final MovieController movieController = MovieController();
   final TextEditingController searchController = TextEditingController();
   late Future<Map> futureNewlyUpdatedMovies;
@@ -47,8 +50,9 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
     }
 
     return Scaffold(
+      key: ValueKey(ref.watch(isLanguageProvider)),
       appBar: AppBar(
-        title: const Text("Tìm kiếm"),
+        title: const Text('search.title').tr(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -81,7 +85,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                     },
                     leading: const Icon(Icons.search),
                     elevation: const WidgetStatePropertyAll(0),
-                    hintText: "Tìm kiếm ...",
+                    hintText: 'search.hint'.tr(),
                   ),
                 ),
               ),
@@ -204,8 +208,8 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                   : dataSearch['data'] != null
                       ? SizedBox(
                           height: MediaQuery.of(context).size.height / 2,
-                          child: const Center(
-                            child: Text("Không tìm thấy phim"),
+                          child: Center(
+                            child: const Text('search.noResult').tr(),
                           ),
                         )
                       : FutureBuilder(
