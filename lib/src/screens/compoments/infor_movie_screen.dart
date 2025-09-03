@@ -971,8 +971,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
           context, 'success.addFavorite'.tr(), Colors.orange,
           duration: 3);
     } else {
-      OverlayScreen()
-          .showOverlay(context, 'errors.generic'.tr(), Colors.red, duration: 3);
+      OverlayScreen().showOverlay(
+          context, 'errors.addFavorite'.tr(), Colors.red,
+          duration: 3);
     }
   }
 
@@ -982,11 +983,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
     if (result) {
       ref.read(getFavoriteMoviesNotifierProvider.notifier).removeState(slug);
       OverlayScreen().showOverlay(
-          context, 'errors.addFavorite'.tr(), Colors.grey,
+          context, 'success.removeFavorite'.tr(), Colors.grey,
           duration: 3);
     } else {
-      OverlayScreen()
-          .showOverlay(context, 'errors.generic'.tr(), Colors.red, duration: 3);
+      OverlayScreen().showOverlay(
+          context, 'errors.removeFavorite'.tr(), Colors.red,
+          duration: 3);
     }
   }
 

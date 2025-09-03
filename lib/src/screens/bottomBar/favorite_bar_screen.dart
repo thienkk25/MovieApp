@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
+import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
 class FavoriteBarScreen extends ConsumerStatefulWidget {
@@ -191,12 +193,48 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                                   fit: BoxFit.fill,
                                   memCacheHeight: 400,
                                 ),
-                                const Positioned(
+                                Positioned(
                                   top: 0,
                                   right: 0,
-                                  child: Icon(
-                                    Icons.favorite,
-                                    color: Colors.orange,
+                                  child: InkWell(
+                                    onTap: () {
+                                      showCupertinoDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return CupertinoAlertDialog(
+                                            title: const Text(
+                                                    'settingsScreen.notifications.title')
+                                                .tr(),
+                                            content: const Text(
+                                                    'dialog.confirmFavorite')
+                                                .tr(),
+                                            actions: [
+                                              CupertinoDialogAction(
+                                                  child: const Text(
+                                                          'navigation.cancel')
+                                                      .tr(),
+                                                  onPressed: () =>
+                                                      Navigator.pop(context)),
+                                              CupertinoDialogAction(
+                                                  child: const Text(
+                                                          'navigation.confirm')
+                                                      .tr(),
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                    removeFavoriteMovie(
+                                                        dataFavorites[index]
+                                                            ['slug']);
+                                                  }),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: const Icon(
+                                      Icons.favorite,
+                                      color: Colors.orange,
+                                      size: 35,
+                                    ),
                                   ),
                                 ),
                                 Positioned(
@@ -228,5 +266,20 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> removeFavoriteMovie(String slug) async {
+    final result = await movieController.removeFavoriteMovie(slug);
+    if (!mounted) return;
+    if (result) {
+      ref.read(getFavoriteMoviesNotifierProvider.notifier).removeState(slug);
+      OverlayScreen().showOverlay(
+          context, 'success.removeFavorite'.tr(), Colors.grey,
+          duration: 3);
+    } else {
+      OverlayScreen().showOverlay(
+          context, 'errors.removeFavorite'.tr(), Colors.red,
+          duration: 3);
+    }
   }
 }

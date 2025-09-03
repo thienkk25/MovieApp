@@ -35,16 +35,16 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   final int year = 0;
   final ScrollController scrollController = ScrollController();
 
-  final List<String> sections = [
-    'app.title'.tr(),
-    'movie.newlyUpdated'.tr(),
-    'movie.single'.tr(),
-    'movie.drama'.tr(),
-    'movie.cartoon'.tr(),
-    'movie.tvShows'.tr(),
-    'movie.vietsub'.tr(),
-    'movie.narrated'.tr(),
-    'movie.dubbed'.tr(),
+  List<String> sections = [
+    'app.home',
+    'movie.newlyUpdated',
+    'movie.single',
+    'movie.drama',
+    'movie.cartoon',
+    'movie.tvShows',
+    'movie.vietsub',
+    'movie.narrated',
+    'movie.dubbed',
   ];
 
   final Map<String, GlobalKey> keys = {};
@@ -64,7 +64,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
     futureDubbedMovies = movieController.dubbedMovies(pageMovie, limitMovie);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
-        ref.read(currentTitle.notifier).state = 'app.home'.tr();
+        ref.read(currentTitle.notifier).state = 'app.home';
       },
     );
 
@@ -139,7 +139,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
       key: ValueKey(ref.watch(isLanguageProvider)),
       appBar: AppBar(
         title: Consumer(
-            builder: (context, ref, child) => Text(ref.watch(currentTitle))),
+            builder: (context, ref, child) =>
+                Text(ref.watch(currentTitle).tr())),
       ),
       body: RefreshIndicator(
         onRefresh: () => refresh(),
@@ -179,7 +180,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                     children: [
                       Text(
                         'movie.genre'.tr(),
-                        key: keys['app.title'.tr()],
+                        key: keys['app.home'],
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
@@ -252,7 +253,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                 ),
                 Text(
                   'movie.newlyUpdated'.tr(),
-                  key: keys['movie.newlyUpdated'.tr()],
+                  key: keys['movie.newlyUpdated'],
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -382,7 +383,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   ),
                 ),
                 InkWell(
-                  key: keys['movie.single'.tr()],
+                  key: keys['movie.single'],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -420,7 +421,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys['movie.drama'.tr()],
+                  key: keys['movie.drama'],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -458,7 +459,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys['movie.cartoon'.tr()],
+                  key: keys['movie.cartoon'],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -496,7 +497,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys['movie.tvShows'.tr()],
+                  key: keys['movie.tvShows'],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -539,7 +540,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys['movie.vietsub'.tr()],
+                  key: keys['movie.vietsub'],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -577,7 +578,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys['movie.narrated'.tr()],
+                  key: keys['movie.narrated'],
                   onTap: () {
                     Navigator.push(
                       context,
@@ -615,7 +616,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   },
                 ),
                 InkWell(
-                  key: keys['movie.dubbed'.tr()],
+                  key: keys['movie.dubbed'],
                   onTap: () {
                     Navigator.push(
                       context,

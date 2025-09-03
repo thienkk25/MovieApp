@@ -190,6 +190,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                     ? const Icon(Icons.check)
                                     : null,
                                 onTap: () async {
+                                  Navigator.pop(context);
                                   context.setLocale(const Locale('vi', ''));
                                   OverlayScreen().showOverlay(
                                       context,
@@ -198,6 +199,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                       duration: 2);
                                   ref.read(isLanguageProvider.notifier).state =
                                       const Locale('vi', '');
+                                  ref.read(currentTitle.notifier).state =
+                                      'app.home';
                                   await pref.setInt("language", 0);
                                 },
                               ),
@@ -212,6 +215,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                     ? const Icon(Icons.check)
                                     : null,
                                 onTap: () async {
+                                  Navigator.pop(context);
                                   context.setLocale(const Locale('en', ''));
                                   OverlayScreen().showOverlay(
                                       context,
@@ -220,6 +224,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                       duration: 2);
                                   ref.read(isLanguageProvider.notifier).state =
                                       const Locale('en', '');
+                                  ref.read(currentTitle.notifier).state =
+                                      'app.home';
                                   await pref.setInt("language", 1);
                                 },
                               ),

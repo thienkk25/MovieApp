@@ -96,20 +96,22 @@ Future<void> main() async {
     await WorkmanagerTask.registerNotificationTasks();
   }
   await LocalNotifications().init();
+  final payload = pref.getString("notification_payload");
   runApp(
     ProviderScope(
       child: EasyLocalization(
         supportedLocales: const [Locale('vi', ''), Locale('en', '')],
         path: 'assets/translations',
         fallbackLocale: const Locale('vi', ''),
-        child: const MyApp(),
+        child: MyApp(initialPayload: payload),
       ),
     ),
   );
 }
 
 class MyApp extends ConsumerStatefulWidget {
-  const MyApp({super.key});
+  final String? initialPayload;
+  const MyApp({super.key, this.initialPayload});
 
   @override
   ConsumerState<MyApp> createState() => _MyAppState();
@@ -149,29 +151,31 @@ class _MyAppState extends ConsumerState<MyApp> {
       ref.read(themeModeProvider.notifier).state = ThemeMode.dark;
     }
 
-    final payload = pref.getString("notification_payload");
-    if (payload != null && payload.isNotEmpty) {
+    if (widget.initialPayload != null && widget.initialPayload!.isNotEmpty) {
       await pref.remove("notification_payload");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (UserController().isUser()) {
           navigatorKey.currentState
               ?.push(
             MaterialPageRoute(
-              builder: (_) => InforMovieScreen(slugMovie: payload),
+              builder: (_) =>
+                  InforMovieScreen(slugMovie: widget.initialPayload!),
             ),
           )
               .then((_) {
-            navigatorKey.currentState?.pushReplacement(
+            navigatorKey.currentState?.pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (_) => const HomeScreen(),
               ),
+              (router) => false,
             );
           });
         } else {
-          navigatorKey.currentState?.push(
+          navigatorKey.currentState?.pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (_) => const LoginScreen(),
             ),
+            (router) => false,
           );
         }
       });

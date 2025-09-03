@@ -26,7 +26,8 @@
         "confirm": "Confirm"
     },
     "dialog": {
-        "confirmLogout": "Are you sure you want to log out?"
+        "confirmLogout": "Are you sure you want to log out?",
+        "confirmFavorite": "Are you sure you want to remove from favorites?"
     },
     "filter": {
         "title": "Filter",

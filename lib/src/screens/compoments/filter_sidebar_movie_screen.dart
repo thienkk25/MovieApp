@@ -67,9 +67,7 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
                     RichText(
                       text: TextSpan(
                         text: 'filter.pleaseSelectGenre'.tr(),
-                        style: const TextStyle(
-                          color: Colors.black,
-                        ),
+                        style: const TextStyle(),
                         children: [
                           TextSpan(
                             text: 'filter.required'.tr(),

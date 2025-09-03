@@ -26,7 +26,8 @@
         "confirm": "Đồng ý"
     },
     "dialog": {
-        "confirmLogout": "Bạn có chắc muốn đăng xuất không?"
+        "confirmLogout": "Bạn có chắc muốn đăng xuất không?",
+        "confirmFavorite": "Bạn có chắc muốn bỏ yêu thích không?"
     },
     "filter": {
         "title": "Bộ lọc",
@@ -166,7 +167,7 @@
         "watchFromStart": "Xem từ đầu",
         "watchLatest": "Xem mới nhất",
         "episodeList": "Danh sách tập:",
-        "relatedMovies": "Phim liên quan",
+        "relatedMovies": "Phim khác",
         "rating": "Đánh giá:",
         "reviews": "Bình luận",
         "trailer": "Trailer",
