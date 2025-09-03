@@ -209,7 +209,7 @@
         "removeFavorite": "Xóa khỏi danh sách yêu thích thất bại",
         "purchase": "Thanh toán thất bại",
         "comment": "Đăng bình luận thất bại",
-        "network": "Lỗi mạng. Vui lòng kiểm tra kết nối",
+        "network": "Mất kết nối Internet. Vui lòng kiểm tra",
         "server": "Lỗi máy chủ. Vui lòng thử lại sau",
         "noData": "Không có dữ liệu",
         "generic": "Có lỗi, vui lòng thử lại!",
@@ -228,6 +228,7 @@
         "addFavorite": "Đã thêm vào danh sách yêu thích",
         "removeFavorite": "Đã xóa khỏi danh sách yêu thích",
         "purchase": "Mua hàng thành công",
-        "comment": "Bình luận đã được đăng"
+        "comment": "Bình luận đã được đăng",
+        "network": "Đã kết nối lại Internet"
     }
 }

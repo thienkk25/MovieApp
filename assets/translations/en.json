@@ -209,7 +209,7 @@
         "removeFavorite": "Failed to remove from favorites",
         "purchase": "Purchase failed",
         "comment": "Failed to post comment",
-        "network": "Network error. Please check your connection",
+        "network": "Internet connection lost. Please check!",
         "server": "Server error. Please try again later",
         "noData": "No data available",
         "generic": "An error occurred, please try again!",
@@ -228,6 +228,7 @@
         "addFavorite": "Added to favorites",
         "removeFavorite": "Removed from favorites",
         "purchase": "Purchase completed successfully",
-        "comment": "Comment posted successfully"
+        "comment": "Comment posted successfully",
+        "network": "Internet reconnected"
     }
 }
