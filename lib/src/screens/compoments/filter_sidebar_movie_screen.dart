@@ -64,20 +64,17 @@ class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
                       centerTitle: true,
                       automaticallyImplyLeading: false,
                     ),
-                    RichText(
-                      text: TextSpan(
-                        text: 'filter.pleaseSelectGenre'.tr(),
-                        style: const TextStyle(),
-                        children: [
-                          TextSpan(
-                            text: 'filter.required'.tr(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
+                    Row(
+                      children: [
+                        Text('filter.pleaseSelectGenre'.tr()),
+                        Text(
+                          'filter.required'.tr(),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     SizedBox(
                       height: 50,

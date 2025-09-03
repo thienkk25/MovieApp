@@ -96,7 +96,12 @@ Future<void> main() async {
     await WorkmanagerTask.registerNotificationTasks();
   }
   await LocalNotifications().init();
-  final payload = pref.getString("notification_payload");
+
+  final NotificationAppLaunchDetails? details =
+      await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+  final String? payload = details?.notificationResponse?.payload ??
+      pref.getString("notification_payload");
+
   runApp(
     ProviderScope(
       child: EasyLocalization(
