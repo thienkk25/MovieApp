@@ -60,11 +60,3 @@ After v1.0.0
 ### Video:
 
 - [Link Cloudinary video demo](https://player.cloudinary.com/embed/?cloud_name=dksr7si4o&public_id=flutter%2Fvideo_kq%2F659a87d2-76ea-4072-a0eb-0a1c39cb0674_ujxnpp&profile=cld-default)
-<iframe
-  src="https://player.cloudinary.com/embed/?cloud_name=dksr7si4o&public_id=flutter%2Fvideo_kq%2F659a87d2-76ea-4072-a0eb-0a1c39cb0674_ujxnpp&profile=cld-default"
-  width="640"
-  height="360" 
-  style="height: auto; width: 100%; aspect-ratio: 640 / 360;"
-  allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-  allowfullscreen
-  frameborder="0"></iframe>
