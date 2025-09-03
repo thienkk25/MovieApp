@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 
@@ -33,7 +34,7 @@ class _NetworkListenerState extends State<NetworkListener> {
         if (isOffline) {
           OverlayScreen().showOverlay(
             context,
-            "Mất kết nối mạng",
+            'errors.network'.tr(),
             Colors.red,
             duration: 600,
           );
@@ -44,7 +45,7 @@ class _NetworkListenerState extends State<NetworkListener> {
       if (isOffline) {
         OverlayScreen().showOverlay(
           context,
-          "Mất kết nối mạng",
+          'errors.network'.tr(),
           Colors.red,
           duration: 600,
         );
@@ -52,7 +53,7 @@ class _NetworkListenerState extends State<NetworkListener> {
         OverlayScreen().removeOverlay();
         OverlayScreen().showOverlay(
           context,
-          "Đã kết nối lại mạng",
+          'success.network'.tr(),
           Colors.green,
           duration: 3,
         );
