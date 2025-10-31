@@ -101,8 +101,8 @@ class AuthService {
   Future<bool> signInWithFacebook() async {
     try {
       final LoginResult result = await FacebookAuth.instance.login(
-          permissions: ['email', 'public_profile'],
-          loginBehavior: LoginBehavior.webOnly);
+        permissions: ['email', 'public_profile'],
+      );
       if (result.status == LoginStatus.success) {
         final OAuthCredential credential =
             FacebookAuthProvider.credential(result.accessToken!.tokenString);

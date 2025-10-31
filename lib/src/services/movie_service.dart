@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
+import 'package:movie_app/src/models/search_filter.dart';
 
 class MovieService {
   Future<List> categoryMovies() async {
@@ -96,10 +97,28 @@ class MovieService {
     }
   }
 
-  Future<Map> searchMovies(String keyword, int limit) async {
+  Future<Map> newlyUpdatedMoviesV3(int page) async {
     try {
       final response = await http.get(Uri.parse(
-          "https://phimapi.com/v1/api/tim-kiem?keyword=$keyword&limit=$limit"));
+          "https://phimapi.com/danh-sach/phim-moi-cap-nhat-v3?page=$page"));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future<Map> searchMovies(
+      {required String keyword,
+      required int limit,
+      SearchFilter? filters}) async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://phimapi.com/v1/api/tim-kiem?keyword=$keyword&limit=$limit&${filters?.toQueryString()}"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data;
@@ -251,8 +270,8 @@ class MovieService {
     }
   }
 
-  Future<bool> addFavoriteMovies(
-      String name, String slug, String posterUrl) async {
+  Future<bool> addFavoriteMovies(String name, String slug, String posterUrl,
+      String lang, String episodeCurrent) async {
     try {
       final auth = FirebaseAuth.instance;
       final fireStore = FirebaseFirestore.instance;
@@ -266,6 +285,8 @@ class MovieService {
         "name": name,
         "slug": slug,
         "poster_url": posterUrl,
+        "lang": lang,
+        "episode_current": episodeCurrent,
         "timestamp": DateTime.now(),
       }, SetOptions(merge: true));
 
