@@ -55,7 +55,8 @@
         "pleaseSelectGenre": "Please select a genre:",
         "pleaseSelectCountry": "Please select a country:",
         "required": "(Required)",
-        "genreRequired": "Genre selection is required"
+        "genreRequired": "Genre selection is required",
+        "search": "Search filter"
     },
     "loginScreen": {
         "title": "Login",

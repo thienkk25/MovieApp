@@ -55,7 +55,8 @@
         "pleaseSelectGenre": "Vui lòng chọn thể loại:",
         "pleaseSelectCountry": "Vui lòng chọn quốc gia:",
         "required": "(Bắt buộc)",
-        "genreRequired": "Bắt buộc chọn thể loại"
+        "genreRequired": "Bắt buộc chọn thể loại",
+        "search": "Bộ lọc tìm kiếm"
     },
     "loginScreen": {
         "title": "Đăng nhập",
