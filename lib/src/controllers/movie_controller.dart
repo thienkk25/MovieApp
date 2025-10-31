@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/models/search_filter.dart';
 import 'package:movie_app/src/services/movie_service.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
@@ -42,8 +43,17 @@ class MovieController {
     return data;
   }
 
-  Future<Map> searchMovies(String keyword, int limit) async {
-    final data = await movieService.searchMovies(keyword, limit);
+  Future<Map> newlyUpdatedMoviesV3({int page = 1}) async {
+    final data = await movieService.newlyUpdatedMoviesV3(page);
+    return data;
+  }
+
+  Future<Map> searchMovies(
+      {required String keyword,
+      required int limit,
+      SearchFilter? filters}) async {
+    final data = await movieService.searchMovies(
+        keyword: keyword, limit: limit, filters: filters);
     return data;
   }
 
@@ -93,9 +103,10 @@ class MovieController {
     ref.read(getFavoriteMoviesNotifierProvider.notifier).initState(data);
   }
 
-  Future<bool> addFavoriteMovies(
-      String name, String slug, String posterUrl) async {
-    final result = await movieService.addFavoriteMovies(name, slug, posterUrl);
+  Future<bool> addFavoriteMovies(String name, String slug, String posterUrl,
+      String lang, String episodeCurrent) async {
+    final result = await movieService.addFavoriteMovies(
+        name, slug, posterUrl, lang, episodeCurrent);
     return result;
   }
 
