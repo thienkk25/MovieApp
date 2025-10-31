@@ -1,13 +1,16 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
-import 'package:movie_app/src/screens/compoments/filter_sidebar_movie_screen.dart';
+import 'package:movie_app/src/models/movie_model.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
 import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
+import 'package:movie_app/src/screens/widgets/card_movie.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
 class HomeBarScreen extends ConsumerStatefulWidget {
@@ -19,6 +22,7 @@ class HomeBarScreen extends ConsumerStatefulWidget {
 
 class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   final MovieController movieController = MovieController();
+  final PageController pageController = PageController(viewportFraction: .7);
   late Future<List> futureCategoryMovies;
   late Future<Map> futureNewlyUpdatedMovies;
   late Future<Map> futureSingleMovies;
@@ -34,10 +38,11 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   final String country = "";
   final int year = 0;
   final ScrollController scrollController = ScrollController();
+  int currentPage = 0;
+  Timer? timer;
 
   List<String> sections = [
     'app.home',
-    'movie.newlyUpdated',
     'movie.single',
     'movie.drama',
     'movie.cartoon',
@@ -53,7 +58,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   void initState() {
     super.initState();
     futureCategoryMovies = movieController.categoryMovies();
-    futureNewlyUpdatedMovies = movieController.newlyUpdatedMovies();
+    futureNewlyUpdatedMovies = movieController.newlyUpdatedMoviesV3();
     futureSingleMovies = movieController.singleMovies(pageMovie, limitMovie);
     futureDramaMovies = movieController.dramaMovies(pageMovie, limitMovie);
     futureCartoonMovies = movieController.cartoonMovies(pageMovie, limitMovie);
@@ -72,11 +77,29 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
       keys[sec] = GlobalKey();
     }
     scrollController.addListener(onScroll);
+    timer = Timer.periodic(
+      const Duration(seconds: 15),
+      (timer) {
+        if (pageController.hasClients) {
+          int nextPage = pageController.page!.round() + 1;
+          if (nextPage >= 10) {
+            nextPage = 0;
+          }
+          pageController.animateToPage(
+            nextPage,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
     scrollController.dispose();
+    pageController.dispose();
+    timer!.cancel();
     super.dispose();
   }
 
@@ -107,7 +130,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   Future<void> refresh() async {
     setState(() {
       futureCategoryMovies = movieController.categoryMovies();
-      futureNewlyUpdatedMovies = movieController.newlyUpdatedMovies();
+      futureNewlyUpdatedMovies = movieController.newlyUpdatedMoviesV3();
       futureSingleMovies = movieController.singleMovies(pageMovie, limitMovie);
       futureDramaMovies = movieController.dramaMovies(pageMovie, limitMovie);
       futureCartoonMovies =
@@ -120,7 +143,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
           movieController.narratedMovies(pageMovie, limitMovie);
       futureDubbedMovies = movieController.dubbedMovies(pageMovie, limitMovie);
     });
-    Future.wait([
+    await Future.wait([
       futureCategoryMovies,
       futureNewlyUpdatedMovies,
       futureSingleMovies,
@@ -135,525 +158,563 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final hasPadingBottom = MediaQuery.of(context).padding.bottom;
     return Scaffold(
       key: ValueKey(ref.watch(isLanguageProvider)),
       appBar: AppBar(
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF0F2027),
+                Color(0xFF203A43),
+                Color(0xFF2C5364),
+              ],
+            ),
+          ),
+        ),
         title: Consumer(
-            builder: (context, ref, child) =>
-                Text(ref.watch(currentTitle).tr())),
+          builder: (context, ref, _) => Text(
+            ref.watch(currentTitle).tr(),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        centerTitle: true,
       ),
       body: RefreshIndicator(
         onRefresh: () => refresh(),
         child: SingleChildScrollView(
           controller: scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 15),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: hasPadingBottom + 10),
             child: Column(
               spacing: 10,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InkWell(
-                  onTap: () => showGeneralDialog(
-                    context: context,
-                    barrierDismissible: true,
-                    barrierLabel: "Filter",
-                    pageBuilder: (context, anim1, anim2) {
-                      return FilterSidebarMovieScreen(
-                        futureCategoryMovies: futureCategoryMovies,
-                        pageMovie: pageMovie,
-                        limitMovie: limitMovie,
-                      );
-                    },
-                    transitionBuilder: (context, anim1, anim2, child) {
-                      final offsetAnimation = Tween<Offset>(
-                        begin: const Offset(1, 0),
-                        end: Offset.zero,
-                      ).animate(anim1);
-                      return SlideTransition(
-                          position: offsetAnimation, child: child);
-                    },
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'movie.genre'.tr(),
-                        key: keys['app.home'],
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const Icon(Icons.filter_list_alt)
-                    ],
-                  ),
-                ),
                 SizedBox(
-                  height: 50,
-                  child: FutureBuilder(
-                    future: futureCategoryMovies,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else if (snapshot.hasData) {
-                        final categoryMovies = snapshot.data!;
-                        return CarouselView(
-                          onTap: (value) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ViewMoreScreen(
-                                    categoryMovies[value]['slug'],
-                                    pageMovie,
-                                    limitMovie,
-                                    sortType,
-                                    country,
-                                    year),
-                              ),
-                            );
-                          },
-                          elevation: 2,
-                          shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          itemExtent: MediaQuery.of(context).size.width / 3,
-                          children: List.generate(
-                            categoryMovies.length,
-                            (index) => Container(
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Color(0xff30cfd0),
-                                    Color(0xff330867)
-                                  ],
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  categoryMovies[index]['name'],
-                                  style: const TextStyle(color: Colors.white),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      } else {
-                        return const Center(
-                          child: Icon(Icons.error),
-                        );
-                      }
-                    },
-                  ),
-                ),
-                Text(
-                  'movie.newlyUpdated'.tr(),
-                  key: keys['movie.newlyUpdated'],
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  height: 250,
+                  key: keys['app.home'],
+                  height: MediaQuery.sizeOf(context).height / 1.7,
                   child: FutureBuilder(
                     future: futureNewlyUpdatedMovies,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else if (snapshot.hasData) {
-                        Map newlyUpdatedMovies = snapshot.data!;
-                        return ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          itemCount: newlyUpdatedMovies['items']?.length ?? 0,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 10),
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => InforMovieScreen(
-                                              slugMovie:
-                                                  newlyUpdatedMovies['items']
-                                                      [index]['slug'])));
-                                },
-                                child: Container(
-                                  width: 160,
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: const BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(5)),
-                                    gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          Color(0xff30cfd0),
-                                          Color(0xff330867)
-                                        ]),
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      CachedNetworkImage(
-                                        imageUrl: newlyUpdatedMovies['items']
-                                            [index]['poster_url'],
-                                        progressIndicatorBuilder:
-                                            (context, url, progress) =>
-                                                const Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(Icons.error),
-                                        height: double.infinity,
-                                        width: double.infinity,
-                                        fit: BoxFit.fill,
-                                        memCacheHeight: 400,
-                                      ),
-                                      Positioned(
-                                          child: Container(
-                                        padding: const EdgeInsets.all(5.0),
-                                        decoration: const BoxDecoration(
-                                            color: Colors.orange,
-                                            borderRadius: BorderRadius.only(
-                                                bottomRight:
-                                                    Radius.circular(5))),
-                                        child: Text(
-                                          newlyUpdatedMovies['items'][index]
-                                                  ['year']
-                                              .toString(),
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      )),
-                                      Positioned(
-                                          top: -5,
-                                          right: 0,
-                                          child: ClipRRect(
-                                            clipBehavior: Clip.antiAlias,
-                                            borderRadius:
-                                                const BorderRadius.only(
-                                                    bottomLeft:
-                                                        Radius.circular(50)),
-                                            child: Image.asset(
-                                              "assets/imgs/new-blinking.gif",
-                                              height: 30,
-                                              width: 30,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          )),
-                                      Positioned(
-                                        bottom: 0,
-                                        child: Container(
-                                          width: 260,
-                                          padding: const EdgeInsets.all(10.0),
-                                          color: Colors.black
-                                              .withValues(alpha: .3),
-                                          child: Text(
-                                            newlyUpdatedMovies['items'][index]
-                                                ['name'],
-                                            style: const TextStyle(
-                                                color: Colors.white),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      )
+                    builder: (context, asyncSnapshot) {
+                      if (asyncSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      Map newlyUpdatedMovies = asyncSnapshot.data!;
+                      final items = newlyUpdatedMovies['items'] ?? [];
+
+                      return StatefulBuilder(
+                        builder: (context, StateSetter stateSetter) {
+                          return Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (items.isNotEmpty)
+                                CachedNetworkImage(
+                                  imageUrl: items[currentPage]['poster_url'],
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.black.withValues(alpha: .7),
+                                      Colors.black.withValues(alpha: .9),
                                     ],
                                   ),
                                 ),
                               ),
-                            );
-                          },
-                        );
-                      } else {
-                        return const Center(
-                          child: Icon(Icons.error),
-                        );
-                      }
+                              PageView.builder(
+                                controller: pageController,
+                                itemCount: items.length,
+                                onPageChanged: (page) =>
+                                    stateSetter(() => currentPage = page),
+                                itemBuilder: (context, index) {
+                                  return AnimatedBuilder(
+                                    animation: pageController,
+                                    builder: (context, child) {
+                                      double value = 0;
+                                      if (pageController
+                                          .position.haveDimensions) {
+                                        value = pageController.page! - index;
+                                      }
+                                      double scale = (1 - (value.abs() * 0.3))
+                                          .clamp(0.8, 1.0);
+                                      double angle = value * (-0.25);
+                                      return Center(
+                                        child: SizedBox(
+                                          width:
+                                              MediaQuery.sizeOf(context).width /
+                                                  1.8,
+                                          height: MediaQuery.sizeOf(context)
+                                                      .height /
+                                                  2 -
+                                              40,
+                                          child: Transform.scale(
+                                            scale:
+                                                Curves.easeOut.transform(scale),
+                                            child: Transform.rotate(
+                                              angle: angle,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withValues(
+                                                              alpha: .3),
+                                                      blurRadius: 12,
+                                                      offset:
+                                                          const Offset(0, 6),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  child: CardMovie(
+                                                    onTap: () {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (_) =>
+                                                              InforMovieScreen(
+                                                            slugMovie:
+                                                                items[index]
+                                                                    ['slug'],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                    movie: MovieData.fromJson(
+                                                        items[index]),
+                                                    isLink: true,
+                                                    isNewMovie: true,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     },
                   ),
                 ),
-                InkWell(
-                  key: keys['movie.single'],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen("Phim Lẻ", pageMovie,
-                            limitMovie, sortType, country, year),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Column(
+                    spacing: 10,
                     children: [
-                      Text(
-                        'movie.single'.tr(),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                      GestureDetector(
+                        key: keys['movie.single'],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreScreen(
+                                  "Phim Lẻ",
+                                  pageMovie,
+                                  limitMovie,
+                                  sortType,
+                                  country,
+                                  year),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'movie.single'.tr(),
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const Icon(Icons.arrow_forward_ios)
-                    ],
+                      FutureBuilder(
+                        future: futureSingleMovies,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const ShimmerLoading();
+                          } else if (snapshot.hasData) {
+                            Map dataMovies = snapshot.data!;
+                            return GridViewScreen(dataMovies: dataMovies);
+                          } else {
+                            return const Center(
+                              child: Icon(Icons.error),
+                            );
+                          }
+                        },
+                      ),
+                      GestureDetector(
+                        key: keys['movie.drama'],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreScreen(
+                                  "Phim Bộ",
+                                  pageMovie,
+                                  limitMovie,
+                                  sortType,
+                                  country,
+                                  year),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'movie.drama'.tr(),
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FutureBuilder(
+                        future: futureDramaMovies,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const ShimmerLoading();
+                          } else if (snapshot.hasData) {
+                            Map dataMovies = snapshot.data!;
+                            return GridViewScreen(dataMovies: dataMovies);
+                          } else {
+                            return const Center(
+                              child: Icon(Icons.error),
+                            );
+                          }
+                        },
+                      ),
+                      GestureDetector(
+                        key: keys['movie.cartoon'],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreScreen(
+                                  "Phim Hoạt Hình",
+                                  pageMovie,
+                                  limitMovie,
+                                  sortType,
+                                  country,
+                                  year),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'movie.cartoon'.tr(),
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FutureBuilder(
+                        future: futureCartoonMovies,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const ShimmerLoading();
+                          } else if (snapshot.hasData) {
+                            Map dataMovies = snapshot.data!;
+                            return GridViewScreen(dataMovies: dataMovies);
+                          } else {
+                            return const Center(
+                              child: Icon(Icons.error),
+                            );
+                          }
+                        },
+                      ),
+                      GestureDetector(
+                        key: keys['movie.tvShows'],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreScreen(
+                                  "Chương trình truyền hình",
+                                  pageMovie,
+                                  limitMovie,
+                                  sortType,
+                                  country,
+                                  year),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'movie.tvShows'.tr(),
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FutureBuilder(
+                        future: futureTvShowsMovies,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const ShimmerLoading();
+                          } else if (snapshot.hasData) {
+                            Map dataMovies = snapshot.data!;
+                            return GridViewScreen(dataMovies: dataMovies);
+                          } else {
+                            return const Center(
+                              child: Icon(Icons.error),
+                            );
+                          }
+                        },
+                      ),
+                      GestureDetector(
+                        key: keys['movie.vietsub'],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreScreen(
+                                  "Phim Vietsub",
+                                  pageMovie,
+                                  limitMovie,
+                                  sortType,
+                                  country,
+                                  year),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'movie.vietsub'.tr(),
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FutureBuilder(
+                        future: futureVietSubMovies,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const ShimmerLoading();
+                          } else if (snapshot.hasData) {
+                            Map dataMovies = snapshot.data!;
+                            return GridViewScreen(dataMovies: dataMovies);
+                          } else {
+                            return const Center(
+                              child: Icon(Icons.error),
+                            );
+                          }
+                        },
+                      ),
+                      GestureDetector(
+                        key: keys['movie.narrated'],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreScreen(
+                                  "Phim Thuyết Minh",
+                                  pageMovie,
+                                  limitMovie,
+                                  sortType,
+                                  country,
+                                  year),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'movie.narrated'.tr(),
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FutureBuilder(
+                        future: futureNarratedMovies,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const ShimmerLoading();
+                          } else if (snapshot.hasData) {
+                            Map dataMovies = snapshot.data!;
+                            return GridViewScreen(dataMovies: dataMovies);
+                          } else {
+                            return const Center(
+                              child: Icon(Icons.error),
+                            );
+                          }
+                        },
+                      ),
+                      GestureDetector(
+                        key: keys['movie.dubbed'],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreScreen(
+                                  "Phim Lồng Tiếng",
+                                  pageMovie,
+                                  limitMovie,
+                                  sortType,
+                                  country,
+                                  year),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'movie.dubbed'.tr(),
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FutureBuilder(
+                        future: futureDubbedMovies,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const ShimmerLoading();
+                          } else if (snapshot.hasData) {
+                            Map dataMovies = snapshot.data!;
+                            return GridViewScreen(dataMovies: dataMovies);
+                          } else {
+                            return const Center(
+                              child: Icon(Icons.error),
+                            );
+                          }
+                        },
+                      ),
+                    ].animate(interval: 200.ms).fadeIn(duration: 500.ms),
                   ),
                 ),
-                FutureBuilder(
-                  future: futureSingleMovies,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const ShimmerLoading();
-                    } else if (snapshot.hasData) {
-                      Map dataMovies = snapshot.data!;
-                      return GridViewScreen(dataMovies: dataMovies);
-                    } else {
-                      return const Center(
-                        child: Icon(Icons.error),
-                      );
-                    }
-                  },
-                ),
-                InkWell(
-                  key: keys['movie.drama'],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen("Phim Bộ", pageMovie,
-                            limitMovie, sortType, country, year),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'movie.drama'.tr(),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const Icon(Icons.arrow_forward_ios)
-                    ],
-                  ),
-                ),
-                FutureBuilder(
-                  future: futureDramaMovies,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const ShimmerLoading();
-                    } else if (snapshot.hasData) {
-                      Map dataMovies = snapshot.data!;
-                      return GridViewScreen(dataMovies: dataMovies);
-                    } else {
-                      return const Center(
-                        child: Icon(Icons.error),
-                      );
-                    }
-                  },
-                ),
-                InkWell(
-                  key: keys['movie.cartoon'],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen("Phim Hoạt Hình",
-                            pageMovie, limitMovie, sortType, country, year),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'movie.cartoon'.tr(),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const Icon(Icons.arrow_forward_ios)
-                    ],
-                  ),
-                ),
-                FutureBuilder(
-                  future: futureCartoonMovies,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const ShimmerLoading();
-                    } else if (snapshot.hasData) {
-                      Map dataMovies = snapshot.data!;
-                      return GridViewScreen(dataMovies: dataMovies);
-                    } else {
-                      return const Center(
-                        child: Icon(Icons.error),
-                      );
-                    }
-                  },
-                ),
-                InkWell(
-                  key: keys['movie.tvShows'],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen(
-                            "Chương trình truyền hình",
-                            pageMovie,
-                            limitMovie,
-                            sortType,
-                            country,
-                            year),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'movie.tvShows'.tr(),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const Icon(Icons.arrow_forward_ios)
-                    ],
-                  ),
-                ),
-                FutureBuilder(
-                  future: futureTvShowsMovies,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const ShimmerLoading();
-                    } else if (snapshot.hasData) {
-                      Map dataMovies = snapshot.data!;
-                      return GridViewScreen(dataMovies: dataMovies);
-                    } else {
-                      return const Center(
-                        child: Icon(Icons.error),
-                      );
-                    }
-                  },
-                ),
-                InkWell(
-                  key: keys['movie.vietsub'],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen("Phim Vietsub",
-                            pageMovie, limitMovie, sortType, country, year),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'movie.vietsub'.tr(),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const Icon(Icons.arrow_forward_ios)
-                    ],
-                  ),
-                ),
-                FutureBuilder(
-                  future: futureVietSubMovies,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const ShimmerLoading();
-                    } else if (snapshot.hasData) {
-                      Map dataMovies = snapshot.data!;
-                      return GridViewScreen(dataMovies: dataMovies);
-                    } else {
-                      return const Center(
-                        child: Icon(Icons.error),
-                      );
-                    }
-                  },
-                ),
-                InkWell(
-                  key: keys['movie.narrated'],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen("Phim Thuyết Minh",
-                            pageMovie, limitMovie, sortType, country, year),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'movie.narrated'.tr(),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const Icon(Icons.arrow_forward_ios)
-                    ],
-                  ),
-                ),
-                FutureBuilder(
-                  future: futureNarratedMovies,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const ShimmerLoading();
-                    } else if (snapshot.hasData) {
-                      Map dataMovies = snapshot.data!;
-                      return GridViewScreen(dataMovies: dataMovies);
-                    } else {
-                      return const Center(
-                        child: Icon(Icons.error),
-                      );
-                    }
-                  },
-                ),
-                InkWell(
-                  key: keys['movie.dubbed'],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ViewMoreScreen("Phim Lồng Tiếng",
-                            pageMovie, limitMovie, sortType, country, year),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'movie.dubbed'.tr(),
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const Icon(Icons.arrow_forward_ios)
-                    ],
-                  ),
-                ),
-                FutureBuilder(
-                  future: futureDubbedMovies,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const ShimmerLoading();
-                    } else if (snapshot.hasData) {
-                      Map dataMovies = snapshot.data!;
-                      return GridViewScreen(dataMovies: dataMovies);
-                    } else {
-                      return const Center(
-                        child: Icon(Icons.error),
-                      );
-                    }
-                  },
-                ),
-              ].animate(interval: 200.ms).fadeIn(duration: 500.ms),
+              ],
             ),
           ),
         ),
@@ -688,6 +749,7 @@ class GridViewScreen extends StatelessWidget {
     return GridView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
+      padding: EdgeInsets.zero,
       itemCount: dataMovies['data']?['items'].length ?? 0,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: responsiveColumnCount,
@@ -696,87 +758,19 @@ class GridViewScreen extends StatelessWidget {
         crossAxisSpacing: 10,
       ),
       itemBuilder: (context, index) {
-        return InkWell(
-          onTap: () => Navigator.push(
+        return CardMovie(
+          onTap: () => {
+            Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (_) => InforMovieScreen(
-                        slugMovie: dataMovies['data']['items'][index]['slug'],
-                      ))),
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-                gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xff30cfd0), Color(0xff330867)])),
-            child: Stack(
-              children: [
-                CachedNetworkImage(
-                  imageUrl:
-                      "https://phimimg.com/${dataMovies['data']['items'][index]['poster_url']}",
-                  progressIndicatorBuilder: (context, url, progress) =>
-                      const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                  height: double.infinity,
-                  width: double.infinity,
-                  fit: BoxFit.fill,
-                  memCacheHeight: 400,
+                builder: (_) => InforMovieScreen(
+                  slugMovie: dataMovies['data']['items'][index]['slug'],
                 ),
-                Positioned(
-                    child: Container(
-                  padding: const EdgeInsets.all(5.0),
-                  decoration: const BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(5),
-                        bottomLeft: Radius.circular(5),
-                      )),
-                  child: Text(
-                    dataMovies['data']['items'][index]['lang'],
-                    style: const TextStyle(color: Colors.white),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )),
-                Positioned(
-                    top: 35,
-                    child: Container(
-                      padding: const EdgeInsets.all(5.0),
-                      decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: .4),
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(5),
-                            bottomRight: Radius.circular(5),
-                            bottomLeft: Radius.circular(5),
-                          )),
-                      child: Text(
-                        dataMovies['data']['items'][index]['episode_current'],
-                        style: const TextStyle(color: Colors.white),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    )),
-                Positioned(
-                  bottom: 0,
-                  child: Container(
-                    width: 300,
-                    padding: const EdgeInsets.all(10.0),
-                    color: Colors.black.withValues(alpha: .4),
-                    child: Text(
-                      dataMovies['data']['items'][index]['name'],
-                      style: const TextStyle(color: Colors.white),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                )
-              ],
+              ),
             ),
-          ),
+          },
+          movie: MovieData.fromJson(dataMovies['data']['items'][index]),
+          isLink: false,
         );
       },
     );

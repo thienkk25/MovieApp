@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:movie_app/firebase_options.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
@@ -82,26 +83,26 @@ void callbackDispatcher() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await LocalNotifications().init();
   await EasyLocalization.ensureInitialized();
+  await Workmanager().initialize(callbackDispatcher);
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Ho_Chi_Minh'));
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await Workmanager().initialize(callbackDispatcher);
   final pref = await SharedPreferences.getInstance();
   final isNotificationEnabled = pref.getBool("notification_enabled") ?? true;
   if (isNotificationEnabled) {
     await WorkmanagerTask.registerNotificationTasks();
   }
-  await LocalNotifications().init();
 
   final NotificationAppLaunchDetails? details =
       await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
   final String? payload = details?.notificationResponse?.payload ??
       pref.getString("notification_payload");
-
+  MediaKit.ensureInitialized();
   runApp(
     ProviderScope(
       child: EasyLocalization(
@@ -129,25 +130,28 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
-        loadDeault();
+        loadDeault(context);
       },
     );
     super.initState();
   }
 
-  void onTranslatedLanguage(Locale? locale) {
-    setState(() {});
-  }
-
-  Future<void> loadDeault() async {
+  Future<void> loadDeault(BuildContext context) async {
     final pref = await SharedPreferences.getInstance();
     String isThemeMode = pref.getString("themeMode") ?? "auto";
     int isLanguage = pref.getInt("language") ?? 0;
+    bool isNotification = pref.getBool("notification_enabled") ?? true;
+
     if (isLanguage == 0) {
+      if (!context.mounted) return;
+      context.setLocale(const Locale('vi', ''));
       ref.read(isLanguageProvider.notifier).state = const Locale('vi', '');
     } else {
+      if (!context.mounted) return;
+      context.setLocale(const Locale('en', ''));
       ref.read(isLanguageProvider.notifier).state = const Locale('en', '');
     }
+
     if (isThemeMode == "auto") {
       ref.read(themeModeProvider.notifier).state = ThemeMode.system;
     } else if (isThemeMode == "light") {
@@ -156,7 +160,9 @@ class _MyAppState extends ConsumerState<MyApp> {
       ref.read(themeModeProvider.notifier).state = ThemeMode.dark;
     }
 
-    if (widget.initialPayload != null && widget.initialPayload!.isNotEmpty) {
+    if (widget.initialPayload != null &&
+        widget.initialPayload!.isNotEmpty &&
+        isNotification) {
       await pref.remove("notification_payload");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (UserController().isUser()) {

@@ -14,7 +14,7 @@ class OverlayScreen {
 
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: MediaQuery.of(context).padding.top + 10,
+        top: MediaQuery.of(context).padding.top + 15,
         left: 40,
         right: 40,
         child: Material(

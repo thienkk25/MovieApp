@@ -1,9 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
+import 'package:movie_app/src/models/movie_model.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
+import 'package:movie_app/src/screens/widgets/card_movie.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -241,86 +242,21 @@ class MovieItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      key: ValueKey(id),
+    return CardMovie(
       onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
               builder: (_) => InforMovieScreen(
                     slugMovie: slugMovie,
                   ))),
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xff30cfd0), Color(0xff330867)])),
-        child: Stack(
-          children: [
-            CachedNetworkImage(
-              imageUrl: "https://phimimg.com/$imageUrl",
-              progressIndicatorBuilder: (context, url, progress) =>
-                  const Center(
-                child: CircularProgressIndicator(),
-              ),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-              height: double.infinity,
-              width: double.infinity,
-              fit: BoxFit.fill,
-              memCacheHeight: 400,
-            ),
-            Positioned(
-                child: Container(
-              padding: const EdgeInsets.all(5.0),
-              decoration: const BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.only(
-                      bottomRight: Radius.circular(5),
-                      bottomLeft: Radius.circular(5))),
-              child: Text(
-                lang,
-                style: const TextStyle(color: Colors.white),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            )),
-            Positioned(
-                top: 35,
-                child: Container(
-                  padding: const EdgeInsets.all(5.0),
-                  decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: .4),
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(5),
-                        bottomRight: Radius.circular(5),
-                        bottomLeft: Radius.circular(5),
-                      )),
-                  child: Text(
-                    episodeCurrent,
-                    style: const TextStyle(color: Colors.white),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )),
-            Positioned(
-              bottom: 0,
-              child: Container(
-                width: 300,
-                padding: const EdgeInsets.all(10.0),
-                color: Colors.black.withValues(alpha: .4),
-                child: Text(
-                  name,
-                  style: const TextStyle(color: Colors.white),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      movie: MovieData(
+          id: id,
+          slug: slugMovie,
+          posterUrl: imageUrl,
+          lang: lang,
+          name: name,
+          episodeCurrent: episodeCurrent),
+      isLink: false,
     );
   }
 }

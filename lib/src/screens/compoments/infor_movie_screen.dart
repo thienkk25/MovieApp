@@ -5,11 +5,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/controllers/series_recommendation_controller.dart';
+import 'package:movie_app/src/models/movie_model.dart';
 import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
 import 'package:movie_app/src/screens/compoments/watch_movie_screen.dart';
 import 'package:movie_app/src/screens/configs/overlay_screen.dart';
+import 'package:movie_app/src/screens/widgets/card_movie.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
-import 'package:readmore/readmore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class InforMovieScreen extends ConsumerStatefulWidget {
   final String slugMovie;
@@ -22,6 +24,7 @@ class InforMovieScreen extends ConsumerStatefulWidget {
 class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   final MovieController movieController = MovieController();
   final ScrollController scrollController = ScrollController();
+  final Map<int, double> itemEpisodeOffsets = {};
   bool isIconFavorite = false;
   int currentPage = 0;
   final int pageMovie = 1;
@@ -29,13 +32,21 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   final String sortType = "desc";
   final String country = "";
   final int year = 0;
-  bool isServer = true;
   late Future<Map?> singleDetailMovies;
   late Future<Map?> episodeHistoryMovies;
+  late SharedPreferences pref;
 
   @override
   void initState() {
     loadData();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        pref = await SharedPreferences.getInstance();
+        ref.read(isAutoNextMovie.notifier).state =
+            pref.getBool("isAutoNextMovie") ?? false;
+        ref.read(isCollapsedReadMore.notifier).state = true;
+      },
+    );
     super.initState();
   }
 
@@ -54,7 +65,15 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   }
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final double height = MediaQuery.of(context).size.width / (16 / 9);
+
     Map dataFavorites = ref.read(getFavoriteMoviesNotifierProvider);
     return FutureBuilder<Map?>(
       future: singleDetailMovies,
@@ -101,30 +120,50 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                 builder: (context, StateSetter stateSetter) {
                   return Padding(
                     padding: const EdgeInsets.only(right: 10),
-                    child: isIconFavorite
-                        ? GestureDetector(
-                            onTap: () {
-                              removeFavoriteMovie(
-                                  dataInforMovie?['movie']['slug']);
-                              stateSetter(() {
-                                isIconFavorite = false;
-                              });
-                            },
-                            child: const Icon(
-                              Icons.favorite,
-                              color: Colors.orange,
-                            ))
-                        : GestureDetector(
-                            onTap: () {
-                              addFavoriteMovie(
-                                  dataInforMovie?['movie']['name'],
-                                  dataInforMovie?['movie']['slug'],
-                                  dataInforMovie?['movie']['poster_url']);
-                              stateSetter(() {
-                                isIconFavorite = true;
-                              });
-                            },
-                            child: const Icon(Icons.favorite_border)),
+                    child: GestureDetector(
+                      onTap: () {
+                        if (isIconFavorite) {
+                          removeFavoriteMovie(dataInforMovie?['movie']['slug']);
+                        } else {
+                          addFavoriteMovie(
+                            dataInforMovie?['movie']['name'],
+                            dataInforMovie?['movie']['slug'],
+                            dataInforMovie?['movie']['poster_url'],
+                            dataInforMovie?['movie']['lang'],
+                            dataInforMovie?['movie']['episode_current'],
+                          );
+                        }
+                        stateSetter(() {
+                          isIconFavorite = !isIconFavorite;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isIconFavorite
+                              ? Colors.orange.withValues(alpha: .2)
+                              : Colors.grey.withValues(alpha: .1),
+                        ),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (child, animation) =>
+                              ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          ),
+                          child: Icon(
+                            isIconFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            key: ValueKey<bool>(isIconFavorite),
+                            color: isIconFavorite ? Colors.orange : Colors.grey,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                    ),
                   );
                 },
               ),
@@ -143,8 +182,11 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           spacing: 5,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const SizedBox(
-                                height: 200, child: WatchMovieScreen()),
+                            AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: WatchMovieScreen(
+                                  widget.slugMovie, dataInforMovie!),
+                            ),
                             Container(
                               margin:
                                   const EdgeInsets.only(left: 10, right: 10),
@@ -166,17 +208,11 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                                 wasWatchEpisodeMovies.notifier)
                                             .state = episode + 1;
                                         ref
-                                                .read(
-                                                    isClickLWatchEpisodeLinkMovies
-                                                        .notifier)
-                                                .state =
-                                            isServer
-                                                ? dataInforMovie!['episodes'][0]
-                                                        ['server_data'][episode]
-                                                    ['link_m3u8']
-                                                : dataInforMovie!['episodes'][0]
-                                                        ['server_data'][episode]
-                                                    ['link_embed'];
+                                            .read(isClickLWatchEpisodeLinkMovies
+                                                .notifier)
+                                            .state = dataInforMovie['episodes']
+                                                [0]['server_data'][episode]
+                                            ['link_m3u8'];
 
                                         movieController.addHistoryWatchMovies(
                                             dataInforMovie['movie']['name'],
@@ -233,7 +269,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   InkWell(
                                     onTap: () {
                                       final int size =
-                                          dataInforMovie!['episodes'][0]
+                                          dataInforMovie['episodes'][0]
                                                   ['server_data']
                                               .length;
                                       if (ref.read(wasWatchEpisodeMovies) !=
@@ -241,23 +277,17 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                           ref.read(wasWatchEpisodeMovies) <
                                               size) {
                                         int episode =
-                                            ref.read(wasWatchEpisodeMovies)!;
+                                            ref.read(wasWatchEpisodeMovies);
                                         ref
                                             .read(
                                                 wasWatchEpisodeMovies.notifier)
                                             .state = episode + 1;
                                         ref
-                                                .read(
-                                                    isClickLWatchEpisodeLinkMovies
-                                                        .notifier)
-                                                .state =
-                                            isServer
-                                                ? dataInforMovie['episodes'][0]
-                                                        ['server_data'][episode]
-                                                    ['link_m3u8']
-                                                : dataInforMovie['episodes'][0]
-                                                        ['server_data'][episode]
-                                                    ['link_embed'];
+                                            .read(isClickLWatchEpisodeLinkMovies
+                                                .notifier)
+                                            .state = dataInforMovie['episodes']
+                                                [0]['server_data'][episode]
+                                            ['link_m3u8'];
                                         movieController.addHistoryWatchMovies(
                                             dataInforMovie['movie']['name'],
                                             widget.slugMovie,
@@ -310,86 +340,100 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               padding:
                                   const EdgeInsets.only(left: 10, right: 10),
                               height: 40,
-                              child: StatefulBuilder(
-                                builder: (context, StateSetter stateSetter) {
+                              child: Consumer(
+                                builder: (context, ref, child) {
                                   return Row(
-                                    spacing: 5,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text('player.server').tr(),
-                                      GestureDetector(
-                                        onTap: () {
-                                          stateSetter(() {
-                                            isServer = true;
-                                          });
-                                          if (ref.read(wasWatchEpisodeMovies) !=
-                                              -1) {
-                                            ref.read(isClickLWatchEpisodeLinkMovies.notifier).state = isServer
-                                                ? dataInforMovie!['episodes'][0]
+                                      Row(
+                                        children: [
+                                          const Text('player.server').tr(),
+                                          GestureDetector(
+                                            onTap: () {
+                                              if (ref.read(
+                                                      wasWatchEpisodeMovies) !=
+                                                  -1) {
+                                                ref
+                                                    .read(
+                                                        isClickLWatchEpisodeLinkMovies
+                                                            .notifier)
+                                                    .state = dataInforMovie[
+                                                        'episodes'][0]
                                                     ['server_data'][ref.read(
                                                         wasWatchEpisodeMovies) -
-                                                    1]['link_m3u8']
-                                                : dataInforMovie!['episodes'][0]
-                                                        ['server_data'][
-                                                    ref.read(wasWatchEpisodeMovies) -
-                                                        1]['link_embed'];
-                                          }
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.all(5.0),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                const BorderRadiusDirectional
-                                                    .all(Radius.circular(5)),
-                                            color: isServer
-                                                ? Colors.orange
-                                                : Colors.grey[400],
-                                          ),
-                                          child: const Center(
-                                            child: Text(
-                                              "M3u8",
-                                              style: TextStyle(
-                                                  color: Colors.white),
+                                                    1]['link_m3u8'];
+                                              }
+                                            },
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.all(5.0),
+                                              decoration: const BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadiusDirectional.all(
+                                                        Radius.circular(5)),
+                                                color: Colors.orange,
+                                              ),
+                                              child: const Center(
+                                                child: Text(
+                                                  "M3u8",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          stateSetter(() {
-                                            isServer = false;
-                                          });
-                                          if (ref.read(wasWatchEpisodeMovies) !=
-                                              -1) {
-                                            ref.read(isClickLWatchEpisodeLinkMovies.notifier).state = isServer
-                                                ? dataInforMovie!['episodes'][0]
-                                                    ['server_data'][ref.read(
-                                                        wasWatchEpisodeMovies) -
-                                                    1]['link_m3u8']
-                                                : dataInforMovie!['episodes'][0]
-                                                        ['server_data'][
-                                                    ref.read(wasWatchEpisodeMovies) -
-                                                        1]['link_embed'];
-                                          }
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.all(5.0),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                const BorderRadiusDirectional
-                                                    .all(Radius.circular(5)),
-                                            color: isServer
-                                                ? Colors.grey[400]
-                                                : Colors.orange,
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            ref.watch(isAutoNextMovie)
+                                                ? Icons.play_circle
+                                                : Icons.pause_circle,
+                                            color: ref.watch(isAutoNextMovie)
+                                                ? Colors.blue
+                                                : Colors.grey[600],
+                                            size: 28,
                                           ),
-                                          child: const Center(
-                                            child: Text(
-                                              "Embed",
-                                              style: TextStyle(
-                                                  color: Colors.white),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Auto Next',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: ref.watch(isAutoNextMovie)
+                                                  ? Colors.blue[700]
+                                                  : Colors.grey[700],
                                             ),
                                           ),
-                                        ),
-                                      ),
+                                          const SizedBox(width: 8),
+                                          SizedBox(
+                                            width: 60,
+                                            child: Switch(
+                                              value: ref.watch(isAutoNextMovie),
+                                              onChanged: (value) async {
+                                                ref
+                                                    .read(isAutoNextMovie
+                                                        .notifier)
+                                                    .state = value;
+
+                                                await pref.setBool(
+                                                    "isAutoNextMovie", value);
+                                              },
+                                              activeThumbColor: Colors.blue,
+                                              activeTrackColor:
+                                                  Colors.blue[200],
+                                              inactiveThumbColor:
+                                                  Colors.grey[400],
+                                              inactiveTrackColor:
+                                                  Colors.grey[300],
+                                            ),
+                                          ),
+                                        ],
+                                      )
                                     ],
                                   );
                                 },
@@ -397,8 +441,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             ),
                           ],
                         )
-                      : SizedBox(
-                          height: 200,
+                      : AspectRatio(
+                          aspectRatio: 16 / 9,
                           child: Stack(
                             children: [
                               PageView.builder(
@@ -536,7 +580,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   padding: const EdgeInsets.only(right: 5),
                                   child: InkWell(
                                     onTap: () {
-                                      Navigator.pushReplacement(
+                                      Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (_) => ViewMoreScreen(
@@ -584,9 +628,41 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                              "${'movieDetail.quality'.tr()} ${dataInforMovie?['movie']['quality']}"),
-                          Text(dataInforMovie?['movie']['lang']),
+                          Row(
+                            children: [
+                              Text('movieDetail.quality'.tr()),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6),
+                                  color: Colors.blueAccent,
+                                ),
+                                child: Text(
+                                  "${dataInforMovie?['movie']['quality'] ?? ''}",
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6),
+                              color: Colors.orangeAccent,
+                            ),
+                            child: Text(
+                              dataInforMovie?['movie']['lang'] ?? '',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12),
+                            ),
+                          ),
                         ],
                       ),
                       Row(
@@ -598,19 +674,43 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                         ],
                       ),
                       const Text('movieDetail.description').tr(),
-                      ReadMoreText(
-                        dataInforMovie?['movie']['content'],
-                        style: const TextStyle(color: Colors.grey),
-                        trimMode: TrimMode.Line,
-                        trimLines: 3,
-                        colorClickableText: Colors.black,
-                        trimCollapsedText: 'movieDetail.seeMore'.tr(),
-                        trimExpandedText: 'movieDetail.seeLess'.tr(),
-                        moreStyle: const TextStyle(
-                            color: Colors.lightBlueAccent,
-                            fontWeight: FontWeight.bold),
-                        lessStyle: const TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold),
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final isCollapsed = ref.watch(isCollapsedReadMore);
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                dataInforMovie?['movie']['content'] ?? '',
+                                maxLines: isCollapsed ? 3 : null,
+                                overflow: isCollapsed
+                                    ? TextOverflow.ellipsis
+                                    : TextOverflow.visible,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  ref.read(isCollapsedReadMore.notifier).state =
+                                      !isCollapsed;
+                                },
+                                child: Text(
+                                  isCollapsed
+                                      ? 'movieDetail.seeMore'.tr()
+                                      : 'movieDetail.seeLess'.tr(),
+                                  style: TextStyle(
+                                    color: isCollapsed
+                                        ? Colors.lightBlueAccent
+                                        : Theme.of(context)
+                                            .appBarTheme
+                                            .foregroundColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                       SizedBox(
                         height: 40,
@@ -632,11 +732,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         .read(isClickLWatchEpisodeLinkMovies
                                             .notifier)
                                         .state =
-                                    isServer
-                                        ? dataInforMovie!['episodes'][0]
-                                            ['server_data'][0]['link_m3u8']
-                                        : dataInforMovie!['episodes'][0]
-                                            ['server_data'][0]['link_embed'];
+                                    dataInforMovie!['episodes'][0]
+                                        ['server_data'][0]['link_m3u8'];
 
                                 movieController.addHistoryWatchMovies(
                                     dataInforMovie['movie']['name'],
@@ -680,13 +777,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         .read(isClickLWatchEpisodeLinkMovies
                                             .notifier)
                                         .state =
-                                    isServer
-                                        ? dataInforMovie['episodes'][0]
-                                                ['server_data'][size - 1]
-                                            ['link_m3u8']
-                                        : dataInforMovie['episodes'][0]
-                                                ['server_data'][size - 1]
-                                            ['link_embed'];
+                                    dataInforMovie['episodes'][0]['server_data']
+                                        [size - 1]['link_m3u8'];
                                 movieController.addHistoryWatchMovies(
                                     dataInforMovie['movie']['name'],
                                     widget.slugMovie,
@@ -725,76 +817,128 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               return const SizedBox();
                             }
                             return Consumer(
-                              builder: (context, ref, child) => Text(
-                                  'historyScreen.watchedEpisode'.tr(args: [
-                                'movie.episode'
-                                    .plural(ref.watch(wasWatchEpisodeMovies))
-                              ])),
+                              builder: (context, ref, child) => TextButton(
+                                onPressed: () => {
+                                  ref.read(isCollapsedReadMore.notifier).state =
+                                      true,
+                                  scrollController.position.animateTo(
+                                      itemEpisodeOffsets[
+                                          ref.watch(wasWatchEpisodeMovies) -
+                                              1]!,
+                                      duration: Durations.long1,
+                                      curve: Curves.linear)
+                                },
+                                style: const ButtonStyle(
+                                    padding: WidgetStatePropertyAll(
+                                        EdgeInsetsGeometry.all(0))),
+                                child: Text('historyScreen.watchedEpisode'
+                                    .tr(args: [
+                                  'movie.episode'
+                                      .plural(ref.watch(wasWatchEpisodeMovies))
+                                ])),
+                              ),
                             );
                           }),
                       const Text('movieDetail.episodeList').tr(),
-                      Consumer(
-                        builder: (context, ref, child) => GridView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: dataInforMovie?['episodes'][0]
-                                      ['server_data']
-                                  .length ??
-                              0,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 5,
-                                  crossAxisSpacing: 5,
-                                  mainAxisSpacing: 5,
-                                  mainAxisExtent: 40),
-                          itemBuilder: (context, index) => InkWell(
-                            onTap: () {
-                              scrollController.position.animateTo(0,
-                                  duration: Durations.long1,
-                                  curve: Curves.linear);
-                              ref.read(wasWatchEpisodeMovies.notifier).state =
-                                  index + 1;
-                              ref
-                                  .read(isClickWatchEpisodeMovies.notifier)
-                                  .state = true;
+                      GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: dataInforMovie?['episodes'][0]['server_data']
+                                .length ??
+                            0,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 5,
+                                crossAxisSpacing: 5,
+                                mainAxisSpacing: 5,
+                                mainAxisExtent: 40),
+                        itemBuilder: (context, index) {
+                          double itemHeight = 40 + 5;
 
-                              ref
-                                      .read(isClickLWatchEpisodeLinkMovies.notifier)
-                                      .state =
-                                  isServer
-                                      ? dataInforMovie!['episodes'][0]
-                                          ['server_data'][index]['link_m3u8']
-                                      : dataInforMovie!['episodes'][0]
-                                          ['server_data'][index]['link_embed'];
-                              movieController.addHistoryWatchMovies(
-                                  dataInforMovie['movie']['name'],
-                                  widget.slugMovie,
-                                  dataInforMovie['movie']['poster_url'],
-                                  index + 1);
-                              addHistoryWatchMovies(
-                                  dataInforMovie['movie']['name'],
-                                  widget.slugMovie,
-                                  dataInforMovie['movie']['poster_url'],
-                                  index + 1);
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadiusDirectional.all(
-                                    Radius.circular(5)),
-                                color: ref.watch(wasWatchEpisodeMovies) - 1 ==
-                                        index
-                                    ? Colors.orange
-                                    : Colors.grey[400],
-                              ),
-                              child: Center(
-                                child: Text(
-                                  (index + 1).toString(),
-                                  style: const TextStyle(color: Colors.white),
+                          int rowIndex = index ~/ 5;
+
+                          if (rowIndex == 0) {
+                            double offset = itemHeight;
+
+                            itemEpisodeOffsets[index] = offset + 115 + height;
+                          } else {
+                            double offset =
+                                rowIndex * itemHeight + 115 + height;
+
+                            itemEpisodeOffsets[index] = offset;
+                          }
+
+                          return Consumer(
+                            builder: (context, ref, child) => InkWell(
+                              onTap: () {
+                                scrollController.position.animateTo(0,
+                                    duration: Durations.long1,
+                                    curve: Curves.linear);
+                                ref.read(wasWatchEpisodeMovies.notifier).state =
+                                    index + 1;
+                                ref
+                                    .read(isClickWatchEpisodeMovies.notifier)
+                                    .state = true;
+
+                                ref
+                                        .read(isClickLWatchEpisodeLinkMovies
+                                            .notifier)
+                                        .state =
+                                    dataInforMovie!['episodes'][0]
+                                        ['server_data'][index]['link_m3u8'];
+                                movieController.addHistoryWatchMovies(
+                                    dataInforMovie['movie']['name'],
+                                    widget.slugMovie,
+                                    dataInforMovie['movie']['poster_url'],
+                                    index + 1);
+                                addHistoryWatchMovies(
+                                    dataInforMovie['movie']['name'],
+                                    widget.slugMovie,
+                                    dataInforMovie['movie']['poster_url'],
+                                    index + 1);
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  gradient: ref.watch(wasWatchEpisodeMovies) -
+                                              1 ==
+                                          index
+                                      ? const LinearGradient(
+                                          colors: [
+                                            Colors.orangeAccent,
+                                            Colors.deepOrange
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        )
+                                      : const LinearGradient(
+                                          colors: [Colors.grey, Colors.grey],
+                                        ),
+                                  boxShadow: [
+                                    if (ref.watch(wasWatchEpisodeMovies) - 1 ==
+                                        index)
+                                      BoxShadow(
+                                        color:
+                                            Colors.orange.withValues(alpha: .5),
+                                        offset: const Offset(2, 2),
+                                        blurRadius: 4,
+                                      ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    (index + 1).toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                       Text(
                         'movieDetail.relatedMovies'.tr(),
@@ -838,8 +982,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                 crossAxisSpacing: 10,
                               ),
                               itemBuilder: (context, index) {
-                                return InkWell(
-                                  onTap: () => Navigator.pushReplacement(
+                                return CardMovie(
+                                  onTap: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => InforMovieScreen(
@@ -847,96 +991,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                       ),
                                     ),
                                   ),
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(5)),
-                                        gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              Color(0xff30cfd0),
-                                              Color(0xff330867)
-                                            ])),
-                                    child: Stack(
-                                      children: [
-                                        CachedNetworkImage(
-                                          imageUrl:
-                                              "https://phimimg.com/${dataMovies[index]['poster_url']}",
-                                          progressIndicatorBuilder:
-                                              (context, url, progress) =>
-                                                  const Center(
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              const Icon(Icons.error),
-                                          height: double.infinity,
-                                          width: double.infinity,
-                                          fit: BoxFit.fill,
-                                          memCacheHeight: 400,
-                                        ),
-                                        Positioned(
-                                            child: Container(
-                                          padding: const EdgeInsets.all(5.0),
-                                          decoration: const BoxDecoration(
-                                              color: Colors.orange,
-                                              borderRadius: BorderRadius.only(
-                                                bottomRight: Radius.circular(5),
-                                                bottomLeft: Radius.circular(5),
-                                              )),
-                                          child: Text(
-                                            dataMovies[index]['lang'],
-                                            style: const TextStyle(
-                                                color: Colors.white),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        )),
-                                        Positioned(
-                                            top: 35,
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.all(5.0),
-                                              decoration: BoxDecoration(
-                                                  color: Colors.black
-                                                      .withValues(alpha: .4),
-                                                  borderRadius:
-                                                      const BorderRadius.only(
-                                                    topRight:
-                                                        Radius.circular(5),
-                                                    bottomRight:
-                                                        Radius.circular(5),
-                                                    bottomLeft:
-                                                        Radius.circular(5),
-                                                  )),
-                                              child: Text(
-                                                dataMovies[index]
-                                                    ['episode_current'],
-                                                style: const TextStyle(
-                                                    color: Colors.white),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            )),
-                                        Positioned(
-                                          bottom: 0,
-                                          child: Container(
-                                            width: 300,
-                                            padding: const EdgeInsets.all(10.0),
-                                            color: Colors.black
-                                                .withValues(alpha: .4),
-                                            child: Text(
-                                              dataMovies[index]['name'],
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
+                                  movie: MovieData.fromJson(dataMovies[index]),
+                                  isLink: false,
                                 );
                               },
                             );
@@ -958,15 +1014,19 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
     );
   }
 
-  Future<void> addFavoriteMovie(
-      String name, String slug, String posterUrl) async {
-    final result =
-        await movieController.addFavoriteMovies(name, slug, posterUrl);
+  Future<void> addFavoriteMovie(String name, String slug, String posterUrl,
+      String lang, String episodeCurrent) async {
+    final result = await movieController.addFavoriteMovies(
+        name, slug, posterUrl, lang, episodeCurrent);
     if (!mounted) return;
     if (result) {
-      ref
-          .read(getFavoriteMoviesNotifierProvider.notifier)
-          .addState({"name": name, "slug": slug, "poster_url": posterUrl});
+      ref.read(getFavoriteMoviesNotifierProvider.notifier).addState(MovieData(
+              name: name,
+              slug: slug,
+              posterUrl: posterUrl,
+              lang: lang,
+              episodeCurrent: episodeCurrent)
+          .toJson());
       OverlayScreen().showOverlay(
           context, 'success.addFavorite'.tr(), Colors.orange,
           duration: 3);

@@ -7,6 +7,7 @@ import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 
 class FilterSidebarMovieScreen extends StatefulWidget {
   final Future<List> futureCategoryMovies;
+  final Future<List> futureCountryMovies;
   final int pageMovie;
   final int limitMovie;
 
@@ -15,6 +16,7 @@ class FilterSidebarMovieScreen extends StatefulWidget {
     required this.futureCategoryMovies,
     required this.pageMovie,
     required this.limitMovie,
+    required this.futureCountryMovies,
   });
 
   @override
@@ -25,278 +27,305 @@ class FilterSidebarMovieScreen extends StatefulWidget {
 class _FilterSidebarMovieScreenState extends State<FilterSidebarMovieScreen> {
   final MovieController movieController = MovieController();
   final TextEditingController textEditingController = TextEditingController();
-  late Future<List> futureCountryMovies;
+
   String currentSlugCategory = "";
   int currentIndexCategory = -1;
   int currentIndexCountry = -1;
   String sortType = "desc";
   String country = "";
   int year = 0;
+
   @override
   void initState() {
-    futureCountryMovies = movieController.countryMovies();
     super.initState();
+  }
+
+  Widget _buildGridItem({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        margin: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.orangeAccent : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? Colors.orange : Colors.grey.shade400,
+            width: 1.2,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.grey[800],
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final sizeWidth = MediaQuery.of(context).size.width;
+
+    int columnCount = sizeWidth < 600
+        ? 2
+        : sizeWidth <= 900
+            ? 3
+            : sizeWidth <= 1300
+                ? 4
+                : 5;
+
     return SafeArea(
       child: Align(
-        alignment: Alignment.centerRight,
+        alignment: Alignment.centerLeft,
         child: Material(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(16),
-            bottomLeft: Radius.circular(16),
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20),
           ),
+          elevation: 8,
           child: Container(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            width: MediaQuery.of(context).size.width * 0.8,
+            width: sizeWidth * 0.8,
             height: double.infinity,
-            color: Theme.of(context).appBarTheme.backgroundColor,
-            child: Stack(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 10,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    AppBar(
-                      title: const Text('filter.title').tr(),
-                      centerTitle: true,
-                      automaticallyImplyLeading: false,
-                    ),
-                    Row(
-                      children: [
-                        Text('filter.pleaseSelectGenre'.tr()),
-                        Text(
-                          'filter.required'.tr(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 50,
-                      child: FutureBuilder(
-                        future: widget.futureCategoryMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (snapshot.hasData) {
-                            final categoryMovies = snapshot.data!;
-                            return CarouselView(
-                              onTap: (value) {
-                                setState(() {
-                                  currentSlugCategory =
-                                      categoryMovies[value]['slug'];
-                                  currentIndexCategory = value;
-                                });
-                              },
-                              elevation: 2,
-                              shape: ContinuousRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              itemExtent: MediaQuery.of(context).size.width / 3,
-                              children: List.generate(
-                                categoryMovies.length,
-                                (index) => Container(
-                                  width: 60,
-                                  color: currentIndexCategory == index
-                                      ? Colors.orange
-                                      : Colors.grey,
-                                  child: Center(
-                                    child: Text(
-                                      categoryMovies[index]['name'],
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
-                        },
+                    Text(
+                      'filter.title'.tr(),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Text('filter.pleaseSelectCountry').tr(),
-                    SizedBox(
-                      height: 50,
-                      child: FutureBuilder(
-                        future: futureCountryMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (snapshot.hasData) {
-                            final countryMovies = snapshot.data!;
-                            return CarouselView(
-                              onTap: (value) {
-                                if (currentIndexCountry == value) {
-                                  currentIndexCountry = -1;
-                                  country = "";
-                                } else {
-                                  currentIndexCountry = value;
-                                  country = countryMovies[value]['slug'];
-                                }
-                                setState(() {});
-                              },
-                              elevation: 2,
-                              shape: ContinuousRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              itemExtent: MediaQuery.of(context).size.width / 3,
-                              children: List.generate(
-                                countryMovies.length,
-                                (index) => Container(
-                                  width: 60,
-                                  color: currentIndexCountry == index
-                                      ? Colors.orange
-                                      : Colors.grey,
-                                  child: Center(
-                                    child: Text(
-                                      countryMovies[index]['name'],
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          width: 70,
-                          child: TextFormField(
-                            controller: textEditingController,
-                            keyboardType: TextInputType.number,
-                            onTapOutside: (event) {
-                              FocusScope.of(context).requestFocus(FocusNode());
-                            },
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(4),
-                            ],
-                            decoration: InputDecoration(
-                              labelText: 'filter.year'.tr(),
-                              border: const OutlineInputBorder(),
-                            ),
-                            onChanged: (value) {
-                              if (value.isNotEmpty) {
-                                year = int.parse(value);
-                              } else {
-                                year = 0;
-                              }
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: 140,
-                          child: DropdownButtonFormField(
-                            decoration: InputDecoration(
-                              labelText: 'filter.sortBy'.tr(),
-                              border: const OutlineInputBorder(),
-                            ),
-                            value: sortType,
-                            items: [
-                              DropdownMenuItem(
-                                value: "desc",
-                                child: const Text('filter.latest').tr(),
-                              ),
-                              DropdownMenuItem(
-                                value: "asc",
-                                child: const Text('filter.oldest').tr(),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              sortType = value!;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(context),
+                    )
                   ],
                 ),
-                Positioned(
-                    bottom: 10,
-                    width: MediaQuery.sizeOf(context).width * 0.8 - 20,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(height: 10),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            padding: const EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            width: 80,
-                            child: Text(
-                              'navigation.exit'.tr(),
-                              style: const TextStyle(color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            if (currentSlugCategory.isNotEmpty &&
-                                currentIndexCategory != -1) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ViewMoreScreen(
-                                      currentSlugCategory,
-                                      widget.pageMovie,
-                                      widget.limitMovie,
-                                      sortType,
-                                      country,
-                                      year),
-                                ),
-                              );
-                            } else {
-                              OverlayScreen().showOverlay(context,
-                                  'filter.genreRequired'.tr(), Colors.red,
-                                  duration: 2);
+                        _buildSectionTitle('filter.pleaseSelectGenre'.tr()),
+                        FutureBuilder<List>(
+                          future: widget.futureCategoryMovies,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             }
+                            if (!snapshot.hasData) {
+                              return const Center(child: Icon(Icons.error));
+                            }
+                            final data = snapshot.data!;
+                            return GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: data.length,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: columnCount,
+                                mainAxisExtent: 40,
+                                crossAxisSpacing: 4,
+                                mainAxisSpacing: 4,
+                              ),
+                              itemBuilder: (context, index) => _buildGridItem(
+                                label: data[index]['name'],
+                                isSelected: currentIndexCategory == index,
+                                onTap: () {
+                                  setState(() {
+                                    currentIndexCategory = index;
+                                    currentSlugCategory = data[index]['slug'];
+                                  });
+                                },
+                              ),
+                            );
                           },
-                          child: Container(
-                            padding: const EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(5),
+                        ),
+                        const Divider(height: 24),
+                        _buildSectionTitle('filter.pleaseSelectCountry'.tr()),
+                        FutureBuilder<List>(
+                          future: widget.futureCountryMovies,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                            if (!snapshot.hasData) {
+                              return const Center(child: Icon(Icons.error));
+                            }
+                            final data = snapshot.data!;
+                            return GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: data.length,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: columnCount,
+                                mainAxisExtent: 40,
+                                crossAxisSpacing: 4,
+                                mainAxisSpacing: 4,
+                              ),
+                              itemBuilder: (context, index) => _buildGridItem(
+                                label: data[index]['name'],
+                                isSelected: currentIndexCountry == index,
+                                onTap: () {
+                                  setState(() {
+                                    if (currentIndexCountry == index) {
+                                      currentIndexCountry = -1;
+                                      country = "";
+                                    } else {
+                                      currentIndexCountry = index;
+                                      country = data[index]['slug'];
+                                    }
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                        const Divider(height: 24),
+                        const SizedBox(
+                          height: 6,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: 100,
+                              child: TextFormField(
+                                controller: textEditingController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(4),
+                                ],
+                                decoration: InputDecoration(
+                                  labelText: 'filter.year'.tr(),
+                                  border: const OutlineInputBorder(),
+                                ),
+                                onChanged: (value) {
+                                  year =
+                                      value.isNotEmpty ? int.parse(value) : 0;
+                                },
+                              ),
                             ),
-                            width: 80,
-                            child: Text(
-                              'filter.apply'.tr(),
-                              style: const TextStyle(color: Colors.white),
-                              textAlign: TextAlign.center,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: DropdownButtonFormField(
+                                decoration: InputDecoration(
+                                  labelText: 'filter.sortBy'.tr(),
+                                  border: const OutlineInputBorder(),
+                                ),
+                                initialValue: sortType,
+                                items: [
+                                  DropdownMenuItem(
+                                    value: "desc",
+                                    child: Text('filter.latest'.tr()),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: "asc",
+                                    child: Text('filter.oldest'.tr()),
+                                  ),
+                                ],
+                                onChanged: (v) => sortType = v!,
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
-                    ))
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade400,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('navigation.exit'.tr()),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orangeAccent,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () {
+                          if (currentSlugCategory.isEmpty) {
+                            OverlayScreen().showOverlay(
+                              context,
+                              'filter.genreRequired'.tr(),
+                              Colors.red,
+                              duration: 2,
+                            );
+                            return;
+                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreScreen(
+                                currentSlugCategory,
+                                widget.pageMovie,
+                                widget.limitMovie,
+                                sortType,
+                                country,
+                                year,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'filter.apply'.tr(),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
               ],
             ),
           ),
