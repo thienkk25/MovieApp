@@ -39,6 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final sizeWidth = MediaQuery.sizeOf(context).width;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
@@ -58,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 20,
             ),
             SizedBox(
-              width: MediaQuery.of(context).size.width / 1.2,
+              width: sizeWidth / 1.2,
               child: Form(
                 key: keyForm,
                 child: Column(
@@ -189,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         height: 50,
-                        width: 250,
+                        width: sizeWidth / 1.2,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           color: Colors.white,
@@ -197,6 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Border.all(width: 1, color: Colors.grey.shade400),
                         ),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           spacing: 10,
                           children: [
                             Image.asset(
@@ -223,14 +225,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         height: 50,
-                        width: 250,
+                        width: sizeWidth / 1.2,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
-                          color: const Color(0xFF1877F2), // Facebook Blue
+                          color: const Color(0xFF1877F2),
                           border: Border.all(
                               width: 1, color: const Color(0xFF1877F2)),
                         ),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           spacing: 10,
                           children: [
                             Image.asset(
