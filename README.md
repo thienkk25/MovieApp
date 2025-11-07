@@ -10,7 +10,7 @@ Your mini cinema on the go! Enjoy thousands of blockbuster movies and exciting s
 - Has diverse genres
 
 ### 2. **Smart Search**  
-- Search movie by name or filter by category movie with country, sort type, year.
+- Search movie by name or filter by category movie with country, sort type, year,...
 
 ### 3. **Synchronization and Progress Tracking**  
 - Users can save their favorite movies or delete favorite.
@@ -24,6 +24,7 @@ Your mini cinema on the go! Enjoy thousands of blockbuster movies and exciting s
 - Watch information profile.
 - Change language Vietnamese, English.
 - On/off notification.
+- History watched movies.
 - Change theme dark, light or system device.
 
 ## Technology Stack  
