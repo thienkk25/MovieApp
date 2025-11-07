@@ -357,231 +357,234 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              spacing: 20,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Text(
-                    'filter.search'.tr(),
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                spacing: 20,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      'filter.search'.tr(),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-                Column(
-                  spacing: 14,
-                  children: [
-                    FutureBuilder(
-                      future: futureCategoryMovies,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Text('Lỗi: ${snapshot.error}');
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return const Text("Không có dữ liệu");
-                        }
+                  Column(
+                    spacing: 14,
+                    children: [
+                      FutureBuilder(
+                        future: futureCategoryMovies,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Text('Lỗi: ${snapshot.error}');
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Text("Không có dữ liệu");
+                          }
 
-                        final categories = snapshot.data!;
+                          final categories = snapshot.data!;
 
-                        return DropdownButtonFormField<String>(
-                          initialValue: currentFilter.category,
-                          decoration: InputDecoration(
-                            labelText: 'filter.category'.tr(),
-                            border: const OutlineInputBorder(),
-                          ),
-                          isExpanded: true,
-                          items: [
-                            ...categories.map(
-                              (e) => DropdownMenuItem(
-                                value: e['slug'],
-                                child: Text(e['name']!),
-                              ),
-                            )
-                          ],
-                          onChanged: (v) => ref
-                              .read(searchFilterProvider.notifier)
-                              .setCategory(v),
-                        );
-                      },
-                    ),
-                    FutureBuilder(
-                      future: futureCountryMovies,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Text('Lỗi: ${snapshot.error}');
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return const Text("Không có dữ liệu");
-                        }
-
-                        final countries = snapshot.data!;
-
-                        return DropdownButtonFormField<String>(
-                          initialValue: currentFilter.country,
-                          decoration: InputDecoration(
-                            labelText: 'filter.country'.tr(),
-                            border: const OutlineInputBorder(),
-                          ),
-                          isExpanded: true,
-                          items: [
-                            ...countries.map(
-                              (e) => DropdownMenuItem(
-                                value: e['slug'],
-                                child: Text(e['name']!),
-                              ),
-                            )
-                          ],
-                          onChanged: (v) => ref
-                              .read(searchFilterProvider.notifier)
-                              .setCountry(v),
-                        );
-                      },
-                    ),
-                    DropdownButtonFormField<int>(
-                      initialValue: currentFilter.year,
-                      decoration: InputDecoration(
-                        labelText: 'filter.year'.tr(),
-                        border: const OutlineInputBorder(),
-                      ),
-                      items: List.generate(
-                        DateTime.now().year - 1969,
-                        (i) => DropdownMenuItem(
-                          value: DateTime.now().year - i,
-                          child: Text('${DateTime.now().year - i}'),
-                        ),
-                      ),
-                      onChanged: (v) =>
-                          ref.read(searchFilterProvider.notifier).setYear(v),
-                    ),
-                    DropdownButtonFormField<String>(
-                      initialValue: currentFilter.sortLang,
-                      decoration: InputDecoration(
-                        labelText: 'app.language'.tr(),
-                        border: const OutlineInputBorder(),
-                      ),
-                      items: [
-                        {'label': 'Tất cả', 'value': null},
-                        {'label': 'Vietsub', 'value': 'vietsub'},
-                        {'label': 'Thuyết minh', 'value': 'thuyet-minh'},
-                        {'label': 'Lồng tiếng', 'value': 'long-tieng'},
-                      ]
-                          .map((e) => DropdownMenuItem(
-                                value: e['value'],
-                                child: Text(e['label'] ?? 'Tất cả'),
-                              ))
-                          .toList(),
-                      onChanged: (v) => ref
-                          .read(searchFilterProvider.notifier)
-                          .setSortLang(v),
-                    ),
-                    Row(
-                      children: [
-                        Flexible(
-                          flex: 2,
-                          child: DropdownButtonFormField<String>(
-                            isExpanded: true,
+                          return DropdownButtonFormField<String>(
+                            initialValue: currentFilter.category,
                             decoration: InputDecoration(
-                              labelText: 'filter.sortBy'.tr(),
+                              labelText: 'filter.category'.tr(),
                               border: const OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 12),
                             ),
-                            initialValue: currentFilter.sortField,
-                            items: const [
-                              DropdownMenuItem(
-                                  value: 'modified.time',
-                                  child: Text("Thời gian cập nhật")),
-                              DropdownMenuItem(
-                                  value: '_id', child: Text("ID phim")),
-                              DropdownMenuItem(
-                                  value: 'year', child: Text("Năm phát hành")),
+                            isExpanded: true,
+                            items: [
+                              ...categories.map(
+                                (e) => DropdownMenuItem(
+                                  value: e['slug'],
+                                  child: Text(e['name']!),
+                                ),
+                              )
                             ],
                             onChanged: (v) => ref
                                 .read(searchFilterProvider.notifier)
-                                .setSortField(v ?? 'modified.time'),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          flex: 1,
-                          child: DropdownButtonFormField<String>(
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              labelText: 'filter.sortBy'.tr(),
-                              border: const OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 12),
-                            ),
-                            initialValue: currentFilter.sortType,
-                            items: const [
-                              DropdownMenuItem(
-                                  value: 'desc', child: Text("Giảm dần")),
-                              DropdownMenuItem(
-                                  value: 'asc', child: Text("Tăng dần")),
-                            ],
-                            onChanged: (v) => ref
-                                .read(searchFilterProvider.notifier)
-                                .setSortType(v ?? 'desc'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Row(
-                  spacing: 12,
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          ref.read(searchFilterProvider.notifier).clear();
-                          Navigator.pop(context);
+                                .setCategory(v),
+                          );
                         },
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('filter.reset').tr(),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.orange),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                      ),
+                      FutureBuilder(
+                        future: futureCountryMovies,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Text('Lỗi: ${snapshot.error}');
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Text("Không có dữ liệu");
+                          }
+
+                          final countries = snapshot.data!;
+
+                          return DropdownButtonFormField<String>(
+                            initialValue: currentFilter.country,
+                            decoration: InputDecoration(
+                              labelText: 'filter.country'.tr(),
+                              border: const OutlineInputBorder(),
+                            ),
+                            isExpanded: true,
+                            items: [
+                              ...countries.map(
+                                (e) => DropdownMenuItem(
+                                  value: e['slug'],
+                                  child: Text(e['name']!),
+                                ),
+                              )
+                            ],
+                            onChanged: (v) => ref
+                                .read(searchFilterProvider.notifier)
+                                .setCountry(v),
+                          );
+                        },
+                      ),
+                      DropdownButtonFormField<int>(
+                        initialValue: currentFilter.year,
+                        decoration: InputDecoration(
+                          labelText: 'filter.year'.tr(),
+                          border: const OutlineInputBorder(),
+                        ),
+                        items: List.generate(
+                          DateTime.now().year - 1969,
+                          (i) => DropdownMenuItem(
+                            value: DateTime.now().year - i,
+                            child: Text('${DateTime.now().year - i}'),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        onChanged: (v) =>
+                            ref.read(searchFilterProvider.notifier).setYear(v),
+                      ),
+                      DropdownButtonFormField<String>(
+                        initialValue: currentFilter.sortLang,
+                        decoration: InputDecoration(
+                          labelText: 'app.language'.tr(),
+                          border: const OutlineInputBorder(),
+                        ),
+                        items: [
+                          {'label': 'Tất cả', 'value': null},
+                          {'label': 'Vietsub', 'value': 'vietsub'},
+                          {'label': 'Thuyết minh', 'value': 'thuyet-minh'},
+                          {'label': 'Lồng tiếng', 'value': 'long-tieng'},
+                        ]
+                            .map((e) => DropdownMenuItem(
+                                  value: e['value'],
+                                  child: Text(e['label'] ?? 'Tất cả'),
+                                ))
+                            .toList(),
+                        onChanged: (v) => ref
+                            .read(searchFilterProvider.notifier)
+                            .setSortLang(v),
+                      ),
+                      Row(
+                        children: [
+                          Flexible(
+                            flex: 2,
+                            child: DropdownButtonFormField<String>(
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                labelText: 'filter.sortBy'.tr(),
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 12),
+                              ),
+                              initialValue: currentFilter.sortField,
+                              items: const [
+                                DropdownMenuItem(
+                                    value: 'modified.time',
+                                    child: Text("Thời gian cập nhật")),
+                                DropdownMenuItem(
+                                    value: '_id', child: Text("ID phim")),
+                                DropdownMenuItem(
+                                    value: 'year',
+                                    child: Text("Năm phát hành")),
+                              ],
+                              onChanged: (v) => ref
+                                  .read(searchFilterProvider.notifier)
+                                  .setSortField(v ?? 'modified.time'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            flex: 1,
+                            child: DropdownButtonFormField<String>(
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                labelText: 'filter.sortBy'.tr(),
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 12),
+                              ),
+                              initialValue: currentFilter.sortType,
+                              items: const [
+                                DropdownMenuItem(
+                                    value: 'desc', child: Text("Giảm dần")),
+                                DropdownMenuItem(
+                                    value: 'asc', child: Text("Tăng dần")),
+                              ],
+                              onChanged: (v) => ref
+                                  .read(searchFilterProvider.notifier)
+                                  .setSortType(v ?? 'desc'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Row(
+                    spacing: 12,
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            ref.read(searchFilterProvider.notifier).clear();
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text('filter.reset').tr(),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.orange),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.check_rounded),
-                        label: const Text('filter.apply').tr(),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.check_rounded),
+                          label: const Text('filter.apply').tr(),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),
-                    ),
-                  ],
-                )
-              ],
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         );

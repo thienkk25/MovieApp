@@ -32,159 +32,163 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       body: SafeArea(
-          child: Column(
-        children: [
-          SizedBox(
-            height: 80,
-            width: double.infinity,
-            child: Center(
-                child: Text(
-              'registerScreen.title'.tr(),
-              style: const TextStyle(fontSize: 24),
-            ).animate().scaleXY(duration: 1.seconds)),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width / 1.2,
-            child: Form(
-              key: keyForm,
-              child: Column(
-                spacing: 10,
-                children: [
-                  TextFormField(
-                    controller: emailController,
-                    validator: (value) {
-                      if (value == null || value == "") {
-                        return 'errors.emailRequired'.tr();
-                      } else if (!emailRegExp.hasMatch(value)) {
-                        return 'errors.emailInvalid'.tr();
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.email),
-                      labelText: "Email",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
-                        borderSide: const BorderSide(width: 1),
-                      ),
-                    ),
-                  ),
-                  TextFormField(
-                    controller: pwController,
-                    validator: (value) {
-                      if (value == null || value == "") {
-                        return 'errors.passwordRequired'.tr();
-                      } else if (value.length < 6) {
-                        return 'errors.passwordTooShort'.tr();
-                      }
-                      return null;
-                    },
-                    obscureText: obscureText,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock),
-                      suffixIcon: obscureText
-                          ? GestureDetector(
-                              onTap: () => setState(() {
-                                    obscureText = !obscureText;
-                                  }),
-                              child: const Icon(Icons.visibility_off_outlined))
-                          : GestureDetector(
-                              onTap: () => setState(() {
-                                    obscureText = !obscureText;
-                                  }),
-                              child: const Icon(Icons.visibility_outlined)),
-                      labelText: 'registerScreen.password'.tr(),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
-                        borderSide: const BorderSide(width: 1),
-                      ),
-                    ),
-                  ),
-                  TextFormField(
-                    controller: rePwController,
-                    validator: (value) {
-                      if (value == null || value == "") {
-                        return 'errors.passwordRequired'.tr();
-                      } else if (value != pwController.text) {
-                        return 'errors.confirmPasswordMismatch'.tr();
-                      }
-                      return null;
-                    },
-                    obscureText: obscureText,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock),
-                      suffixIcon: obscureText
-                          ? GestureDetector(
-                              onTap: () => setState(() {
-                                    obscureText = !obscureText;
-                                  }),
-                              child: const Icon(Icons.visibility_off_outlined))
-                          : GestureDetector(
-                              onTap: () => setState(() {
-                                    obscureText = !obscureText;
-                                  }),
-                              child: const Icon(Icons.visibility_outlined)),
-                      labelText: 'registerScreen.confirmPassword'.tr(),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
-                        borderSide: const BorderSide(width: 1),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      if (keyForm.currentState!.validate()) {
-                        register(emailController.text, pwController.text);
-                        emailController.clear();
-                        pwController.clear();
-                        rePwController.clear();
-                      }
-                    },
-                    child: Container(
-                      height: 40,
-                      width: 100,
-                      decoration: BoxDecoration(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(5)),
-                          color: Colors.lightBlue,
-                          border:
-                              Border.all(width: 1, color: Colors.lightBlue)),
-                      child: Center(
-                        child: Text(
-                          'registerScreen.title'.tr(),
-                          style: const TextStyle(color: Colors.white),
+          child: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 80,
+              width: double.infinity,
+              child: Center(
+                  child: Text(
+                'registerScreen.title'.tr(),
+                style: const TextStyle(fontSize: 24),
+              ).animate().scaleXY(duration: 1.seconds)),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width / 1.2,
+              child: Form(
+                key: keyForm,
+                child: Column(
+                  spacing: 10,
+                  children: [
+                    TextFormField(
+                      controller: emailController,
+                      validator: (value) {
+                        if (value == null || value == "") {
+                          return 'errors.emailRequired'.tr();
+                        } else if (!emailRegExp.hasMatch(value)) {
+                          return 'errors.emailInvalid'.tr();
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.email),
+                        labelText: "Email",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide: const BorderSide(width: 1),
                         ),
                       ),
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'registerScreen.haveAccount'.tr(),
-                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Text(
-                          'loginScreen.title'.tr(),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 12),
+                    TextFormField(
+                      controller: pwController,
+                      validator: (value) {
+                        if (value == null || value == "") {
+                          return 'errors.passwordRequired'.tr();
+                        } else if (value.length < 6) {
+                          return 'errors.passwordTooShort'.tr();
+                        }
+                        return null;
+                      },
+                      obscureText: obscureText,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: obscureText
+                            ? GestureDetector(
+                                onTap: () => setState(() {
+                                      obscureText = !obscureText;
+                                    }),
+                                child:
+                                    const Icon(Icons.visibility_off_outlined))
+                            : GestureDetector(
+                                onTap: () => setState(() {
+                                      obscureText = !obscureText;
+                                    }),
+                                child: const Icon(Icons.visibility_outlined)),
+                        labelText: 'registerScreen.password'.tr(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide: const BorderSide(width: 1),
                         ),
                       ),
-                    ],
-                  ),
-                ].animate(interval: 300.ms).scaleY(duration: 300.ms),
+                    ),
+                    TextFormField(
+                      controller: rePwController,
+                      validator: (value) {
+                        if (value == null || value == "") {
+                          return 'errors.passwordRequired'.tr();
+                        } else if (value != pwController.text) {
+                          return 'errors.confirmPasswordMismatch'.tr();
+                        }
+                        return null;
+                      },
+                      obscureText: obscureText,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: obscureText
+                            ? GestureDetector(
+                                onTap: () => setState(() {
+                                      obscureText = !obscureText;
+                                    }),
+                                child:
+                                    const Icon(Icons.visibility_off_outlined))
+                            : GestureDetector(
+                                onTap: () => setState(() {
+                                      obscureText = !obscureText;
+                                    }),
+                                child: const Icon(Icons.visibility_outlined)),
+                        labelText: 'registerScreen.confirmPassword'.tr(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide: const BorderSide(width: 1),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        if (keyForm.currentState!.validate()) {
+                          register(emailController.text, pwController.text);
+                          emailController.clear();
+                          pwController.clear();
+                          rePwController.clear();
+                        }
+                      },
+                      child: Container(
+                        height: 40,
+                        width: 100,
+                        decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(5)),
+                            color: Colors.lightBlue,
+                            border:
+                                Border.all(width: 1, color: Colors.lightBlue)),
+                        child: Center(
+                          child: Text(
+                            'registerScreen.title'.tr(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'registerScreen.haveAccount'.tr(),
+                          style:
+                              TextStyle(color: Colors.grey[400], fontSize: 12),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Text(
+                            'loginScreen.title'.tr(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ].animate(interval: 300.ms).scaleY(duration: 300.ms),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       )),
     );
   }

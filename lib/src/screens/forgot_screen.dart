@@ -29,92 +29,94 @@ class _ForgotScreenState extends State<ForgotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       body: SafeArea(
-          child: Column(
-        spacing: 20,
-        children: [
-          SizedBox(
-            height: 100,
-            width: double.infinity,
-            child: Center(
-                child: Text(
-              'forgotPasswordScreen.title'.tr(),
-              style: const TextStyle(fontSize: 24),
-            ).animate().scaleXY(duration: 1.seconds)),
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width / 1.2,
-            child: Form(
-              key: keyForm,
-              child: Column(
-                spacing: 20,
-                children: [
-                  TextFormField(
-                    controller: emailController,
-                    validator: (value) {
-                      if (value == null || value == "") {
-                        return 'errors.emailRequired'.tr();
-                      } else if (!emailRegExp.hasMatch(value)) {
-                        return 'errors.emailInvalid'.tr();
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.email),
-                      labelText: "Email",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
-                        borderSide: const BorderSide(width: 1),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      if (keyForm.currentState!.validate()) {
-                        forgot(emailController.text);
-                      }
-                    },
-                    child: Container(
-                      height: 40,
-                      width: 100,
-                      decoration: BoxDecoration(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(5)),
-                          color: Colors.lightBlue,
-                          border:
-                              Border.all(width: 1, color: Colors.lightBlue)),
-                      child: Center(
-                        child: Text(
-                          'forgotPasswordScreen.sendButton'.tr(),
-                          style: const TextStyle(color: Colors.white),
+          child: SingleChildScrollView(
+        child: Column(
+          spacing: 20,
+          children: [
+            SizedBox(
+              height: 100,
+              width: double.infinity,
+              child: Center(
+                  child: Text(
+                'forgotPasswordScreen.title'.tr(),
+                style: const TextStyle(fontSize: 24),
+              ).animate().scaleXY(duration: 1.seconds)),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width / 1.2,
+              child: Form(
+                key: keyForm,
+                child: Column(
+                  spacing: 20,
+                  children: [
+                    TextFormField(
+                      controller: emailController,
+                      validator: (value) {
+                        if (value == null || value == "") {
+                          return 'errors.emailRequired'.tr();
+                        } else if (!emailRegExp.hasMatch(value)) {
+                          return 'errors.emailInvalid'.tr();
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.email),
+                        labelText: "Email",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide: const BorderSide(width: 1),
                         ),
                       ),
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'registerScreen.haveAccount'.tr(),
-                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Text(
-                          'loginScreen.title'.tr(),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 12),
+                    GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        if (keyForm.currentState!.validate()) {
+                          forgot(emailController.text);
+                        }
+                      },
+                      child: Container(
+                        height: 40,
+                        width: 100,
+                        decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(5)),
+                            color: Colors.lightBlue,
+                            border:
+                                Border.all(width: 1, color: Colors.lightBlue)),
+                        child: Center(
+                          child: Text(
+                            'forgotPasswordScreen.sendButton'.tr(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
-                    ],
-                  )
-                ].animate(interval: 300.ms).scaleXY(duration: 300.ms),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'registerScreen.haveAccount'.tr(),
+                          style:
+                              TextStyle(color: Colors.grey[400], fontSize: 12),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Text(
+                            'loginScreen.title'.tr(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    )
+                  ].animate(interval: 300.ms).scaleXY(duration: 300.ms),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       )),
     );
   }

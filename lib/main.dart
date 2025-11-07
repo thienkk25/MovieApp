@@ -163,7 +163,6 @@ class _MyAppState extends ConsumerState<MyApp> {
     if (widget.initialPayload != null &&
         widget.initialPayload!.isNotEmpty &&
         isNotification) {
-      await pref.remove("notification_payload");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (UserController().isUser()) {
           navigatorKey.currentState
@@ -173,7 +172,8 @@ class _MyAppState extends ConsumerState<MyApp> {
                   InforMovieScreen(slugMovie: widget.initialPayload!),
             ),
           )
-              .then((_) {
+              .then((_) async {
+            await pref.remove("notification_payload");
             navigatorKey.currentState?.pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (_) => const HomeScreen(),

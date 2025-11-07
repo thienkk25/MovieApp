@@ -5,6 +5,7 @@ import 'package:movie_app/src/controllers/user_controller.dart';
 import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/home_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotifications {
@@ -25,22 +26,26 @@ class LocalNotifications {
 
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        final pref = await SharedPreferences.getInstance();
         if (response.payload != null && response.payload!.isNotEmpty) {
           UserController().isUser()
               ? navigatorKey.currentState
                   ?.push(
-                    MaterialPageRoute(
-                      builder: (_) => InforMovieScreen(
-                        slugMovie: response.payload.toString(),
-                      ),
+                  MaterialPageRoute(
+                    builder: (_) => InforMovieScreen(
+                      slugMovie: response.payload.toString(),
                     ),
-                  )
+                  ),
+                )
                   .then(
-                    (_) => MaterialPageRoute(
+                  (_) async {
+                    await pref.remove("notification_payload");
+                    return MaterialPageRoute(
                       builder: (_) => const HomeScreen(),
-                    ),
-                  )
+                    );
+                  },
+                )
               : navigatorKey.currentState?.push(
                   MaterialPageRoute(
                     builder: (_) => const LoginScreen(),
