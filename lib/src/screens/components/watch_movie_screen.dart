@@ -68,11 +68,6 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
               ref.read(isClickLWatchEpisodeLinkMovies.notifier).state =
                   widget.dataInforMovie['episodes'][0]['server_data'][episode]
                       ['link_m3u8'];
-              movieController.addHistoryWatchMovies(
-                  widget.dataInforMovie['movie']['name'],
-                  widget.slugMovie,
-                  widget.dataInforMovie['movie']['poster_url'],
-                  episode + 1);
               addHistoryWatchMovies(
                   widget.dataInforMovie['movie']['name'],
                   widget.slugMovie,

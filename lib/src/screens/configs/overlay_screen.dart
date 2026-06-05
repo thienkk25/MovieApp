@@ -12,7 +12,7 @@ class OverlayScreen {
       {int duration = 0}) {
     removeOverlay();
 
-    overlayEntry = OverlayEntry(
+    final entry = OverlayEntry(
       builder: (context) => Positioned(
         top: MediaQuery.of(context).padding.top + 15,
         left: 40,
@@ -36,10 +36,15 @@ class OverlayScreen {
       ).animate().slideY(duration: 300.ms),
     );
 
-    Overlay.of(context, rootOverlay: true).insert(overlayEntry!);
+    overlayEntry = entry;
+    Overlay.of(context, rootOverlay: true).insert(entry);
 
     if (duration > 0) {
-      Future.delayed(Duration(seconds: duration), () => removeOverlay());
+      Future.delayed(Duration(seconds: duration), () {
+        if (overlayEntry == entry) {
+          removeOverlay();
+        }
+      });
     }
   }
 

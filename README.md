@@ -15,6 +15,7 @@ Your mini cinema on the go! Enjoy thousands of blockbuster movies and exciting s
 ### 3. **Synchronization and Progress Tracking**  
 - Users can save their favorite movies or delete favorite.
 - Users can view the history of the movies they have watched in the history settings and can clear that history.
+- Users can quickly resume their movies from the **"Continue Watching"** section directly on the Home Screen.
 
 ### 4. **User Account Management**  
 - Sign up, log in and fortgot account via email.
@@ -42,7 +43,7 @@ Your mini cinema on the go! Enjoy thousands of blockbuster movies and exciting s
 - **Http (Flutter)**: Libraries for making HTTP requests.  
 
 ### 4. **State Management**  
-- **Riverpod**: Efficiently manage application state.
+- **Riverpod**: Efficiently manage application state and cache API responses to optimize network performance.
 
 ## Project results
 
@@ -69,3 +70,10 @@ After v1.0.0
 ### Video:
 
 - [Link Cloudinary video demo](https://player.cloudinary.com/embed/?cloud_name=dksr7si4o&public_id=flutter%2Fvideo_kq%2F7197948695202_nq0kkv&profile=cld-default)
+
+## What's New in v1.3.0
+
+- **Continue Watching**: Added a horizontal scroll row at the top of the Home Screen displaying user's recently watched movies from Firestore, allowing users to resume watching instantly.
+- **State Caching with Riverpod**: Integrated Riverpod FutureProviders to cache category lists and movie listings, avoiding redundant API calls and increasing responsiveness.
+- **Critical Bug Fixes**: Fixed a bug causing duplicate Firestore watch history writes and resolved a notification/overlay race condition.
+- **Clean Folder Structure**: Cleaned up the folder hierarchy, renaming misspelled `compoments` directory to `components`.

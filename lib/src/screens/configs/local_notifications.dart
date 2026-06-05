@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:movie_app/main.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
-import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
+import 'package:movie_app/src/screens/components/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/home_screen.dart';
 import 'package:movie_app/src/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,8 +41,11 @@ class LocalNotifications {
                   .then(
                   (_) async {
                     await pref.remove("notification_payload");
-                    return MaterialPageRoute(
-                      builder: (_) => const HomeScreen(),
+                    navigatorKey.currentState?.pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const HomeScreen(),
+                      ),
+                      (route) => false,
                     );
                   },
                 )

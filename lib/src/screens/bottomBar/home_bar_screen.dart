@@ -7,10 +7,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/models/movie_model.dart';
-import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
-import 'package:movie_app/src/screens/compoments/shimmer_loading.dart';
-import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
+import 'package:movie_app/src/screens/components/infor_movie_screen.dart';
+import 'package:movie_app/src/screens/components/shimmer_loading.dart';
+import 'package:movie_app/src/screens/components/view_more_screen.dart';
 import 'package:movie_app/src/screens/widgets/card_movie.dart';
+import 'package:movie_app/src/services/movie_providers.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
 class HomeBarScreen extends ConsumerStatefulWidget {
@@ -23,15 +24,6 @@ class HomeBarScreen extends ConsumerStatefulWidget {
 class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   final MovieController movieController = MovieController();
   final PageController pageController = PageController(viewportFraction: .7);
-  late Future<List> futureCategoryMovies;
-  late Future<Map> futureNewlyUpdatedMovies;
-  late Future<Map> futureSingleMovies;
-  late Future<Map> futureDramaMovies;
-  late Future<Map> futureCartoonMovies;
-  late Future<Map> futureTvShowsMovies;
-  late Future<Map> futureVietSubMovies;
-  late Future<Map> futureNarratedMovies;
-  late Future<Map> futureDubbedMovies;
   final int pageMovie = 1;
   final int limitMovie = 12;
   final String sortType = "desc";
@@ -57,19 +49,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   @override
   void initState() {
     super.initState();
-    futureCategoryMovies = movieController.categoryMovies();
-    futureNewlyUpdatedMovies = movieController.newlyUpdatedMoviesV3();
-    futureSingleMovies = movieController.singleMovies(pageMovie, limitMovie);
-    futureDramaMovies = movieController.dramaMovies(pageMovie, limitMovie);
-    futureCartoonMovies = movieController.cartoonMovies(pageMovie, limitMovie);
-    futureTvShowsMovies = movieController.tvShowsMovies(pageMovie, limitMovie);
-    futureVietSubMovies = movieController.vietSubMovies(pageMovie, limitMovie);
-    futureNarratedMovies =
-        movieController.narratedMovies(pageMovie, limitMovie);
-    futureDubbedMovies = movieController.dubbedMovies(pageMovie, limitMovie);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
         ref.read(currentTitle.notifier).state = 'app.home';
+        movieController.historyWatchMovies(ref);
       },
     );
 
@@ -99,7 +82,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   void dispose() {
     scrollController.dispose();
     pageController.dispose();
-    timer!.cancel();
+    timer?.cancel();
     super.dispose();
   }
 
@@ -128,32 +111,146 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   }
 
   Future<void> refresh() async {
-    setState(() {
-      futureCategoryMovies = movieController.categoryMovies();
-      futureNewlyUpdatedMovies = movieController.newlyUpdatedMoviesV3();
-      futureSingleMovies = movieController.singleMovies(pageMovie, limitMovie);
-      futureDramaMovies = movieController.dramaMovies(pageMovie, limitMovie);
-      futureCartoonMovies =
-          movieController.cartoonMovies(pageMovie, limitMovie);
-      futureTvShowsMovies =
-          movieController.tvShowsMovies(pageMovie, limitMovie);
-      futureVietSubMovies =
-          movieController.vietSubMovies(pageMovie, limitMovie);
-      futureNarratedMovies =
-          movieController.narratedMovies(pageMovie, limitMovie);
-      futureDubbedMovies = movieController.dubbedMovies(pageMovie, limitMovie);
-    });
-    await Future.wait([
-      futureCategoryMovies,
-      futureNewlyUpdatedMovies,
-      futureSingleMovies,
-      futureDramaMovies,
-      futureCartoonMovies,
-      futureTvShowsMovies,
-      futureVietSubMovies,
-      futureNarratedMovies,
-      futureDubbedMovies
-    ]);
+    ref.invalidate(categoryMoviesProvider);
+    ref.invalidate(newlyUpdatedMoviesProvider);
+    ref.invalidate(singleMoviesProvider);
+    ref.invalidate(dramaMoviesProvider);
+    ref.invalidate(cartoonMoviesProvider);
+    ref.invalidate(tvShowsMoviesProvider);
+    ref.invalidate(vietSubMoviesProvider);
+    ref.invalidate(narratedMoviesProvider);
+    ref.invalidate(dubbedMoviesProvider);
+
+    await movieController.historyWatchMovies(ref);
+    try {
+      await ref.read(newlyUpdatedMoviesProvider.future);
+    } catch (_) {}
+  }
+
+  Widget _buildContinueWatching() {
+    final historyMap = ref.watch(historyMoviesNotifierProvider);
+    final historyList = historyMap.values.toList();
+    if (historyList.isEmpty) return const SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Text(
+            'historyScreen.title'.tr(),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 110,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: historyList.length,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            itemBuilder: (context, index) {
+              final movie = historyList[index];
+              return Container(
+                width: 240,
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withValues(alpha: .1)),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => InforMovieScreen(slugMovie: movie['slug']),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 75,
+                          height: 110,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: movie['poster_url'],
+                                fit: BoxFit.cover,
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error, color: Colors.white30),
+                              ),
+                              Container(
+                                color: Colors.black26,
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.play_circle_outline,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  movie['name'] ?? '',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.withValues(alpha: .8),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'historyScreen.watchedEpisode'.tr(args: [
+                                      'movie.episode'.plural(movie['episode'])
+                                    ]),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
+    );
   }
 
   @override
@@ -201,29 +298,22 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                 SizedBox(
                   key: keys['app.home'],
                   height: MediaQuery.sizeOf(context).height / 1.7,
-                  child: FutureBuilder(
-                    future: futureNewlyUpdatedMovies,
-                    builder: (context, asyncSnapshot) {
-                      if (asyncSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      Map newlyUpdatedMovies = asyncSnapshot.data!;
+                  child: ref.watch(newlyUpdatedMoviesProvider).when(
+                    data: (newlyUpdatedMovies) {
                       final items = newlyUpdatedMovies['items'] ?? [];
+                      if (items.isEmpty) return const SizedBox();
 
                       return StatefulBuilder(
                         builder: (context, StateSetter stateSetter) {
                           return Stack(
                             fit: StackFit.expand,
                             children: [
-                              if (items.isNotEmpty)
-                                CachedNetworkImage(
-                                  imageUrl: items[currentPage]['poster_url'],
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                ),
+                              CachedNetworkImage(
+                                imageUrl: items[currentPage]['poster_url'],
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
                               Container(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
@@ -319,8 +409,11 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         },
                       );
                     },
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                   ),
                 ),
+                _buildContinueWatching(),
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   child: Column(
@@ -348,7 +441,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             Text(
                               'movie.single'.tr(),
                               style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
@@ -365,21 +458,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                           ],
                         ),
                       ),
-                      FutureBuilder(
-                        future: futureSingleMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const ShimmerLoading();
-                          } else if (snapshot.hasData) {
-                            Map dataMovies = snapshot.data!;
-                            return GridViewScreen(dataMovies: dataMovies);
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
-                        },
+                      ref.watch(singleMoviesProvider).when(
+                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
+                        loading: () => const ShimmerLoading(),
+                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
                       GestureDetector(
                         key: keys['movie.drama'],
@@ -403,7 +485,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             Text(
                               'movie.drama'.tr(),
                               style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
@@ -420,21 +502,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                           ],
                         ),
                       ),
-                      FutureBuilder(
-                        future: futureDramaMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const ShimmerLoading();
-                          } else if (snapshot.hasData) {
-                            Map dataMovies = snapshot.data!;
-                            return GridViewScreen(dataMovies: dataMovies);
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
-                        },
+                      ref.watch(dramaMoviesProvider).when(
+                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
+                        loading: () => const ShimmerLoading(),
+                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
                       GestureDetector(
                         key: keys['movie.cartoon'],
@@ -458,7 +529,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             Text(
                               'movie.cartoon'.tr(),
                               style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
@@ -475,21 +546,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                           ],
                         ),
                       ),
-                      FutureBuilder(
-                        future: futureCartoonMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const ShimmerLoading();
-                          } else if (snapshot.hasData) {
-                            Map dataMovies = snapshot.data!;
-                            return GridViewScreen(dataMovies: dataMovies);
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
-                        },
+                      ref.watch(cartoonMoviesProvider).when(
+                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
+                        loading: () => const ShimmerLoading(),
+                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
                       GestureDetector(
                         key: keys['movie.tvShows'],
@@ -513,7 +573,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             Text(
                               'movie.tvShows'.tr(),
                               style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
@@ -530,21 +590,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                           ],
                         ),
                       ),
-                      FutureBuilder(
-                        future: futureTvShowsMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const ShimmerLoading();
-                          } else if (snapshot.hasData) {
-                            Map dataMovies = snapshot.data!;
-                            return GridViewScreen(dataMovies: dataMovies);
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
-                        },
+                      ref.watch(tvShowsMoviesProvider).when(
+                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
+                        loading: () => const ShimmerLoading(),
+                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
                       GestureDetector(
                         key: keys['movie.vietsub'],
@@ -568,7 +617,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             Text(
                               'movie.vietsub'.tr(),
                               style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
@@ -585,21 +634,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                           ],
                         ),
                       ),
-                      FutureBuilder(
-                        future: futureVietSubMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const ShimmerLoading();
-                          } else if (snapshot.hasData) {
-                            Map dataMovies = snapshot.data!;
-                            return GridViewScreen(dataMovies: dataMovies);
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
-                        },
+                      ref.watch(vietSubMoviesProvider).when(
+                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
+                        loading: () => const ShimmerLoading(),
+                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
                       GestureDetector(
                         key: keys['movie.narrated'],
@@ -623,7 +661,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             Text(
                               'movie.narrated'.tr(),
                               style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
@@ -640,21 +678,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                           ],
                         ),
                       ),
-                      FutureBuilder(
-                        future: futureNarratedMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const ShimmerLoading();
-                          } else if (snapshot.hasData) {
-                            Map dataMovies = snapshot.data!;
-                            return GridViewScreen(dataMovies: dataMovies);
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
-                        },
+                      ref.watch(narratedMoviesProvider).when(
+                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
+                        loading: () => const ShimmerLoading(),
+                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
                       GestureDetector(
                         key: keys['movie.dubbed'],
@@ -678,7 +705,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             Text(
                               'movie.dubbed'.tr(),
                               style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
@@ -695,21 +722,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                           ],
                         ),
                       ),
-                      FutureBuilder(
-                        future: futureDubbedMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const ShimmerLoading();
-                          } else if (snapshot.hasData) {
-                            Map dataMovies = snapshot.data!;
-                            return GridViewScreen(dataMovies: dataMovies);
-                          } else {
-                            return const Center(
-                              child: Icon(Icons.error),
-                            );
-                          }
-                        },
+                      ref.watch(dubbedMoviesProvider).when(
+                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
+                        loading: () => const ShimmerLoading(),
+                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
                     ].animate(interval: 200.ms).fadeIn(duration: 500.ms),
                   ),

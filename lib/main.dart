@@ -9,7 +9,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:movie_app/firebase_options.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/controllers/user_controller.dart';
-import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
+import 'package:movie_app/src/screens/components/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/configs/local_notifications.dart';
 import 'package:movie_app/src/screens/configs/network_listener.dart';
 import 'package:movie_app/src/screens/configs/workmanager_task.dart';

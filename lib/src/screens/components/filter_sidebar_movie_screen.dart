@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
-import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
+import 'package:movie_app/src/screens/components/view_more_screen.dart';
 import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 
 class FilterSidebarMovieScreen extends StatefulWidget {

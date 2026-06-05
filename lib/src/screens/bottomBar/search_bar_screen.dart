@@ -6,9 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/models/movie_model.dart';
-import 'package:movie_app/src/screens/compoments/filter_sidebar_movie_screen.dart';
-import 'package:movie_app/src/screens/compoments/infor_movie_screen.dart';
+import 'package:movie_app/src/screens/components/filter_sidebar_movie_screen.dart';
+import 'package:movie_app/src/screens/components/infor_movie_screen.dart';
 import 'package:movie_app/src/screens/widgets/card_movie.dart';
+import 'package:movie_app/src/services/movie_providers.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
 
 class SearchBarScreen extends ConsumerStatefulWidget {
@@ -34,8 +35,8 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
   @override
   void initState() {
     futureNewlyUpdatedMovies = movieController.newlyUpdatedMoviesV3(page: 2);
-    futureCategoryMovies = movieController.categoryMovies();
-    futureCountryMovies = movieController.countryMovies();
+    futureCategoryMovies = ref.read(categoryMoviesProvider.future);
+    futureCountryMovies = ref.read(countryMoviesProvider.future);
     super.initState();
   }
 

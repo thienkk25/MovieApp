@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:movie_app/src/controllers/movie_controller.dart';
 import 'package:movie_app/src/controllers/series_recommendation_controller.dart';
 import 'package:movie_app/src/models/movie_model.dart';
-import 'package:movie_app/src/screens/compoments/view_more_screen.dart';
-import 'package:movie_app/src/screens/compoments/watch_movie_screen.dart';
+import 'package:movie_app/src/screens/components/view_more_screen.dart';
+import 'package:movie_app/src/screens/components/watch_movie_screen.dart';
 import 'package:movie_app/src/screens/configs/overlay_screen.dart';
 import 'package:movie_app/src/screens/widgets/card_movie.dart';
 import 'package:movie_app/src/services/riverpod_service.dart';
@@ -214,12 +214,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                                 [0]['server_data'][episode]
                                             ['link_m3u8'];
 
-                                        movieController.addHistoryWatchMovies(
-                                            dataInforMovie['movie']['name'],
-                                            widget.slugMovie,
-                                            dataInforMovie['movie']
-                                                ['poster_url'],
-                                            episode + 1);
                                         addHistoryWatchMovies(
                                             dataInforMovie['movie']['name'],
                                             widget.slugMovie,
@@ -288,12 +282,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             .state = dataInforMovie['episodes']
                                                 [0]['server_data'][episode]
                                             ['link_m3u8'];
-                                        movieController.addHistoryWatchMovies(
-                                            dataInforMovie['movie']['name'],
-                                            widget.slugMovie,
-                                            dataInforMovie['movie']
-                                                ['poster_url'],
-                                            episode + 1);
                                         addHistoryWatchMovies(
                                             dataInforMovie['movie']['name'],
                                             widget.slugMovie,
@@ -735,11 +723,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                     dataInforMovie!['episodes'][0]
                                         ['server_data'][0]['link_m3u8'];
 
-                                movieController.addHistoryWatchMovies(
-                                    dataInforMovie['movie']['name'],
-                                    widget.slugMovie,
-                                    dataInforMovie['movie']['poster_url'],
-                                    1);
                                 addHistoryWatchMovies(
                                     dataInforMovie['movie']['name'],
                                     widget.slugMovie,
@@ -779,11 +762,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         .state =
                                     dataInforMovie['episodes'][0]['server_data']
                                         [size - 1]['link_m3u8'];
-                                movieController.addHistoryWatchMovies(
-                                    dataInforMovie['movie']['name'],
-                                    widget.slugMovie,
-                                    dataInforMovie['movie']['poster_url'],
-                                    size);
                                 addHistoryWatchMovies(
                                     dataInforMovie['movie']['name'],
                                     widget.slugMovie,
@@ -886,11 +864,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         .state =
                                     dataInforMovie!['episodes'][0]
                                         ['server_data'][index]['link_m3u8'];
-                                movieController.addHistoryWatchMovies(
-                                    dataInforMovie['movie']['name'],
-                                    widget.slugMovie,
-                                    dataInforMovie['movie']['poster_url'],
-                                    index + 1);
                                 addHistoryWatchMovies(
                                     dataInforMovie['movie']['name'],
                                     widget.slugMovie,
