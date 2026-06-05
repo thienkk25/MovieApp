@@ -744,6 +744,50 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   trailing: const Icon(Icons.arrow_forward_ios),
                 ),
               ),
+              const SizedBox(height: 40),
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      '© ${DateTime.now().year} MovieApp. All rights reserved.',
+                      style: const TextStyle(
+                        color: Color(0xFF9E9E9E),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Developed with ❤️ by ',
+                          style: TextStyle(
+                            color: Color(0xFF757575),
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'Thien Nguyen',
+                          style: TextStyle(
+                            color: Colors.orangeAccent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Version 1.3.0',
+                      style: TextStyle(
+                        color: Color(0xFFBDBDBD),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
