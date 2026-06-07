@@ -132,6 +132,13 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
     final historyList = historyMap.values.toList();
     if (historyList.isEmpty) return const SizedBox();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : Colors.black87;
+    final cardBg = isDark ? Colors.white.withValues(alpha: .08) : Colors.black.withValues(alpha: .05);
+    final borderColor = isDark ? Colors.white.withValues(alpha: .1) : Colors.black.withValues(alpha: .08);
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final iconColor = isDark ? Colors.white30 : Colors.black26;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -139,10 +146,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Text(
             'historyScreen.title'.tr(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: titleColor,
             ),
           ),
         ),
@@ -158,9 +165,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                 width: 240,
                 margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .08),
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withValues(alpha: .1)),
+                  border: Border.all(color: borderColor),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -185,7 +192,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                 imageUrl: movie['poster_url'],
                                 fit: BoxFit.cover,
                                 errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error, color: Colors.white30),
+                                    Icon(Icons.error, color: iconColor),
                               ),
                               Container(
                                 color: Colors.black26,
@@ -211,8 +218,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                   movie['name'] ?? '',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: textColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                   ),
