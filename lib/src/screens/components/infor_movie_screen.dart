@@ -25,7 +25,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   final MovieController movieController = MovieController();
   final ScrollController scrollController = ScrollController();
   final Map<int, double> itemEpisodeOffsets = {};
-  bool isIconFavorite = false;
   int currentPage = 0;
   final int pageMovie = 1;
   final int limitMovie = 12;
@@ -74,7 +73,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.width / (16 / 9);
 
-    Map dataFavorites = ref.read(getFavoriteMoviesNotifierProvider);
+    final dataFavorites = ref.watch(getFavoriteMoviesNotifierProvider);
+    final isFavorite = dataFavorites.containsKey(widget.slugMovie);
+
     return FutureBuilder<Map?>(
       future: singleDetailMovies,
       builder: (context, snapshot) {
@@ -105,9 +106,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
         }
 
         Map? dataInforMovie = snapshot.data;
-        if (dataFavorites.containsKey(widget.slugMovie)) {
-          isIconFavorite = true;
-        }
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -116,56 +114,49 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
             ),
             centerTitle: true,
             actions: [
-              StatefulBuilder(
-                builder: (context, StateSetter stateSetter) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: GestureDetector(
-                      onTap: () {
-                        if (isIconFavorite) {
-                          removeFavoriteMovie(dataInforMovie?['movie']['slug']);
-                        } else {
-                          addFavoriteMovie(
-                            dataInforMovie?['movie']['name'],
-                            dataInforMovie?['movie']['slug'],
-                            dataInforMovie?['movie']['poster_url'],
-                            dataInforMovie?['movie']['lang'],
-                            dataInforMovie?['movie']['episode_current'],
-                          );
-                        }
-                        stateSetter(() {
-                          isIconFavorite = !isIconFavorite;
-                        });
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isIconFavorite
-                              ? Colors.orange.withValues(alpha: .2)
-                              : Colors.grey.withValues(alpha: .1),
-                        ),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          transitionBuilder: (child, animation) =>
-                              ScaleTransition(
-                            scale: animation,
-                            child: child,
-                          ),
-                          child: Icon(
-                            isIconFavorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            key: ValueKey<bool>(isIconFavorite),
-                            color: isIconFavorite ? Colors.orange : Colors.grey,
-                            size: 28,
-                          ),
-                        ),
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: GestureDetector(
+                  onTap: () {
+                    if (isFavorite) {
+                      removeFavoriteMovie(dataInforMovie?['movie']['slug']);
+                    } else {
+                      addFavoriteMovie(
+                        dataInforMovie?['movie']['name'],
+                        dataInforMovie?['movie']['slug'],
+                        dataInforMovie?['movie']['poster_url'],
+                        dataInforMovie?['movie']['lang'],
+                        dataInforMovie?['movie']['episode_current'],
+                      );
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isFavorite
+                          ? Colors.orange.withValues(alpha: .2)
+                          : Colors.grey.withValues(alpha: .1),
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) =>
+                          ScaleTransition(
+                        scale: animation,
+                        child: child,
+                      ),
+                      child: Icon(
+                        isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        key: ValueKey<bool>(isFavorite),
+                        color: isFavorite ? Colors.orange : Colors.grey,
+                        size: 28,
                       ),
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ],
           ),
