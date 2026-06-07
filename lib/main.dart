@@ -7,15 +7,17 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:movie_app/firebase_options.dart';
-import 'package:movie_app/src/controllers/movie_controller.dart';
-import 'package:movie_app/src/controllers/user_controller.dart';
-import 'package:movie_app/src/screens/components/infor_movie_screen.dart';
-import 'package:movie_app/src/screens/configs/local_notifications.dart';
-import 'package:movie_app/src/screens/configs/network_listener.dart';
-import 'package:movie_app/src/screens/configs/workmanager_task.dart';
-import 'package:movie_app/src/screens/home_screen.dart';
-import 'package:movie_app/src/screens/login_screen.dart';
-import 'package:movie_app/src/services/riverpod_service.dart';
+import 'package:movie_app/src/features/movie/data/datasources/movie_remote_data_source.dart';
+import 'package:movie_app/src/features/movie/data/datasources/movie_firestore_data_source.dart';
+import 'package:movie_app/src/features/movie/data/repositories/movie_repository_impl.dart';
+import 'package:movie_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:movie_app/src/core/providers/core_providers.dart';
+import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
+import 'package:movie_app/src/core/configs/local_notifications.dart';
+import 'package:movie_app/src/core/configs/network_listener.dart';
+import 'package:movie_app/src/core/configs/workmanager_task.dart';
+import 'package:movie_app/src/features/movie/presentation/screens/home_screen.dart';
+import 'package:movie_app/src/features/auth/presentation/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -35,7 +37,10 @@ Future<void> notificationTapBackground(NotificationResponse response) async {
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     if (task == "fetch_api_newlyUpdatedMovies") {
-      final data = await MovieController().newlyUpdatedMovies();
+      final data = await MovieRepositoryImpl(
+        remoteDataSource: MovieRemoteDataSourceImpl(),
+        firestoreDataSource: MovieFirestoreDataSourceImpl(),
+      ).newlyUpdatedMovies(1);
 
       if (data.isNotEmpty) {
         final title = "Phim ${data['items'][0]['name']}";
@@ -124,8 +129,6 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> {
-  final UserController userController = UserController();
-
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
@@ -164,7 +167,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         widget.initialPayload!.isNotEmpty &&
         isNotification) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (UserController().isUser()) {
+        if (ref.read(isUserUseCaseProvider).call()) {
           navigatorKey.currentState
               ?.push(
             MaterialPageRoute(
@@ -196,7 +199,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     Widget home =
-        userController.isUser() ? const HomeScreen() : const LoginScreen();
+        ref.watch(isUserUseCaseProvider).call() ? const HomeScreen() : const LoginScreen();
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
