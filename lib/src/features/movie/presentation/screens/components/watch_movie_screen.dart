@@ -59,25 +59,7 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
       },
     );
     _completedSubscription = _player.stream.completed.listen((_) {
-      if (!mounted || _isAutoNexting.value) return;
-
-      if (ref.read(isAutoNextMovie) && totalDurationVideo > Duration.zero) {
-        _isAutoNexting.value = true;
-        _countdown.value = 3;
-        _autoNextTimer?.cancel();
-        _autoNextTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-          if (!mounted) {
-            timer.cancel();
-            return;
-          }
-          if (_countdown.value > 1) {
-            _countdown.value -= 1;
-          } else {
-            timer.cancel();
-            _playNextEpisode();
-          }
-        });
-      }
+      // Auto-next has been disabled
     });
 
     super.initState();

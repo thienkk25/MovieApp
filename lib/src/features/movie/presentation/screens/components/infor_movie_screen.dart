@@ -10,7 +10,6 @@ import 'package:movie_app/src/features/movie/presentation/screens/components/wat
 import 'package:movie_app/src/core/configs/overlay_screen.dart';
 import 'package:movie_app/src/core/widgets/card_movie.dart';
 import 'package:movie_app/src/features/movie/presentation/providers/movie_providers.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class InforMovieScreen extends ConsumerStatefulWidget {
   final String slugMovie;
@@ -32,16 +31,13 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   late Future<Map?> singleDetailMovies;
   late Future<Map?> episodeHistoryMovies;
   late Future<List> recommendedMovies;
-  late SharedPreferences pref;
 
   @override
   void initState() {
     loadData();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) async {
-        pref = await SharedPreferences.getInstance();
-        ref.read(isAutoNextMovie.notifier).state =
-            pref.getBool("isAutoNextMovie") ?? false;
+        ref.read(isAutoNextMovie.notifier).state = false;
         ref.read(isCollapsedReadMore.notifier).state = true;
       },
     );
@@ -369,38 +365,6 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                                     color: Colors.orange,
                                                   ),
                                                   child: const Text("M3u8", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                ref.watch(isAutoNextMovie) ? Icons.play_circle_fill_rounded : Icons.pause_circle_filled_rounded,
-                                                color: ref.watch(isAutoNextMovie) ? Colors.blue : Colors.grey[500],
-                                                size: 20,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                'Auto Next',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 13,
-                                                  color: ref.watch(isAutoNextMovie) ? Colors.blue : Colors.grey[500],
-                                                ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              SizedBox(
-                                                height: 28,
-                                                child: Switch(
-                                                  value: ref.watch(isAutoNextMovie),
-                                                  onChanged: (value) async {
-                                                    ref.read(isAutoNextMovie.notifier).state = value;
-                                                    await pref.setBool("isAutoNextMovie", value);
-                                                  },
-                                                  activeThumbColor: Colors.blue,
-                                                  activeTrackColor: Colors.blue.withValues(alpha: 0.4),
                                                 ),
                                               ),
                                             ],
