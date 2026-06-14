@@ -22,9 +22,16 @@ class CardMovie extends StatelessWidget {
       onTap: onTap,
       child: Container(
         clipBehavior: Clip.antiAlias,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-          gradient: LinearGradient(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
@@ -38,36 +45,36 @@ class CardMovie extends StatelessWidget {
                   : "https://phimimg.com/${movie.posterUrl}",
               progressIndicatorBuilder: (context, url, progress) =>
                   const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(color: Colors.orangeAccent),
               ),
               errorWidget: (context, url, error) => const Icon(Icons.error),
               height: double.infinity,
               width: double.infinity,
-              fit: BoxFit.fill,
+              fit: BoxFit.cover,
               memCacheHeight: 400,
             ),
             Positioned(
-              top: 0,
-              left: 0,
+              top: 6,
+              left: 6,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Colors.orangeAccent, Colors.deepOrange],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(6),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: .3),
-                          offset: const Offset(2, 2),
-                          blurRadius: 4,
+                          offset: const Offset(1, 1),
+                          blurRadius: 3,
                         ),
                       ],
                     ),
@@ -75,14 +82,14 @@ class CardMovie extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.language,
-                            size: 14, color: Colors.white),
+                            size: 11, color: Colors.white),
                         const SizedBox(width: 4),
                         Text(
                           movie.lang ?? '',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 10,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -90,31 +97,32 @@ class CardMovie extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: .5),
-                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.black.withValues(alpha: .6),
+                      borderRadius: BorderRadius.circular(6),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: .3),
-                          offset: const Offset(2, 2),
-                          blurRadius: 4,
+                          offset: const Offset(1, 1),
+                          blurRadius: 3,
                         ),
                       ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.tv, size: 14, color: Colors.white),
+                        const Icon(Icons.tv, size: 11, color: Colors.white),
                         const SizedBox(width: 4),
                         Text(
                           movie.episodeCurrent ?? '',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 10,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -130,12 +138,26 @@ class CardMovie extends StatelessWidget {
               left: 0,
               right: 0,
               child: Container(
-                width: 300,
-                padding: const EdgeInsets.all(10.0),
-                color: Colors.black.withValues(alpha: .4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.0),
+                      Colors.black.withValues(alpha: 0.85),
+                    ],
+                  ),
+                ),
                 child: Text(
                   movie.name ?? '',
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),

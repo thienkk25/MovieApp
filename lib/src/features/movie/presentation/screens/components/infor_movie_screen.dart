@@ -993,7 +993,8 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   ),
                                 );
                               } else if (snapshot.hasData) {
-                                List dataMovies = snapshot.data!;
+                                List rawMovies = snapshot.data!;
+                                List dataMovies = rawMovies.take(12).toList();
                                 double sizeWidth = MediaQuery.of(context).size.width;
                                 int responsiveColumnCount = sizeWidth < 600
                                     ? 2
