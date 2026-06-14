@@ -790,26 +790,34 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               return const SizedBox();
                             }
                             return Consumer(
-                              builder: (context, ref, child) => TextButton(
-                                onPressed: () => {
-                                  ref.read(isCollapsedReadMore.notifier).state =
-                                      true,
-                                  scrollController.position.animateTo(
-                                      itemEpisodeOffsets[
-                                          ref.watch(wasWatchEpisodeMovies) -
-                                              1]!,
-                                      duration: Durations.long1,
-                                      curve: Curves.linear)
-                                },
-                                style: const ButtonStyle(
-                                    padding: WidgetStatePropertyAll(
-                                        EdgeInsetsGeometry.all(0))),
-                                child: Text('historyScreen.watchedEpisode'
-                                    .tr(args: [
-                                  'movie.episode'
-                                      .plural(ref.watch(wasWatchEpisodeMovies))
-                                ])),
-                              ),
+                              builder: (context, ref, child) {
+                                final watchedEpisode = ref.watch(wasWatchEpisodeMovies);
+                                if (watchedEpisode == -1) {
+                                  return const SizedBox();
+                                }
+                                return TextButton(
+                                  onPressed: () {
+                                    ref.read(isCollapsedReadMore.notifier).state = true;
+                                    final episodeIndex = watchedEpisode - 1;
+                                    final targetOffset = itemEpisodeOffsets[episodeIndex] ?? 0.0;
+                                    if (scrollController.hasClients) {
+                                      scrollController.animateTo(
+                                        targetOffset,
+                                        duration: Durations.long1,
+                                        curve: Curves.linear,
+                                      );
+                                    }
+                                  },
+                                  style: const ButtonStyle(
+                                      padding: WidgetStatePropertyAll(
+                                          EdgeInsetsGeometry.all(0))),
+                                  child: Text('historyScreen.watchedEpisode'
+                                      .tr(args: [
+                                    'movie.episode'
+                                        .plural(watchedEpisode)
+                                  ])),
+                                );
+                              },
                             );
                           }),
                       const Text('movieDetail.episodeList').tr(),
