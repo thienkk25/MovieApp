@@ -90,11 +90,14 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
     _durationSubscription?.cancel();
     _completedSubscription?.cancel();
 
+    // Immediately halt decoding and audio output to stop native streams.
+    try {
+      _player.stop();
+    } catch (_) {}
+
     final playerToDispose = _player;
-    Future.microtask(() async {
-      try {
-        await playerToDispose.stop();
-      } catch (_) {}
+    // Delay the FFI disposal to allow the GPU/native surface cleanup callbacks to settle.
+    Future.delayed(const Duration(milliseconds: 1000), () async {
       try {
         await playerToDispose.dispose();
       } catch (_) {}
