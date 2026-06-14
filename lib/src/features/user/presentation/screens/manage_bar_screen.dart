@@ -28,6 +28,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
   late final String profilePicture;
   late final SharedPreferences pref;
   late bool isNotification;
+
   @override
   void initState() {
     user = ref.read(getCurrentUserUseCaseProvider).call();
@@ -50,20 +51,592 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
     isNotification = pref.getBool("notification_enabled") ?? true;
   }
 
+  Widget _buildSettingItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Widget? trailing,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.orangeAccent, size: 22),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            trailing ?? const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showNotificationSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF141622),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, StateSetter stateSetter) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                title: Text(
+                  'settingsScreen.notifications.on'.tr(),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+                trailing: isNotification
+                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    : null,
+                onTap: () async {
+                  Navigator.pop(context);
+                  OverlayScreen().showOverlay(
+                      context,
+                      'settingsScreen.notifications.on'.tr(),
+                      Colors.green,
+                      duration: 2);
+                  pref.setBool("notification_enabled", true);
+                  setState(() => isNotification = true);
+                },
+              ),
+              const Divider(height: 1, color: Colors.white10),
+              ListTile(
+                title: Text(
+                  'settingsScreen.notifications.off'.tr(),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+                trailing: isNotification
+                    ? null
+                    : const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent),
+                onTap: () async {
+                  Navigator.pop(context);
+                  OverlayScreen().showOverlay(
+                      context,
+                      'settingsScreen.notifications.off'.tr(),
+                      Colors.grey,
+                      duration: 2);
+                  pref.setBool("notification_enabled", false);
+                  await WorkmanagerTask.cancelNotificationTasks();
+                  setState(() => isNotification = false);
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLanguageSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF141622),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Consumer(
+        builder: (context, ref, child) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                title: Text(
+                  'settingsScreen.language.vi'.tr(),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+                trailing: ref.watch(isLanguageProvider) == const Locale('vi', '')
+                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    : null,
+                onTap: () async {
+                  Navigator.pop(context);
+                  context.setLocale(const Locale('vi', ''));
+                  OverlayScreen().showOverlay(
+                      context,
+                      'settingsScreen.language.vi'.tr(),
+                      Colors.blueGrey,
+                      duration: 2);
+                  ref.read(isLanguageProvider.notifier).state = const Locale('vi', '');
+                  ref.read(currentTitle.notifier).state = 'app.home';
+                  await pref.setInt("language", 0);
+                },
+              ),
+              const Divider(height: 1, color: Colors.white10),
+              ListTile(
+                title: Text(
+                  'settingsScreen.language.en'.tr(),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+                trailing: ref.watch(isLanguageProvider) == const Locale('en', '')
+                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    : null,
+                onTap: () async {
+                  Navigator.pop(context);
+                  context.setLocale(const Locale('en', ''));
+                  OverlayScreen().showOverlay(
+                      context,
+                      'settingsScreen.language.en'.tr(),
+                      Colors.blueGrey,
+                      duration: 2);
+                  ref.read(isLanguageProvider.notifier).state = const Locale('en', '');
+                  ref.read(currentTitle.notifier).state = 'app.home';
+                  await pref.setInt("language", 1);
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showThemeSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF141622),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Consumer(
+        builder: (context, ref, child) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.light_mode, color: Colors.white70),
+                title: Text(
+                  'settingsScreen.theme.light'.tr(),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+                trailing: ref.watch(themeModeProvider) == ThemeMode.light
+                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    : null,
+                onTap: () async {
+                  ref.read(themeModeProvider.notifier).state = ThemeMode.light;
+                  Navigator.pop(context);
+                  OverlayScreen().showOverlay(
+                      context,
+                      'settingsScreen.theme.light'.tr(),
+                      Colors.blueGrey,
+                      duration: 2);
+                  pref.setString("themeMode", "light");
+                },
+              ),
+              const Divider(height: 1, color: Colors.white10),
+              ListTile(
+                leading: const Icon(Icons.dark_mode, color: Colors.white70),
+                title: Text(
+                  'settingsScreen.theme.dark'.tr(),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+                trailing: ref.watch(themeModeProvider) == ThemeMode.dark
+                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    : null,
+                onTap: () async {
+                  ref.read(themeModeProvider.notifier).state = ThemeMode.dark;
+                  Navigator.pop(context);
+                  OverlayScreen().showOverlay(
+                      context,
+                      'settingsScreen.theme.dark'.tr(),
+                      Colors.blueGrey,
+                      duration: 2);
+                  pref.setString("themeMode", "dark");
+                },
+              ),
+              const Divider(height: 1, color: Colors.white10),
+              ListTile(
+                leading: const Icon(Icons.phone_android, color: Colors.white70),
+                title: Text(
+                  'settingsScreen.theme.system'.tr(),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+                trailing: ref.watch(themeModeProvider) == ThemeMode.system
+                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    : null,
+                onTap: () async {
+                  ref.read(themeModeProvider.notifier).state = ThemeMode.system;
+                  Navigator.pop(context);
+                  OverlayScreen().showOverlay(
+                      context,
+                      'settingsScreen.theme.system'.tr(),
+                      Colors.blueGrey,
+                      duration: 2);
+                  pref.setString("themeMode", "auto");
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showHistorySheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF141622),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          Map data = ref.watch(historyMoviesNotifierProvider);
+          List dataHistory = data.values.toList();
+
+          if (dataHistory.isEmpty) {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height * 0.4,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.history_rounded, size: 64, color: Colors.white30),
+                    const SizedBox(height: 12),
+                    Text(
+                      'historyScreen.emptyMessage'.tr(),
+                      style: const TextStyle(fontSize: 16, color: Colors.white30),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.7,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                const SizedBox(height: 6),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      spacing: 8,
+                      children: [
+                        const Icon(Icons.history_rounded, size: 26, color: Colors.orangeAccent),
+                        Text(
+                          'historyScreen.title'.tr(),
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const Divider(color: Colors.white10),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: dataHistory.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final item = dataHistory[index];
+
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => InforMovieScreen(slugMovie: item['slug']),
+                          ),
+                        ),
+                        onLongPress: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => Dialog(
+                              backgroundColor: const Color(0xFF1C1E2D),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      item['name'],
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          color: Colors.white),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => InforMovieScreen(slugMovie: item['slug']),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.orangeAccent,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          icon: const Icon(Icons.play_arrow_rounded),
+                                          label: Text('app.watch'.tr()),
+                                        ),
+                                        OutlinedButton.icon(
+                                          style: OutlinedButton.styleFrom(
+                                            backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+                                            side: const BorderSide(color: Colors.redAccent),
+                                            foregroundColor: Colors.redAccent,
+                                          ),
+                                          onPressed: () async {
+                                            final result = await ref
+                                                .read(removeHistoryWatchMovieUseCaseProvider)
+                                                .call(item['slug']);
+                                            if (!context.mounted) return;
+                                            Navigator.pop(context);
+                                            if (result) {
+                                              OverlayScreen().showOverlay(
+                                                  context,
+                                                  'success.delete'.tr(),
+                                                  Colors.green,
+                                                  duration: 3);
+                                              ref
+                                                  .read(historyMoviesNotifierProvider.notifier)
+                                                  .removeState(item['slug']);
+                                            } else {
+                                              OverlayScreen().showOverlay(
+                                                  context,
+                                                  'errors.delete'.tr(),
+                                                  Colors.red,
+                                                  duration: 3);
+                                            }
+                                          },
+                                          icon: const Icon(Icons.delete_outline_rounded),
+                                          label: Text('app.del'.tr()),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.white.withValues(alpha: 0.04),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                          ),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(16),
+                                  bottomLeft: Radius.circular(16),
+                                ),
+                                child: CachedNetworkImage(
+                                  imageUrl: item['poster_url'],
+                                  height: 90,
+                                  width: 65,
+                                  fit: BoxFit.cover,
+                                  progressIndicatorBuilder: (context, url, progress) =>
+                                      const Center(child: CircularProgressIndicator()),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error, size: 40, color: Colors.white24),
+                                  memCacheHeight: 150,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item['name'],
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'historyScreen.watchedEpisode'.tr(
+                                          args: ['movie.episode'.plural(item['episode'])],
+                                        ),
+                                        style: const TextStyle(
+                                          color: Colors.orangeAccent,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right_rounded, size: 20, color: Colors.white38),
+                              const SizedBox(width: 12),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showLogoutConfirmDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: const Color(0xFF1C1E2D),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                'settingsScreen.notifications.title'.tr(), // Just a header or "Log Out"
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'dialog.confirmLogout'.tr(),
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Colors.white70,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                spacing: 12,
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white24),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('navigation.cancel'.tr(), style: const TextStyle(color: Colors.white70)),
+                    ),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        signOut();
+                      },
+                      child: Text('navigation.ok'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF090A0F),
       appBar: AppBar(
         elevation: 0,
+        backgroundColor: Colors.transparent,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF0F2027),
-                Color(0xFF203A43),
-                Color(0xFF2C5364),
+                Color(0xFF090A0F),
+                Color(0xFF10121D),
               ],
             ),
           ),
@@ -71,8 +644,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
         title: Text(
           'app.information'.tr(),
           style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.8,
             color: Colors.white,
           ),
         ),
@@ -84,662 +658,78 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
           padding: const EdgeInsets.only(bottom: 80),
           child: Column(
             children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Consumer(
-                    builder: (context, ref, child) => AnimatedMovieHeader(
-                      profilePicture: profilePicture,
-                      userName: ref.watch(currentNameUser),
-                      myselftEmail: myselftEmail,
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const MyProfileScreen()));
-                    },
-                    child: ListTile(
-                      leading: const Icon(Icons.contact_mail_outlined),
-                      title: const Text('profileScreen.title').tr(),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) => StatefulBuilder(
-                          builder: (context, StateSetter stateSetter) =>
-                              SafeArea(
-                            child: Wrap(
-                              children: [
-                                ListTile(
-                                  title: const Text(
-                                          'settingsScreen.notifications.on')
-                                      .tr(),
-                                  trailing: isNotification
-                                      ? const Icon(Icons.check)
-                                      : null,
-                                  onTap: () async {
-                                    Navigator.pop(context);
-                                    OverlayScreen().showOverlay(
-                                        context,
-                                        'settingsScreen.notifications.on'.tr(),
-                                        Colors.green,
-                                        duration: 2);
-                                    pref.setBool("notification_enabled", true);
-                                    stateSetter(() => isNotification = true);
-                                  },
-                                ),
-                                const Divider(
-                                  height: 1,
-                                ),
-                                ListTile(
-                                  title: Text(
-                                      'settingsScreen.notifications.off'.tr()),
-                                  trailing: isNotification
-                                      ? null
-                                      : const Icon(Icons.check),
-                                  onTap: () async {
-                                    Navigator.pop(context);
-                                    OverlayScreen().showOverlay(
-                                        context,
-                                        'settingsScreen.notifications.off'.tr(),
-                                        Colors.grey,
-                                        duration: 2);
-                                    pref.setBool("notification_enabled", false);
-                                    await WorkmanagerTask
-                                        .cancelNotificationTasks();
-                                    stateSetter(() => isNotification = false);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    child: ListTile(
-                      leading: const Icon(Icons.notifications),
-                      title:
-                          const Text('settingsScreen.notifications.title').tr(),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) => Consumer(
-                          builder: (context, ref, child) => SafeArea(
-                            child: Wrap(
-                              children: [
-                                ListTile(
-                                  title:
-                                      const Text('settingsScreen.language.vi')
-                                          .tr(),
-                                  trailing: ref.watch(isLanguageProvider) ==
-                                          const Locale('vi', '')
-                                      ? const Icon(Icons.check)
-                                      : null,
-                                  onTap: () async {
-                                    Navigator.pop(context);
-                                    context.setLocale(const Locale('vi', ''));
-                                    OverlayScreen().showOverlay(
-                                        context,
-                                        'settingsScreen.language.vi'.tr(),
-                                        Colors.blueGrey,
-                                        duration: 2);
-                                    ref
-                                        .read(isLanguageProvider.notifier)
-                                        .state = const Locale('vi', '');
-                                    ref.read(currentTitle.notifier).state =
-                                        'app.home';
-                                    await pref.setInt("language", 0);
-                                  },
-                                ),
-                                const Divider(
-                                  height: 1,
-                                ),
-                                ListTile(
-                                  title:
-                                      const Text('settingsScreen.language.en')
-                                          .tr(),
-                                  trailing: ref.watch(isLanguageProvider) ==
-                                          const Locale('en', '')
-                                      ? const Icon(Icons.check)
-                                      : null,
-                                  onTap: () async {
-                                    Navigator.pop(context);
-                                    context.setLocale(const Locale('en', ''));
-                                    OverlayScreen().showOverlay(
-                                        context,
-                                        'settingsScreen.language.en'.tr(),
-                                        Colors.blueGrey,
-                                        duration: 2);
-                                    ref
-                                        .read(isLanguageProvider.notifier)
-                                        .state = const Locale('en', '');
-                                    ref.read(currentTitle.notifier).state =
-                                        'app.home';
-                                    await pref.setInt("language", 1);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    child: ListTile(
-                      leading: const Icon(Icons.translate),
-                      title: const Text('app.language').tr(),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) => Consumer(
-                          builder: (context, ref, child) => SafeArea(
-                            child: Wrap(
-                              children: [
-                                ListTile(
-                                  leading: const Icon(Icons.light_mode),
-                                  title:
-                                      const Text('settingsScreen.theme.light')
-                                          .tr(),
-                                  trailing: ref.watch(themeModeProvider) ==
-                                          ThemeMode.light
-                                      ? const Icon(Icons.check)
-                                      : null,
-                                  onTap: () async {
-                                    ref.read(themeModeProvider.notifier).state =
-                                        ThemeMode.light;
-                                    Navigator.pop(context);
-                                    OverlayScreen().showOverlay(
-                                        context,
-                                        'settingsScreen.theme.light'.tr(),
-                                        Colors.blueGrey,
-                                        duration: 2);
-                                    pref.setString("themeMode", "light");
-                                  },
-                                ),
-                                const Divider(
-                                  height: 1,
-                                ),
-                                ListTile(
-                                  leading: const Icon(Icons.dark_mode),
-                                  title: const Text('settingsScreen.theme.dark')
-                                      .tr(),
-                                  trailing: ref.watch(themeModeProvider) ==
-                                          ThemeMode.dark
-                                      ? const Icon(Icons.check)
-                                      : null,
-                                  onTap: () async {
-                                    ref.read(themeModeProvider.notifier).state =
-                                        ThemeMode.dark;
-                                    Navigator.pop(context);
-                                    OverlayScreen().showOverlay(
-                                        context,
-                                        'settingsScreen.theme.dark'.tr(),
-                                        Colors.blueGrey,
-                                        duration: 2);
-                                    pref.setString("themeMode", "dark");
-                                  },
-                                ),
-                                const Divider(
-                                  height: 1,
-                                ),
-                                ListTile(
-                                  leading: const Icon(Icons.phone_android),
-                                  title:
-                                      const Text('settingsScreen.theme.system')
-                                          .tr(),
-                                  trailing: ref.watch(themeModeProvider) ==
-                                          ThemeMode.system
-                                      ? const Icon(Icons.check)
-                                      : null,
-                                  onTap: () async {
-                                    ref.read(themeModeProvider.notifier).state =
-                                        ThemeMode.system;
-                                    Navigator.pop(context);
-                                    OverlayScreen().showOverlay(
-                                        context,
-                                        'settingsScreen.theme.system'.tr(),
-                                        Colors.blueGrey,
-                                        duration: 2);
-                                    pref.setString("themeMode", "auto");
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    child: ListTile(
-                      leading: const Icon(Icons.mode_night),
-                      title: const Text('settingsScreen.theme.title').tr(),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor:
-                            Theme.of(context).scaffoldBackgroundColor,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(30)),
-                        ),
-                        builder: (context) => Consumer(
-                          builder: (context, ref, child) {
-                            Map data = ref.watch(historyMoviesNotifierProvider);
-                            List dataHistory = data.values.toList();
-
-                            if (dataHistory.isEmpty) {
-                              return SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.4,
-                                child: Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.history,
-                                          size: 64, color: Colors.grey),
-                                      const SizedBox(height: 12),
-                                      Text('historyScreen.emptyMessage'.tr(),
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              color: Colors.grey)),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-
-                            return Container(
-                              height: MediaQuery.of(context).size.height * 0.7,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        spacing: 5,
-                                        children: [
-                                          const Icon(
-                                            Icons.history,
-                                            size: 30,
-                                          ),
-                                          Text(
-                                            'historyScreen.title'.tr(),
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.close),
-                                        onPressed: () => Navigator.pop(context),
-                                      ),
-                                    ],
-                                  ),
-                                  const Divider(),
-                                  Expanded(
-                                    child: ListView.separated(
-                                      itemCount: dataHistory.length,
-                                      separatorBuilder: (_, __) =>
-                                          const SizedBox(height: 10),
-                                      itemBuilder: (context, index) {
-                                        final item = dataHistory[index];
-
-                                        return InkWell(
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                          onTap: () => Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => InforMovieScreen(
-                                                  slugMovie: item['slug']),
-                                            ),
-                                          ),
-                                          onLongPress: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) => Dialog(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(16),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      16.0),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Text(
-                                                        item['name'],
-                                                        style: const TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 18),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 20),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceEvenly,
-                                                        children: [
-                                                          ElevatedButton.icon(
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                              Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                  builder: (_) =>
-                                                                      InforMovieScreen(
-                                                                          slugMovie:
-                                                                              item['slug']),
-                                                                ),
-                                                              );
-                                                            },
-                                                            icon: const Icon(
-                                                                Icons
-                                                                    .play_arrow),
-                                                            label: Text(
-                                                                'app.watch'
-                                                                    .tr()),
-                                                          ),
-                                                          OutlinedButton.icon(
-                                                            style: ButtonStyle(
-                                                              backgroundColor:
-                                                                  WidgetStatePropertyAll(
-                                                                      Colors.red[
-                                                                          400]),
-                                                              iconColor:
-                                                                  const WidgetStatePropertyAll(
-                                                                      Colors
-                                                                          .white),
-                                                            ),
-                                                            onPressed:
-                                                                () async {
-                                                              final result =
-                                                                  await ref.read(
-                                                                      removeHistoryWatchMovieUseCaseProvider)
-                                                                  .call(item['slug']);
-                                                              if (!context
-                                                                  .mounted) {
-                                                                return;
-                                                              }
-                                                              Navigator.pop(
-                                                                  context);
-                                                              if (result) {
-                                                                OverlayScreen()
-                                                                    .showOverlay(
-                                                                        context,
-                                                                        'success.delete'
-                                                                            .tr(),
-                                                                        Colors
-                                                                            .green,
-                                                                        duration:
-                                                                            3);
-                                                                ref
-                                                                    .read(historyMoviesNotifierProvider
-                                                                        .notifier)
-                                                                    .removeState(
-                                                                        item[
-                                                                            'slug']);
-                                                              } else {
-                                                                OverlayScreen()
-                                                                    .showOverlay(
-                                                                        context,
-                                                                        'errors.delete'
-                                                                            .tr(),
-                                                                        Colors
-                                                                            .red,
-                                                                        duration:
-                                                                            3);
-                                                              }
-                                                            },
-                                                            icon: const Icon(
-                                                                Icons.delete),
-                                                            label: Text(
-                                                              'app.del'.tr(),
-                                                              style: const TextStyle(
-                                                                  color: Colors
-                                                                      .white),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                              color: Theme.of(context)
-                                                  .cardColor
-                                                  .withValues(alpha: .95),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black
-                                                      .withValues(alpha: .05),
-                                                  blurRadius: 4,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      const BorderRadius.only(
-                                                    topLeft:
-                                                        Radius.circular(16),
-                                                    bottomLeft:
-                                                        Radius.circular(16),
-                                                  ),
-                                                  child: CachedNetworkImage(
-                                                    imageUrl:
-                                                        item['poster_url'],
-                                                    height: 90,
-                                                    width: 65,
-                                                    fit: BoxFit.cover,
-                                                    progressIndicatorBuilder:
-                                                        (context, url,
-                                                                progress) =>
-                                                            const Center(
-                                                                child:
-                                                                    CircularProgressIndicator()),
-                                                    errorWidget: (context, url,
-                                                            error) =>
-                                                        const Icon(Icons.error,
-                                                            size: 40),
-                                                    memCacheHeight: 150,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 12),
-                                                Expanded(
-                                                  child: Padding(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        vertical: 10),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          item['name'],
-                                                          maxLines: 2,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 4),
-                                                        Text(
-                                                          'historyScreen.watchedEpisode'
-                                                              .tr(
-                                                            args: [
-                                                              'movie.episode'
-                                                                  .plural(item[
-                                                                      'episode'])
-                                                            ],
-                                                          ),
-                                                          style: TextStyle(
-                                                            color: Colors
-                                                                .grey[600],
-                                                            fontSize: 13,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                const Icon(
-                                                    Icons
-                                                        .arrow_forward_ios_rounded,
-                                                    size: 18,
-                                                    color: Colors.grey),
-                                                const SizedBox(width: 10),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    child: ListTile(
-                      leading: const Icon(Icons.history),
-                      title: const Text('historyScreen.title').tr(),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                    ),
-                  ),
-                  const Divider(),
-                ],
+              Consumer(
+                builder: (context, ref, child) => AnimatedMovieHeader(
+                  profilePicture: profilePicture,
+                  userName: ref.watch(currentNameUser),
+                  myselftEmail: myselftEmail,
+                ),
               ),
-              InkWell(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (context) => Dialog(
-                      backgroundColor: Colors.transparent,
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 10,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'settingsScreen.notifications.title'.tr(),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'dialog.confirmLogout'.tr(),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                color: Colors.black54,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.grey[300],
-                                      foregroundColor: Colors.black87,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text('navigation.cancel'.tr()),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.redAccent,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      signOut();
-                                    },
-                                    child: Text('navigation.ok'.tr()),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+              const SizedBox(height: 10),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.04),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    children: [
+                      _buildSettingItem(
+                        icon: Icons.contact_mail_outlined,
+                        title: 'profileScreen.title'.tr(),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const MyProfileScreen()));
+                        },
                       ),
-                    ),
-                  );
-                },
-                child: ListTile(
-                  leading: const Icon(Icons.exit_to_app),
-                  title: const Text('profileScreen.logout').tr(),
-                  trailing: const Icon(Icons.arrow_forward_ios),
+                      const Divider(height: 1, color: Colors.white10),
+                      _buildSettingItem(
+                        icon: Icons.notifications_none_rounded,
+                        title: 'settingsScreen.notifications.title'.tr(),
+                        onTap: () => _showNotificationSheet(),
+                      ),
+                      const Divider(height: 1, color: Colors.white10),
+                      _buildSettingItem(
+                        icon: Icons.translate_rounded,
+                        title: 'app.language'.tr(),
+                        onTap: () => _showLanguageSheet(),
+                      ),
+                      const Divider(height: 1, color: Colors.white10),
+                      _buildSettingItem(
+                        icon: Icons.dark_mode_outlined,
+                        title: 'settingsScreen.theme.title'.tr(),
+                        onTap: () => _showThemeSheet(),
+                      ),
+                      const Divider(height: 1, color: Colors.white10),
+                      _buildSettingItem(
+                        icon: Icons.history_rounded,
+                        title: 'historyScreen.title'.tr(),
+                        onTap: () => _showHistorySheet(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.04),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: _buildSettingItem(
+                    icon: Icons.exit_to_app_rounded,
+                    title: 'profileScreen.logout'.tr(),
+                    onTap: () => _showLogoutConfirmDialog(),
+                    trailing: const Icon(Icons.chevron_right_rounded, color: Colors.redAccent, size: 20),
+                  ),
                 ),
               ),
               const SizedBox(height: 40),
@@ -749,7 +739,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                     Text(
                       '© ${DateTime.now().year} MovieApp. All rights reserved.',
                       style: const TextStyle(
-                        color: Color(0xFF9E9E9E),
+                        color: Color(0xFF6E6E6E),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -761,7 +751,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                         Text(
                           'Developed with ❤️ by ',
                           style: TextStyle(
-                            color: Color(0xFF757575),
+                            color: Color(0xFF555555),
                             fontSize: 12,
                           ),
                         ),
@@ -779,7 +769,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                     const Text(
                       'Version 1.3.0',
                       style: TextStyle(
-                        color: Color(0xFFBDBDBD),
+                        color: Color(0xFF8B8B8B),
                         fontSize: 11,
                       ),
                     ),

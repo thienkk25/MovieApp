@@ -127,30 +127,96 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
     } catch (_) {}
   }
 
+  Widget _buildSectionHeader(String titleKey, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 4,
+              height: 18,
+              decoration: BoxDecoration(
+                color: Colors.orangeAccent,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                titleKey.tr(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "movie.genre".tr(), // Localized or general view all
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 12,
+                  color: Colors.white.withValues(alpha: 0.5),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildContinueWatching() {
     final historyMap = ref.watch(historyMoviesNotifierProvider);
     final historyList = historyMap.values.toList();
     if (historyList.isEmpty) return const SizedBox();
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final titleColor = isDark ? Colors.white : Colors.black87;
-    final cardBg = isDark ? Colors.white.withValues(alpha: .08) : Colors.black.withValues(alpha: .05);
-    final borderColor = isDark ? Colors.white.withValues(alpha: .1) : Colors.black.withValues(alpha: .08);
-    final textColor = isDark ? Colors.white : Colors.black87;
-    final iconColor = isDark ? Colors.white30 : Colors.black26;
+    final titleColor = Colors.white;
+    final cardBg = Colors.white.withValues(alpha: .04);
+    final borderColor = Colors.white.withValues(alpha: .08);
+    final textColor = Colors.white;
+    final iconColor = Colors.white30;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Text(
-            'historyScreen.title'.tr(),
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: titleColor,
-            ),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.orangeAccent,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'historyScreen.title'.tr(),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: titleColor,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
         ),
         SizedBox(
@@ -167,7 +233,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                 decoration: BoxDecoration(
                   color: cardBg,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: borderColor),
+                  border: Border.all(color: borderColor, width: 1),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -195,13 +261,22 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                     Icon(Icons.error, color: iconColor),
                               ),
                               Container(
-                                color: Colors.black26,
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.play_circle_outline,
-                                    color: Colors.white,
-                                    size: 28,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withValues(alpha: 0.6),
+                                    ],
                                   ),
+                                ),
+                              ),
+                              const Center(
+                                child: Icon(
+                                  Icons.play_circle_fill_rounded,
+                                  color: Colors.orangeAccent,
+                                  size: 30,
                                 ),
                               ),
                             ],
@@ -229,17 +304,21 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 6, vertical: 3),
                                   decoration: BoxDecoration(
-                                    color: Colors.orange.withValues(alpha: .8),
-                                    borderRadius: BorderRadius.circular(4),
+                                    color: Colors.orange.withValues(alpha: .2),
+                                    border: Border.all(
+                                      color: Colors.orangeAccent.withValues(alpha: 0.4),
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     'historyScreen.watchedEpisode'.tr(args: [
                                       'movie.episode'.plural(movie['episode'])
                                     ]),
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.orangeAccent,
                                       fontSize: 10,
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
@@ -265,17 +344,18 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
     final hasPadingBottom = MediaQuery.of(context).padding.bottom;
     return Scaffold(
       key: ValueKey(ref.watch(isLanguageProvider)),
+      backgroundColor: const Color(0xFF090A0F),
       appBar: AppBar(
         elevation: 0,
+        backgroundColor: Colors.transparent,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF0F2027),
-                Color(0xFF203A43),
-                Color(0xFF2C5364),
+                Color(0xFF090A0F),
+                Color(0xFF10121D),
               ],
             ),
           ),
@@ -284,8 +364,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
           builder: (context, ref, _) => Text(
             ref.watch(currentTitle).tr(),
             style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
               color: Colors.white,
             ),
           ),
@@ -327,8 +408,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                     colors: [
-                                      Colors.black.withValues(alpha: .7),
-                                      Colors.black.withValues(alpha: .9),
+                                      Colors.black.withValues(alpha: .5),
+                                      const Color(0xFF090A0F),
                                     ],
                                   ),
                                 ),
@@ -372,10 +453,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                                     BoxShadow(
                                                       color: Colors.black
                                                           .withValues(
-                                                              alpha: .3),
-                                                      blurRadius: 12,
+                                                              alpha: .4),
+                                                      blurRadius: 16,
                                                       offset:
-                                                          const Offset(0, 6),
+                                                          const Offset(0, 8),
                                                     ),
                                                   ],
                                                 ),
@@ -426,9 +507,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   child: Column(
                     spacing: 10,
                     children: [
-                      GestureDetector(
-                        key: keys['movie.single'],
-                        onTap: () {
+                      _buildSectionHeader(
+                        'movie.single',
+                        () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -442,37 +523,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             ),
                           );
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'movie.single'.tr(),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       ref.watch(singleMoviesProvider).when(
                         data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
                         loading: () => const ShimmerLoading(),
                         error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
-                      GestureDetector(
-                        key: keys['movie.drama'],
-                        onTap: () {
+                      _buildSectionHeader(
+                        'movie.drama',
+                        () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -486,37 +545,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             ),
                           );
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'movie.drama'.tr(),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       ref.watch(dramaMoviesProvider).when(
                         data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
                         loading: () => const ShimmerLoading(),
                         error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
-                      GestureDetector(
-                        key: keys['movie.cartoon'],
-                        onTap: () {
+                      _buildSectionHeader(
+                        'movie.cartoon',
+                        () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -530,37 +567,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             ),
                           );
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'movie.cartoon'.tr(),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       ref.watch(cartoonMoviesProvider).when(
                         data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
                         loading: () => const ShimmerLoading(),
                         error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
-                      GestureDetector(
-                        key: keys['movie.tvShows'],
-                        onTap: () {
+                      _buildSectionHeader(
+                        'movie.tvShows',
+                        () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -574,37 +589,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             ),
                           );
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'movie.tvShows'.tr(),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       ref.watch(tvShowsMoviesProvider).when(
                         data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
                         loading: () => const ShimmerLoading(),
                         error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
-                      GestureDetector(
-                        key: keys['movie.vietsub'],
-                        onTap: () {
+                      _buildSectionHeader(
+                        'movie.vietsub',
+                        () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -618,37 +611,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             ),
                           );
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'movie.vietsub'.tr(),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       ref.watch(vietSubMoviesProvider).when(
                         data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
                         loading: () => const ShimmerLoading(),
                         error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
-                      GestureDetector(
-                        key: keys['movie.narrated'],
-                        onTap: () {
+                      _buildSectionHeader(
+                        'movie.narrated',
+                        () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -662,37 +633,15 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             ),
                           );
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'movie.narrated'.tr(),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       ref.watch(narratedMoviesProvider).when(
                         data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
                         loading: () => const ShimmerLoading(),
                         error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
                       ),
-                      GestureDetector(
-                        key: keys['movie.dubbed'],
-                        onTap: () {
+                      _buildSectionHeader(
+                        'movie.dubbed',
+                        () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -706,28 +655,6 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             ),
                           );
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'movie.dubbed'.tr(),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                       ref.watch(dubbedMoviesProvider).when(
                         data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
