@@ -135,7 +135,56 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
     }
     return Stack(
       children: [
-        Video(controller: _videoController),
+        MaterialVideoControlsTheme(
+          normal: MaterialVideoControlsThemeData(
+            buttonBarButtonSize: 32,
+            primaryButtonBar: [
+              IconButton(
+                icon: const Icon(Icons.replay_10, size: 36, color: Colors.white),
+                onPressed: () {
+                  final position = _player.state.position;
+                  _player.seek(position - const Duration(seconds: 10));
+                },
+              ),
+              const SizedBox(width: 40),
+              const MaterialPlayOrPauseButton(),
+              const SizedBox(width: 40),
+              IconButton(
+                icon: const Icon(Icons.forward_10, size: 36, color: Colors.white),
+                onPressed: () {
+                  final position = _player.state.position;
+                  _player.seek(position + const Duration(seconds: 10));
+                },
+              ),
+            ],
+          ),
+          fullscreen: MaterialVideoControlsThemeData(
+            buttonBarButtonSize: 48,
+            primaryButtonBar: [
+              IconButton(
+                icon: const Icon(Icons.replay_10, size: 48, color: Colors.white),
+                onPressed: () {
+                  final position = _player.state.position;
+                  _player.seek(position - const Duration(seconds: 10));
+                },
+              ),
+              const SizedBox(width: 60),
+              const MaterialPlayOrPauseButton(),
+              const SizedBox(width: 60),
+              IconButton(
+                icon: const Icon(Icons.forward_10, size: 48, color: Colors.white),
+                onPressed: () {
+                  final position = _player.state.position;
+                  _player.seek(position + const Duration(seconds: 10));
+                },
+              ),
+            ],
+          ),
+          child: Video(
+            controller: _videoController,
+            controls: MaterialVideoControls,
+          ),
+        ),
         Align(
           alignment: Alignment.center,
           child: ValueListenableBuilder<bool>(
