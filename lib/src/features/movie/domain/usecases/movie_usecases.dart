@@ -191,52 +191,53 @@ class GetRecommendedPartsUseCase {
     final movieId = movieData['_id'];
 
     Future<List> searchAndFilter(String query, int limit) async {
-      final res = await _repository.searchMovies(keyword: query, limit: limit);
-      final items = res['data']?['items'] as List? ?? [];
-      return items.where((e) => e['_id'] != movieId).toList();
-    }
-
-    final baseName = _getBaseName(movieData['name']);
-    final baseOriginName = _getBaseName(movieData['origin_name']);
-    String getFirstTwoWords(String str) {
-      return RegExp(r'^(.+?\s.+?)\b').firstMatch(str)?.group(1)?.trim() ??
-          str.trim();
-    }
-
-    final List<List> searchResults = await Future.wait([
-      searchAndFilter(baseOriginName, 20),
-      searchAndFilter(getFirstTwoWords(movieData['origin_name']), 10),
-      searchAndFilter(baseName, 20),
-      searchAndFilter(getFirstTwoWords(movieData['name']), 10),
-    ]);
-
-    List allSearchMovies = _uniqueList([
-      ...searchResults[0],
-      ...searchResults[1],
-      ...searchResults[2],
-      ...searchResults[3],
-    ]);
-
-    if (allSearchMovies.length < 10) {
-      final futures = [
-        _repository.categoryDetailMovies(
-            movieData['category'][0]['slug'], 5, 10, "desc", "", 0),
-        _repository.countryDetailMovies(
-            movieData['country'][0]['slug'], 5, 10),
-        _repository.yearDetailMovies(movieData['year'].toString(), 5, 10),
-      ];
-
-      final results = await Future.wait(futures);
-
-      List<List> extraLists = results.map((res) {
+      if (query.trim().isEmpty) return [];
+      try {
+        final res = await _repository.searchMovies(keyword: query, limit: limit);
         final items = res['data']?['items'] as List? ?? [];
         return items.where((e) => e['_id'] != movieId).toList();
-      }).toList();
+      } catch (_) {
+        return [];
+      }
+    }
 
-      List extraData = _uniqueList(extraLists.expand((e) => e).toList())
-        ..shuffle();
+    final baseName = _getBaseName(movieData['name'] ?? '');
+    final baseOriginName = _getBaseName(movieData['origin_name'] ?? '');
 
-      allSearchMovies = _uniqueList([...allSearchMovies, ...extraData.take(12)]);
+    // Optimize: Collect unique and relevant search terms to minimize parallel HTTP requests
+    final searchTerms = <String>{};
+    if (baseOriginName.isNotEmpty) searchTerms.add(baseOriginName);
+    if (baseName.isNotEmpty) searchTerms.add(baseName);
+
+    List allSearchMovies = [];
+    if (searchTerms.isNotEmpty) {
+      final List<List> searchResults = await Future.wait(
+        searchTerms.map((term) => searchAndFilter(term, 12)).toList(),
+      );
+      allSearchMovies = _uniqueList(searchResults.expand((e) => e).toList());
+    }
+
+    // Optimize: If search yields few results, fetch from a single highly-relevant fallback
+    if (allSearchMovies.length < 10) {
+      final categoryList = movieData['category'] as List?;
+      final countryList = movieData['country'] as List?;
+      
+      Map? res;
+      try {
+        if (categoryList != null && categoryList.isNotEmpty && categoryList[0]['slug'] != null) {
+          res = await _repository.categoryDetailMovies(
+              categoryList[0]['slug'], 1, 12, "desc", "", 0);
+        } else if (countryList != null && countryList.isNotEmpty && countryList[0]['slug'] != null) {
+          res = await _repository.countryDetailMovies(
+              countryList[0]['slug'], 1, 12);
+        }
+      } catch (_) {}
+
+      if (res != null) {
+        final items = res['data']?['items'] as List? ?? [];
+        final extraData = items.where((e) => e['_id'] != movieId).toList();
+        allSearchMovies = _uniqueList([...allSearchMovies, ...extraData]);
+      }
     }
 
     return allSearchMovies;
