@@ -74,6 +74,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(isClickLWatchEpisodeLinkMovies);
     final double height = MediaQuery.of(context).size.width / (16 / 9);
 
     final dataFavorites = ref.watch(getFavoriteMoviesNotifierProvider);

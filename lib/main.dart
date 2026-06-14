@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'dart:math';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -88,6 +91,7 @@ void callbackDispatcher() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await _cleanUpMediaKitTempFiles();
   await LocalNotifications().init();
   await EasyLocalization.ensureInitialized();
   await Workmanager().initialize(callbackDispatcher);
@@ -229,4 +233,39 @@ class _MyAppState extends ConsumerState<MyApp> {
       home: NetworkListener(child: home),
     );
   }
+}
+
+Future<void> _cleanUpMediaKitTempFiles() async {
+  try {
+    final directories = <Directory>[];
+
+    try {
+      directories.add(Directory.systemTemp);
+    } catch (_) {}
+
+    try {
+      final supportDir = await getApplicationSupportDirectory();
+      directories.add(supportDir);
+    } catch (_) {}
+    try {
+      final cacheDir = await getTemporaryDirectory();
+      directories.add(cacheDir);
+    } catch (_) {}
+
+    for (final dir in directories) {
+      if (await dir.exists()) {
+        final entities = await dir.list().toList();
+        for (final entity in entities) {
+          if (entity is File) {
+            final filename = p.basename(entity.path);
+            if (filename.startsWith('com.alexmercerind.media_kit.NativeReferenceHolder.')) {
+              try {
+                await entity.delete();
+              } catch (_) {}
+            }
+          }
+        }
+      }
+    }
+  } catch (_) {}
 }
