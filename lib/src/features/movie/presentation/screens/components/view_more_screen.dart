@@ -28,6 +28,9 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   late int currentPage;
   late String titleAppBar;
   late final int totalPages;
+  List<dynamic> dataMovies = [];
+  bool isLoading = false;
+
   @override
   void initState() {
     currentPage = widget.page + 1;
@@ -41,34 +44,37 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
   Future<void> loadData() async {
     Map? data = await getMovies(widget.type, widget.page + 1, widget.limit,
         widget.sortType, widget.country, widget.year);
-    ref
-        .read(viewMoreMoviesNotifierProvider.notifier)
-        .initState(data?['data']?['items'] ?? []);
-    titleAppBar = data?['data']?['titlePage'] ?? "Không rõ";
-    isView = true;
-    totalPages = data?['data']?['params']?['pagination']?['totalPages'] ?? 30;
+    if (!mounted) return;
+    setState(() {
+      dataMovies = data?['data']?['items'] ?? [];
+      titleAppBar = data?['data']?['titlePage'] ?? "Không rõ";
+      isView = true;
+      totalPages = data?['data']?['params']?['pagination']?['totalPages'] ?? 30;
+    });
   }
 
   void isLoadMore() {
-    if (!ref.read(isLoadingMore) &&
+    if (!isLoading &&
         scrollController.hasClients &&
         scrollController.position.pixels >=
             scrollController.position.maxScrollExtent - 200) {
-      ref.read(isLoadingMore.notifier).state = true;
       loadDataMore();
     }
   }
 
   Future<void> loadDataMore() async {
     if (!mounted) return;
+    setState(() {
+      isLoading = true;
+    });
     currentPage++;
     Map? data = await getMovies(widget.type, currentPage, widget.limit,
         widget.sortType, widget.country, widget.year);
     if (!mounted) return;
-    ref
-        .read(viewMoreMoviesNotifierProvider.notifier)
-        .addState(data?['data']?['items'] ?? []);
-    ref.read(isLoadingMore.notifier).state = false;
+    setState(() {
+      dataMovies.addAll(data?['data']?['items'] ?? []);
+      isLoading = false;
+    });
   }
 
   getMovies(String type, int page, int limit, String sortType, String country,
@@ -105,7 +111,6 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List dataMovies = ref.watch(viewMoreMoviesNotifierProvider);
     double sizeWidth = MediaQuery.of(context).size.width;
     int responsiveColumnCount;
     int? itemCount;
@@ -134,7 +139,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(10),
               itemCount: dataMovies.length +
-                  (ref.watch(isLoadingMore) ? itemCount : 0),
+                  (isLoading ? itemCount : 0),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: responsiveColumnCount,
                 mainAxisExtent: 250,

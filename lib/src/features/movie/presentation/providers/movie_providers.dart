@@ -162,11 +162,10 @@ final dubbedMoviesProvider = FutureProvider<Map>((ref) async {
 });
 
 // --- State Providers ---
-final isLoadingMore = StateProvider<bool>((ref) => false);
-final wasWatchEpisodeMovies = StateProvider<int>((ref) => -1);
-final isClickWatchEpisodeMovies = StateProvider<bool>((ref) => false);
-final isClickLWatchEpisodeLinkMovies = StateProvider<String?>((ref) => null);
-final isCollapsedReadMore = StateProvider<bool>((ref) => true);
+final wasWatchEpisodeMovies = StateProvider.autoDispose<int>((ref) => -1);
+final isClickWatchEpisodeMovies = StateProvider.autoDispose<bool>((ref) => false);
+final isClickLWatchEpisodeLinkMovies = StateProvider.autoDispose<String?>((ref) => null);
+final isCollapsedReadMore = StateProvider.autoDispose<bool>((ref) => true);
 final isAutoNextMovie = StateProvider<bool>((ref) => false);
 final currentNameUser = StateProvider<String>((ref) => '');
 
@@ -215,21 +214,7 @@ final historyMoviesNotifierProvider =
     StateNotifierProvider<HistoryMoviesNotifier, Map>(
         (ref) => HistoryMoviesNotifier());
 
-class ViewMoreMoviesNotifier extends StateNotifier<List> {
-  ViewMoreMoviesNotifier() : super([]);
 
-  void initState(List data) {
-    state = [...data];
-  }
-
-  void addState(List data) {
-    state = [...state, ...data];
-  }
-}
-
-final viewMoreMoviesNotifierProvider =
-    StateNotifierProvider<ViewMoreMoviesNotifier, List>(
-        (ref) => ViewMoreMoviesNotifier());
 
 class SearchFilterNotifier extends StateNotifier<SearchFilter> {
   SearchFilterNotifier() : super(SearchFilter());

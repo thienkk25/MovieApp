@@ -30,6 +30,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   final int year = 0;
   late Future<Map?> singleDetailMovies;
   late Future<Map?> episodeHistoryMovies;
+  late Future<List> recommendedMovies;
   late SharedPreferences pref;
 
   @override
@@ -57,6 +58,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
       }
       return data;
     });
+    recommendedMovies = singleDetailMovies.then<List<dynamic>>((movie) {
+      if (movie != null) {
+        return ref.read(getRecommendedPartsUseCaseProvider).call(movie);
+      }
+      return <dynamic>[];
+    }).catchError((_) => <dynamic>[]);
   }
 
   @override
@@ -905,8 +912,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       FutureBuilder(
-                        future: ref.read(getRecommendedPartsUseCaseProvider)
-                            .call(dataInforMovie!),
+                        future: recommendedMovies,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {

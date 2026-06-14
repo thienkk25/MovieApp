@@ -25,6 +25,8 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
   String? _currentVideoUrl;
   final ValueNotifier<bool> _isAutoNexting = ValueNotifier(false);
   final ValueNotifier<int> _countdown = ValueNotifier<int>(3);
+  Timer? _autoNextTimer;
+
   @override
   void initState() {
     _player = Player(
@@ -50,12 +52,17 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
       if (ref.read(isAutoNextMovie) && totalDurationVideo > Duration.zero) {
         _isAutoNexting.value = true;
         _countdown.value = 3;
-
-        Timer.periodic(const Duration(seconds: 1), (timer) async {
+        _autoNextTimer?.cancel();
+        _autoNextTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+          if (!mounted) {
+            timer.cancel();
+            return;
+          }
           if (_countdown.value > 1) {
             _countdown.value -= 1;
           } else {
             timer.cancel();
+            if (!mounted) return;
 
             final int size =
                 widget.dataInforMovie['episodes'][0]['server_data'].length;
@@ -74,15 +81,19 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
 
               await Future.delayed(const Duration(milliseconds: 500));
             } else {
-              OverlayScreen().showOverlay(
-                context,
-                'player.alreadyLatestEpisode'.tr(),
-                Colors.blueGrey,
-                duration: 2,
-              );
+              if (mounted) {
+                OverlayScreen().showOverlay(
+                  context,
+                  'player.alreadyLatestEpisode'.tr(),
+                  Colors.blueGrey,
+                  duration: 2,
+                );
+              }
             }
 
-            _isAutoNexting.value = false;
+            if (mounted) {
+              _isAutoNexting.value = false;
+            }
           }
         });
       }
@@ -93,6 +104,7 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
 
   @override
   void dispose() {
+    _autoNextTimer?.cancel();
     _player.dispose();
     _isAutoNexting.dispose();
     _countdown.dispose();
