@@ -10,9 +10,6 @@ import 'package:movie_app/src/core/configs/overlay_screen.dart';
 import 'package:movie_app/src/features/movie/presentation/providers/movie_providers.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-Player? _globalPlayer;
-VideoController? _globalVideoController;
-
 class WatchMovieScreen extends ConsumerStatefulWidget {
   final String slugMovie;
   final Map<dynamic, dynamic> dataInforMovie;
@@ -37,20 +34,16 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
 
   @override
   void initState() {
-    if (_globalPlayer == null) {
-      _globalPlayer = Player(
-          configuration: const PlayerConfiguration(bufferSize: 64 * 1024 * 1024));
-      _globalVideoController = VideoController(_globalPlayer!);
+    _player = Player(
+        configuration: const PlayerConfiguration(bufferSize: 64 * 1024 * 1024));
+    _videoController = VideoController(_player);
 
-      final platform = _globalPlayer!.platform;
-      try {
-        if (platform.runtimeType.toString().contains('NativePlayer')) {
-          (platform as dynamic).setProperty('hr-seek', 'no');
-        }
-      } catch (_) {}
-    }
-    _player = _globalPlayer!;
-    _videoController = _globalVideoController!;
+    final platform = _player.platform;
+    try {
+      if (platform.runtimeType.toString().contains('NativePlayer')) {
+        (platform as dynamic).setProperty('hr-seek', 'no');
+      }
+    } catch (_) {}
 
     _playingSubscription = _player.stream.playing.listen((event) {
       if (event) {
@@ -97,14 +90,22 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
     _durationSubscription?.cancel();
     _completedSubscription?.cancel();
 
-    // Immediately halt decoding and audio output to stop native streams.
-    try {
-      _player.stop();
-    } catch (_) {}
-
     _isAutoNexting.dispose();
     _countdown.dispose();
     WakelockPlus.disable();
+
+    final playerToDispose = _player;
+    try {
+      playerToDispose.stop();
+    } catch (_) {}
+
+    // Safely dispose of the player to free native memory and release native callbacks
+    Future.delayed(const Duration(milliseconds: 300), () async {
+      try {
+        await playerToDispose.dispose();
+      } catch (_) {}
+    });
+
     super.dispose();
   }
 
