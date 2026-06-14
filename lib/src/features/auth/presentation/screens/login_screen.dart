@@ -20,15 +20,11 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController pwController = TextEditingController();
-  // Regular expression for email validation
+
   final RegExp emailRegExp = RegExp(
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
   GlobalKey<FormState> keyForm = GlobalKey<FormState>();
   bool obscureText = true;
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -37,228 +33,417 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  InputDecoration _buildInputDecoration({
+    required String labelText,
+    required Widget prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      labelStyle: const TextStyle(color: Colors.white38, fontSize: 14),
+      floatingLabelStyle: const TextStyle(color: Colors.orangeAccent),
+      prefixIcon: prefixIcon,
+      prefixIconColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.focused)
+              ? Colors.orangeAccent
+              : Colors.white38),
+      suffixIcon: suffixIcon,
+      suffixIconColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.focused)
+              ? Colors.orangeAccent
+              : Colors.white38),
+      filled: true,
+      fillColor: Colors.white.withValues(alpha: 0.04),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 1.2,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Colors.orangeAccent,
+          width: 1.5,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Colors.redAccent,
+          width: 1.2,
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Colors.redAccent,
+          width: 1.5,
+        ),
+      ),
+      errorStyle: const TextStyle(color: Colors.redAccent),
+    );
+  }
+
+  Widget _buildGlassDecoration() {
+    return Stack(
+      children: [
+        Positioned(
+          top: -80,
+          right: -80,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.orangeAccent.withValues(alpha: 0.12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.orangeAccent.withValues(alpha: 0.12),
+                  blurRadius: 100,
+                  spreadRadius: 40,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -100,
+          left: -100,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFE91E63).withValues(alpha: 0.06),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFE91E63).withValues(alpha: 0.06),
+                  blurRadius: 120,
+                  spreadRadius: 60,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final sizeWidth = MediaQuery.sizeOf(context).width;
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 100,
-                width: double.infinity,
-                child: Center(
-                  child: Text(
-                    'loginScreen.title'.tr(),
-                    style: const TextStyle(fontSize: 24),
-                  ).animate().scaleXY(duration: 1.seconds),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              SizedBox(
-                width: sizeWidth / 1.2,
-                child: Form(
-                  key: keyForm,
-                  child: Column(
-                    spacing: 10,
-                    children: [
-                      TextFormField(
-                        controller: emailController,
-                        validator: (value) {
-                          if (value == null || value == "") {
-                            return 'errors.emailRequired'.tr();
-                          } else if (!emailRegExp.hasMatch(value)) {
-                            return 'errors.emailInvalid'.tr();
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.email),
-                          labelText: "Email",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: const BorderSide(width: 1),
-                          ),
-                        ),
-                      ),
-                      TextFormField(
-                        controller: pwController,
-                        validator: (value) {
-                          if (value == null || value == "") {
-                            return 'errors.passwordRequired'.tr();
-                          }
-                          return null;
-                        },
-                        obscureText: obscureText,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.lock),
-                          suffixIcon: obscureText
-                              ? GestureDetector(
-                                  onTap: () => setState(() {
-                                        obscureText = !obscureText;
-                                      }),
-                                  child:
-                                      const Icon(Icons.visibility_off_outlined))
-                              : GestureDetector(
-                                  onTap: () => setState(() {
-                                        obscureText = !obscureText;
-                                      }),
-                                  child: const Icon(Icons.visibility_outlined)),
-                          labelText: 'loginScreen.password'.tr(),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: const BorderSide(width: 1),
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: GestureDetector(
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const ForgotScreen())),
-                            child:
-                                const Text('loginScreen.forgotPassword').tr()),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          if (keyForm.currentState!.validate()) {
-                            login(emailController.text, pwController.text);
-                          }
-                        },
-                        child: Container(
-                          height: 40,
-                          width: 100,
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(5)),
-                              color: Colors.lightBlue,
+      backgroundColor: const Color(0xFF090A0F),
+      body: Stack(
+        children: [
+          _buildGlassDecoration(),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 10),
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.orangeAccent.withValues(alpha: 0.1),
                               border: Border.all(
-                                  width: 1, color: Colors.lightBlue)),
-                          child: Center(
-                            child: Text(
-                              'loginScreen.title'.tr(),
-                              style: const TextStyle(color: Colors.white),
+                                color: Colors.orangeAccent.withValues(alpha: 0.2),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.orangeAccent.withValues(alpha: 0.05),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.movie_filter_rounded,
+                              size: 44,
+                              color: Colors.orangeAccent,
                             ),
                           ),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                          const SizedBox(height: 16),
                           Text(
-                            'loginScreen.noAccount'.tr(),
-                            style: TextStyle(
-                                color: Colors.grey[400], fontSize: 12),
+                            'loginScreen.title'.tr(),
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
                           ),
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const RegisterScreen())),
-                            child: Text(
-                              'registerScreen.title'.tr(),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12),
+                        ],
+                      ).animate().fade(duration: 800.ms).slideY(begin: -0.2, end: 0, curve: Curves.easeOutQuad),
+                    ),
+                    const SizedBox(height: 36),
+                    Form(
+                      key: keyForm,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'errors.emailRequired'.tr();
+                              } else if (!emailRegExp.hasMatch(value)) {
+                                return 'errors.emailInvalid'.tr();
+                              }
+                              return null;
+                            },
+                            decoration: _buildInputDecoration(
+                              labelText: "Email",
+                              prefixIcon: const Icon(Icons.email_outlined, size: 20),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: pwController,
+                            obscureText: obscureText,
+                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'errors.passwordRequired'.tr();
+                              }
+                              return null;
+                            },
+                            decoration: _buildInputDecoration(
+                              labelText: 'loginScreen.password'.tr(),
+                              prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  obscureText
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  size: 20,
+                                ),
+                                onPressed: () => setState(() {
+                                  obscureText = !obscureText;
+                                }),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Divider(),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: const Text('app.or').tr(),
-                          ),
-                          const Expanded(
-                            child: Divider(),
-                          ),
-                        ],
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          signInWithGoogle();
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          height: 50,
-                          width: sizeWidth / 1.2,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: Colors.white,
-                            border: Border.all(
-                                width: 1, color: Colors.grey.shade400),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 10,
-                            children: [
-                              Image.asset(
-                                "assets/imgs/logo_google.png",
-                                height: 20,
-                                width: 20,
-                              ),
-                              Text(
-                                'loginScreen.loginWith'.tr(args: ["Google"]),
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const ForgotScreen()),
+                        ),
+                        child: Text(
+                          'loginScreen.forgotPassword'.tr(),
+                          style: const TextStyle(
+                            color: Colors.orangeAccent,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
                           ),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          signInWithFacebook();
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          height: 50,
-                          width: sizeWidth / 1.2,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: const Color(0xFF1877F2),
-                            border: Border.all(
-                                width: 1, color: const Color(0xFF1877F2)),
+                    ),
+                    const SizedBox(height: 28),
+                    GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        if (keyForm.currentState!.validate()) {
+                          login(emailController.text, pwController.text);
+                        }
+                      },
+                      child: Container(
+                        height: 52,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: const LinearGradient(
+                            colors: [Colors.orange, Colors.orangeAccent],
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 10,
-                            children: [
-                              Image.asset(
-                                "assets/imgs/logo_facebook.png",
-                                width: 20,
-                                height: 20,
-                              ),
-                              Text(
-                                'loginScreen.loginWith'.tr(args: ["Facebook"]),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.orangeAccent.withValues(alpha: 0.25),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            'loginScreen.title'.tr(),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                       ),
-                    ].animate(interval: 300.ms).scaleX(duration: 300.ms),
-                  ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'loginScreen.noAccount'.tr(),
+                          style: const TextStyle(color: Colors.white38, fontSize: 13),
+                        ),
+                        const SizedBox(width: 4),
+                        GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                          ),
+                          child: Text(
+                            'registerScreen.title'.tr(),
+                            style: const TextStyle(
+                              color: Colors.orangeAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'app.or'.tr(),
+                            style: const TextStyle(color: Colors.white30, fontSize: 12),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    // Google Social login
+                    GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        signInWithGoogle();
+                      },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.white.withValues(alpha: 0.04),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              "assets/imgs/logo_google.png",
+                              height: 20,
+                              width: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'loginScreen.loginWith'.tr(args: ["Google"]),
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Facebook Social login
+                    GestureDetector(
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        signInWithFacebook();
+                      },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: const Color(0xFF1877F2).withValues(alpha: 0.1),
+                          border: Border.all(
+                            color: const Color(0xFF1877F2).withValues(alpha: 0.3),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              "assets/imgs/logo_facebook.png",
+                              width: 20,
+                              height: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'loginScreen.loginWith'.tr(args: ["Facebook"]),
+                              style: const TextStyle(
+                                color: Color(0xFF1877F2),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ].animate(interval: 100.ms).fade(duration: 400.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad),
                 ),
               ),
-            ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(28),
+        decoration: BoxDecoration(
+          color: const Color(0xFF141622),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.5),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: const SizedBox(
+          width: 32,
+          height: 32,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.orangeAccent),
           ),
         ),
       ),
@@ -269,9 +454,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      builder: (context) => _buildLoadingIndicator(),
     );
     final result = await ref.read(loginUseCaseProvider).call(email, password);
     final isUser = ref.read(isUserUseCaseProvider).call();
@@ -302,9 +485,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      builder: (context) => _buildLoadingIndicator(),
     );
     final result = await ref.read(signInWithGoogleUseCaseProvider).call();
     final isUser = ref.read(isUserUseCaseProvider).call();
@@ -331,9 +512,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      builder: (context) => _buildLoadingIndicator(),
     );
     final result = await ref.read(signInWithFacebookUseCaseProvider).call();
     final isUser = ref.read(isUserUseCaseProvider).call();

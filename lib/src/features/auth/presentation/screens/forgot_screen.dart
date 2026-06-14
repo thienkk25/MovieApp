@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -14,61 +16,206 @@ class ForgotScreen extends ConsumerStatefulWidget {
 
 class _ForgotScreenState extends ConsumerState<ForgotScreen> {
   TextEditingController emailController = TextEditingController();
-  TextEditingController pwController = TextEditingController();
-  // Regular expression for email validation
+
   final RegExp emailRegExp = RegExp(
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
   GlobalKey<FormState> keyForm = GlobalKey<FormState>();
+
   @override
   void dispose() {
     emailController.dispose();
-    pwController.dispose();
     super.dispose();
+  }
+
+  InputDecoration _buildInputDecoration({
+    required String labelText,
+    required Widget prefixIcon,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      labelStyle: const TextStyle(color: Colors.white38, fontSize: 14),
+      floatingLabelStyle: const TextStyle(color: Colors.orangeAccent),
+      prefixIcon: prefixIcon,
+      prefixIconColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.focused)
+              ? Colors.orangeAccent
+              : Colors.white38),
+      filled: true,
+      fillColor: Colors.white.withValues(alpha: 0.04),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 1.2,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Colors.orangeAccent,
+          width: 1.5,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Colors.redAccent,
+          width: 1.2,
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Colors.redAccent,
+          width: 1.5,
+        ),
+      ),
+      errorStyle: const TextStyle(color: Colors.redAccent),
+    );
+  }
+
+  Widget _buildGlassDecoration() {
+    return Stack(
+      children: [
+        Positioned(
+          top: -80,
+          right: -80,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.orangeAccent.withValues(alpha: 0.12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.orangeAccent.withValues(alpha: 0.12),
+                  blurRadius: 100,
+                  spreadRadius: 40,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -100,
+          left: -100,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFE91E63).withValues(alpha: 0.06),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFE91E63).withValues(alpha: 0.06),
+                  blurRadius: 120,
+                  spreadRadius: 60,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-          child: SingleChildScrollView(
-        child: Column(
-          spacing: 20,
-          children: [
-            SizedBox(
-              height: 100,
-              width: double.infinity,
-              child: Center(
-                  child: Text(
-                'forgotPasswordScreen.title'.tr(),
-                style: const TextStyle(fontSize: 24),
-              ).animate().scaleXY(duration: 1.seconds)),
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 1.2,
-              child: Form(
-                key: keyForm,
+      backgroundColor: const Color(0xFF090A0F),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white70, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          _buildGlassDecoration(),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Column(
-                  spacing: 20,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TextFormField(
-                      controller: emailController,
-                      validator: (value) {
-                        if (value == null || value == "") {
-                          return 'errors.emailRequired'.tr();
-                        } else if (!emailRegExp.hasMatch(value)) {
-                          return 'errors.emailInvalid'.tr();
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.email),
-                        labelText: "Email",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5),
-                          borderSide: const BorderSide(width: 1),
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.orangeAccent.withValues(alpha: 0.1),
+                              border: Border.all(
+                                color: Colors.orangeAccent.withValues(alpha: 0.2),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.orangeAccent.withValues(alpha: 0.05),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.lock_reset_rounded,
+                              size: 44,
+                              color: Colors.orangeAccent,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'forgotPasswordScreen.title'.tr(),
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'forgotPasswordScreen.description', // Description text if needed, or falls back to standard text.
+                            style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ).tr(),
+                        ],
+                      ).animate().fade(duration: 800.ms).slideY(begin: -0.2, end: 0, curve: Curves.easeOutQuad),
+                    ),
+                    const SizedBox(height: 36),
+                    Form(
+                      key: keyForm,
+                      child: TextFormField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(color: Colors.white, fontSize: 15),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'errors.emailRequired'.tr();
+                          } else if (!emailRegExp.hasMatch(value)) {
+                            return 'errors.emailInvalid'.tr();
+                          }
+                          return null;
+                        },
+                        decoration: _buildInputDecoration(
+                          labelText: "Email",
+                          prefixIcon: const Icon(Icons.email_outlined, size: 20),
                         ),
                       ),
                     ),
+                    const SizedBox(height: 36),
                     GestureDetector(
                       onTap: () {
                         FocusScope.of(context).requestFocus(FocusNode());
@@ -77,47 +224,93 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
                         }
                       },
                       child: Container(
-                        height: 40,
-                        width: 100,
+                        height: 52,
                         decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(5)),
-                            color: Colors.lightBlue,
-                            border:
-                                Border.all(width: 1, color: Colors.lightBlue)),
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: const LinearGradient(
+                            colors: [Colors.orange, Colors.orangeAccent],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.orangeAccent.withValues(alpha: 0.25),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
                         child: Center(
                           child: Text(
                             'forgotPasswordScreen.sendButton'.tr(),
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                       ),
                     ),
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           'registerScreen.haveAccount'.tr(),
-                          style:
-                              TextStyle(color: Colors.grey[400], fontSize: 12),
+                          style: const TextStyle(color: Colors.white38, fontSize: 13),
                         ),
+                        const SizedBox(width: 4),
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
                           child: Text(
                             'loginScreen.title'.tr(),
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 12),
+                              color: Colors.orangeAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],
-                    )
-                  ].animate(interval: 300.ms).scaleXY(duration: 300.ms),
+                    ),
+                  ].animate(interval: 100.ms).fade(duration: 400.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad),
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(28),
+        decoration: BoxDecoration(
+          color: const Color(0xFF141622),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.5),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
+            ),
           ],
         ),
-      )),
+        child: const SizedBox(
+          width: 32,
+          height: 32,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.orangeAccent),
+          ),
+        ),
+      ),
     );
   }
 
@@ -125,9 +318,7 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      builder: (context) => _buildLoadingIndicator(),
     );
     final result = await ref.read(forgotUseCaseProvider).call(email);
     if (!mounted) return;
@@ -136,6 +327,10 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
       OverlayScreen().showOverlay(
           context, 'success.resetPassword'.tr(), Colors.green,
           duration: 3);
+      emailController.clear();
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) Navigator.pop(context);
+      });
     } else {
       OverlayScreen().showOverlay(
           context, 'errors.resetPassword'.tr(), Colors.red,
