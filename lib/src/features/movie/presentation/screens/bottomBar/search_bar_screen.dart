@@ -32,7 +32,8 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
   Map dataSearch = {};
   @override
   void initState() {
-    futureNewlyUpdatedMovies = ref.read(getNewlyUpdatedMoviesV3UseCaseProvider).call(page: 2);
+    futureNewlyUpdatedMovies =
+        ref.read(getNewlyUpdatedMoviesV3UseCaseProvider).call(page: 2);
     futureCategoryMovies = ref.read(categoryMoviesProvider.future);
     futureCountryMovies = ref.read(countryMoviesProvider.future);
     super.initState();
@@ -100,7 +101,8 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Column(
               spacing: 14,
               children: [
@@ -122,12 +124,14 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                         elevation: const WidgetStatePropertyAll(0),
                         backgroundColor:
                             const WidgetStatePropertyAll(Colors.transparent),
-                        leading: const Icon(Icons.search, color: Colors.orangeAccent),
+                        leading: const Icon(Icons.search,
+                            color: Colors.orangeAccent),
                         textStyle: const WidgetStatePropertyAll(
                           TextStyle(color: Colors.white, fontSize: 16),
                         ),
                         hintStyle: WidgetStatePropertyAll(
-                          TextStyle(color: Colors.white70.withValues(alpha: 0.5)),
+                          TextStyle(
+                              color: Colors.white70.withValues(alpha: 0.5)),
                         ),
                         trailing: [
                           if (searchController.text.isNotEmpty)
@@ -147,11 +151,13 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             const Duration(milliseconds: 300),
                             () async {
                               final filters = ref.read(searchFilterProvider);
-                              dataSearch = await ref.read(searchMoviesUseCaseProvider).call(
-                                keyword: value,
-                                limit: 18,
-                                filters: filters,
-                              );
+                              dataSearch = await ref
+                                  .read(searchMoviesUseCaseProvider)
+                                  .call(
+                                    keyword: value,
+                                    limit: 18,
+                                    filters: filters,
+                                  );
                               if (mounted) setState(() {});
                             },
                           );
@@ -225,7 +231,8 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                     Expanded(
                       child: Consumer(
                         builder: (context, ref, child) {
-                          final hasFilter = ref.watch(searchFilterProvider).isNotEmpty;
+                          final hasFilter =
+                              ref.watch(searchFilterProvider).isNotEmpty;
                           return Container(
                             margin: const EdgeInsets.only(left: 6),
                             decoration: BoxDecoration(
@@ -364,7 +371,8 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                                 );
                               } else {
                                 return const Center(
-                                  child: Icon(Icons.error, color: Colors.white24),
+                                  child:
+                                      Icon(Icons.error, color: Colors.white24),
                                 );
                               }
                             },
@@ -388,22 +396,26 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) {
-        final labelStyle = const TextStyle(color: Colors.orangeAccent, fontSize: 14);
-        final decoration = (String label) => InputDecoration(
+        const labelStyle = TextStyle(color: Colors.orangeAccent, fontSize: 14);
+        InputDecoration decoration(String label) => InputDecoration(
               labelText: label,
               labelStyle: labelStyle,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                borderSide:
+                    BorderSide(color: Colors.white.withValues(alpha: 0.1)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                borderSide:
+                    BorderSide(color: Colors.white.withValues(alpha: 0.1)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Colors.orangeAccent, width: 1.5),
+                borderSide:
+                    const BorderSide(color: Colors.orangeAccent, width: 1.5),
               ),
             );
 
@@ -454,10 +466,12 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             return const Center(
                                 child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
-                            return Text('Lỗi: ${snapshot.error}', style: const TextStyle(color: Colors.white70));
+                            return Text('Lỗi: ${snapshot.error}',
+                                style: const TextStyle(color: Colors.white70));
                           } else if (!snapshot.hasData ||
                               snapshot.data!.isEmpty) {
-                            return const Text("Không có dữ liệu", style: TextStyle(color: Colors.white70));
+                            return const Text("Không có dữ liệu",
+                                style: TextStyle(color: Colors.white70));
                           }
 
                           final categories = snapshot.data!;
@@ -465,18 +479,22 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                           return DropdownButtonFormField<String>(
                             initialValue: currentFilter.category,
                             dropdownColor: const Color(0xFF1D1F30),
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 15),
                             decoration: decoration('filter.category'.tr()),
                             isExpanded: true,
                             items: [
-                              DropdownMenuItem<String>(
+                              const DropdownMenuItem<String>(
                                 value: null,
-                                child: Text("Tất cả", style: const TextStyle(color: Colors.white70)),
+                                child: Text("Tất cả",
+                                    style: TextStyle(color: Colors.white70)),
                               ),
                               ...categories.map(
                                 (e) => DropdownMenuItem<String>(
                                   value: e['slug'] as String,
-                                  child: Text(e['name'] as String, style: const TextStyle(color: Colors.white)),
+                                  child: Text(e['name'] as String,
+                                      style:
+                                          const TextStyle(color: Colors.white)),
                                 ),
                               )
                             ],
@@ -494,10 +512,12 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             return const Center(
                                 child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
-                            return Text('Lỗi: ${snapshot.error}', style: const TextStyle(color: Colors.white70));
+                            return Text('Lỗi: ${snapshot.error}',
+                                style: const TextStyle(color: Colors.white70));
                           } else if (!snapshot.hasData ||
                               snapshot.data!.isEmpty) {
-                            return const Text("Không có dữ liệu", style: TextStyle(color: Colors.white70));
+                            return const Text("Không có dữ liệu",
+                                style: TextStyle(color: Colors.white70));
                           }
 
                           final countries = snapshot.data!;
@@ -505,18 +525,22 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                           return DropdownButtonFormField<String>(
                             initialValue: currentFilter.country,
                             dropdownColor: const Color(0xFF1D1F30),
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 15),
                             decoration: decoration('filter.country'.tr()),
                             isExpanded: true,
                             items: [
-                              DropdownMenuItem<String>(
+                              const DropdownMenuItem<String>(
                                 value: null,
-                                child: Text("Tất cả", style: const TextStyle(color: Colors.white70)),
+                                child: Text("Tất cả",
+                                    style: TextStyle(color: Colors.white70)),
                               ),
                               ...countries.map(
                                 (e) => DropdownMenuItem<String>(
                                   value: e['slug'] as String,
-                                  child: Text(e['name'] as String, style: const TextStyle(color: Colors.white)),
+                                  child: Text(e['name'] as String,
+                                      style:
+                                          const TextStyle(color: Colors.white)),
                                 ),
                               )
                             ],
@@ -529,18 +553,21 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                       DropdownButtonFormField<int>(
                         initialValue: currentFilter.year,
                         dropdownColor: const Color(0xFF1D1F30),
-                        style: const TextStyle(color: Colors.white, fontSize: 15),
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 15),
                         decoration: decoration('filter.year'.tr()),
                         items: [
-                          DropdownMenuItem<int>(
+                          const DropdownMenuItem<int>(
                             value: null,
-                            child: Text("Tất cả", style: const TextStyle(color: Colors.white70)),
+                            child: Text("Tất cả",
+                                style: TextStyle(color: Colors.white70)),
                           ),
                           ...List.generate(
                             DateTime.now().year - 1969,
                             (i) => DropdownMenuItem<int>(
                               value: DateTime.now().year - i,
-                              child: Text('${DateTime.now().year - i}', style: const TextStyle(color: Colors.white)),
+                              child: Text('${DateTime.now().year - i}',
+                                  style: const TextStyle(color: Colors.white)),
                             ),
                           ),
                         ],
@@ -550,7 +577,8 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                       DropdownButtonFormField<String>(
                         initialValue: currentFilter.sortLang,
                         dropdownColor: const Color(0xFF1D1F30),
-                        style: const TextStyle(color: Colors.white, fontSize: 15),
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 15),
                         decoration: decoration('app.language'.tr()),
                         items: [
                           {'label': 'Tất cả', 'value': null},
@@ -560,7 +588,11 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                         ]
                             .map((e) => DropdownMenuItem<String>(
                                   value: e['value'],
-                                  child: Text(e['label'] ?? 'Tất cả', style: TextStyle(color: e['value'] == null ? Colors.white70 : Colors.white)),
+                                  child: Text(e['label'] ?? 'Tất cả',
+                                      style: TextStyle(
+                                          color: e['value'] == null
+                                              ? Colors.white70
+                                              : Colors.white)),
                                 ))
                             .toList(),
                         onChanged: (v) => ref
@@ -574,18 +606,23 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             child: DropdownButtonFormField<String>(
                               isExpanded: true,
                               dropdownColor: const Color(0xFF1D1F30),
-                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 14),
                               decoration: decoration('filter.sortBy'.tr()),
                               initialValue: currentFilter.sortField,
                               items: const [
                                 DropdownMenuItem(
                                     value: 'modified.time',
-                                    child: Text("Thời gian cập nhật", style: TextStyle(color: Colors.white))),
+                                    child: Text("Thời gian cập nhật",
+                                        style: TextStyle(color: Colors.white))),
                                 DropdownMenuItem(
-                                    value: '_id', child: Text("ID phim", style: TextStyle(color: Colors.white))),
+                                    value: '_id',
+                                    child: Text("ID phim",
+                                        style: TextStyle(color: Colors.white))),
                                 DropdownMenuItem(
                                     value: 'year',
-                                    child: Text("Năm phát hành", style: TextStyle(color: Colors.white))),
+                                    child: Text("Năm phát hành",
+                                        style: TextStyle(color: Colors.white))),
                               ],
                               onChanged: (v) => ref
                                   .read(searchFilterProvider.notifier)
@@ -598,14 +635,19 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             child: DropdownButtonFormField<String>(
                               isExpanded: true,
                               dropdownColor: const Color(0xFF1D1F30),
-                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 14),
                               decoration: decoration(''),
                               initialValue: currentFilter.sortType,
                               items: const [
                                 DropdownMenuItem(
-                                    value: 'desc', child: Text("Giảm dần", style: TextStyle(color: Colors.white))),
+                                    value: 'desc',
+                                    child: Text("Giảm dần",
+                                        style: TextStyle(color: Colors.white))),
                                 DropdownMenuItem(
-                                    value: 'asc', child: Text("Tăng dần", style: TextStyle(color: Colors.white))),
+                                    value: 'asc',
+                                    child: Text("Tăng dần",
+                                        style: TextStyle(color: Colors.white))),
                               ],
                               onChanged: (v) => ref
                                   .read(searchFilterProvider.notifier)
@@ -626,8 +668,11 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             ref.read(searchFilterProvider.notifier).clear();
                             Navigator.pop(context);
                           },
-                          icon: const Icon(Icons.refresh_rounded, color: Colors.orangeAccent),
-                          label: Text('filter.reset'.tr(), style: const TextStyle(color: Colors.orangeAccent)),
+                          icon: const Icon(Icons.refresh_rounded,
+                              color: Colors.orangeAccent),
+                          label: Text('filter.reset'.tr(),
+                              style:
+                                  const TextStyle(color: Colors.orangeAccent)),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.orangeAccent),
                             shape: RoundedRectangleBorder(
@@ -640,8 +685,12 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                       Expanded(
                         child: FilledButton.icon(
                           onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.check_rounded, color: Colors.white),
-                          label: Text('filter.apply'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          icon: const Icon(Icons.check_rounded,
+                              color: Colors.white),
+                          label: Text('filter.apply'.tr(),
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
                           style: FilledButton.styleFrom(
                             backgroundColor: Colors.orangeAccent,
                             shape: RoundedRectangleBorder(

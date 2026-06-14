@@ -185,11 +185,11 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
     final historyList = historyMap.values.toList();
     if (historyList.isEmpty) return const SizedBox();
 
-    final titleColor = Colors.white;
+    const titleColor = Colors.white;
     final cardBg = Colors.white.withValues(alpha: .04);
     final borderColor = Colors.white.withValues(alpha: .08);
-    final textColor = Colors.white;
-    final iconColor = Colors.white30;
+    const textColor = Colors.white;
+    const iconColor = Colors.white30;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +209,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
               const SizedBox(width: 8),
               Text(
                 'historyScreen.title'.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: titleColor,
@@ -242,7 +242,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => InforMovieScreen(slugMovie: movie['slug']),
+                          builder: (_) =>
+                              InforMovieScreen(slugMovie: movie['slug']),
                         ),
                       );
                     },
@@ -258,7 +259,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                 imageUrl: movie['poster_url'],
                                 fit: BoxFit.cover,
                                 errorWidget: (context, url, error) =>
-                                    Icon(Icons.error, color: iconColor),
+                                    const Icon(Icons.error, color: iconColor),
                               ),
                               Container(
                                 decoration: BoxDecoration(
@@ -293,7 +294,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                   movie['name'] ?? '',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: textColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
@@ -306,7 +307,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                   decoration: BoxDecoration(
                                     color: Colors.orange.withValues(alpha: .2),
                                     border: Border.all(
-                                      color: Colors.orangeAccent.withValues(alpha: 0.4),
+                                      color: Colors.orangeAccent
+                                          .withValues(alpha: 0.4),
                                       width: 1,
                                     ),
                                     borderRadius: BorderRadius.circular(6),
@@ -387,119 +389,127 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                   key: keys['app.home'],
                   height: MediaQuery.sizeOf(context).height / 1.7,
                   child: ref.watch(newlyUpdatedMoviesProvider).when(
-                    data: (newlyUpdatedMovies) {
-                      final items = newlyUpdatedMovies['items'] ?? [];
-                      if (items.isEmpty) return const SizedBox();
+                        data: (newlyUpdatedMovies) {
+                          final items = newlyUpdatedMovies['items'] ?? [];
+                          if (items.isEmpty) return const SizedBox();
 
-                      return StatefulBuilder(
-                        builder: (context, StateSetter stateSetter) {
-                          return Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: items[currentPage]['poster_url'],
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.black.withValues(alpha: .5),
-                                      const Color(0xFF090A0F),
-                                    ],
+                          return StatefulBuilder(
+                            builder: (context, StateSetter stateSetter) {
+                              return Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  CachedNetworkImage(
+                                    imageUrl: items[currentPage]['poster_url'],
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
                                   ),
-                                ),
-                              ),
-                              PageView.builder(
-                                controller: pageController,
-                                itemCount: items.length,
-                                onPageChanged: (page) =>
-                                    stateSetter(() => currentPage = page),
-                                itemBuilder: (context, index) {
-                                  return AnimatedBuilder(
-                                    animation: pageController,
-                                    builder: (context, child) {
-                                      double value = 0;
-                                      if (pageController
-                                          .position.haveDimensions) {
-                                        value = pageController.page! - index;
-                                      }
-                                      double scale = (1 - (value.abs() * 0.3))
-                                          .clamp(0.8, 1.0);
-                                      double angle = value * (-0.25);
-                                      return Center(
-                                        child: SizedBox(
-                                          width:
-                                              MediaQuery.sizeOf(context).width /
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.black.withValues(alpha: .5),
+                                          const Color(0xFF090A0F),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  PageView.builder(
+                                    controller: pageController,
+                                    itemCount: items.length,
+                                    onPageChanged: (page) =>
+                                        stateSetter(() => currentPage = page),
+                                    itemBuilder: (context, index) {
+                                      return AnimatedBuilder(
+                                        animation: pageController,
+                                        builder: (context, child) {
+                                          double value = 0;
+                                          if (pageController
+                                              .position.haveDimensions) {
+                                            value =
+                                                pageController.page! - index;
+                                          }
+                                          double scale =
+                                              (1 - (value.abs() * 0.3))
+                                                  .clamp(0.8, 1.0);
+                                          double angle = value * (-0.25);
+                                          return Center(
+                                            child: SizedBox(
+                                              width: MediaQuery.sizeOf(context)
+                                                      .width /
                                                   1.8,
-                                          height: MediaQuery.sizeOf(context)
-                                                      .height /
-                                                  2 -
-                                              40,
-                                          child: Transform.scale(
-                                            scale:
-                                                Curves.easeOut.transform(scale),
-                                            child: Transform.rotate(
-                                              angle: angle,
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.black
-                                                          .withValues(
-                                                              alpha: .4),
-                                                      blurRadius: 16,
-                                                      offset:
-                                                          const Offset(0, 8),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                  child: CardMovie(
-                                                    onTap: () {
-                                                      Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (_) =>
-                                                              InforMovieScreen(
-                                                            slugMovie:
-                                                                items[index]
-                                                                    ['slug'],
-                                                          ),
+                                              height: MediaQuery.sizeOf(context)
+                                                          .height /
+                                                      2 -
+                                                  40,
+                                              child: Transform.scale(
+                                                scale: Curves.easeOut
+                                                    .transform(scale),
+                                                child: Transform.rotate(
+                                                  angle: angle,
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.black
+                                                              .withValues(
+                                                                  alpha: .4),
+                                                          blurRadius: 16,
+                                                          offset: const Offset(
+                                                              0, 8),
                                                         ),
-                                                      );
-                                                    },
-                                                    movie: MovieData.fromJson(
-                                                        items[index]),
-                                                    isLink: true,
-                                                    isNewMovie: true,
+                                                      ],
+                                                    ),
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                      child: CardMovie(
+                                                        onTap: () {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (_) =>
+                                                                  InforMovieScreen(
+                                                                slugMovie:
+                                                                    items[index]
+                                                                        [
+                                                                        'slug'],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                        movie:
+                                                            MovieData.fromJson(
+                                                                items[index]),
+                                                        isLink: true,
+                                                        isNewMovie: true,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ),
+                                          );
+                                        },
                                       );
                                     },
-                                  );
-                                },
-                              ),
-                            ],
+                                  ),
+                                ],
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
-                  ),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (err, stack) => const Center(
+                            child: Icon(Icons.error, color: Colors.white30)),
+                      ),
                 ),
                 _buildContinueWatching(),
                 Container(
@@ -525,10 +535,13 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         },
                       ),
                       ref.watch(singleMoviesProvider).when(
-                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
-                        loading: () => const ShimmerLoading(),
-                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
-                      ),
+                            data: (dataMovies) =>
+                                GridViewScreen(dataMovies: dataMovies),
+                            loading: () => const ShimmerLoading(),
+                            error: (err, stack) => const Center(
+                                child:
+                                    Icon(Icons.error, color: Colors.white30)),
+                          ),
                       _buildSectionHeader(
                         'movie.drama',
                         () {
@@ -547,10 +560,13 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         },
                       ),
                       ref.watch(dramaMoviesProvider).when(
-                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
-                        loading: () => const ShimmerLoading(),
-                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
-                      ),
+                            data: (dataMovies) =>
+                                GridViewScreen(dataMovies: dataMovies),
+                            loading: () => const ShimmerLoading(),
+                            error: (err, stack) => const Center(
+                                child:
+                                    Icon(Icons.error, color: Colors.white30)),
+                          ),
                       _buildSectionHeader(
                         'movie.cartoon',
                         () {
@@ -569,10 +585,13 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         },
                       ),
                       ref.watch(cartoonMoviesProvider).when(
-                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
-                        loading: () => const ShimmerLoading(),
-                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
-                      ),
+                            data: (dataMovies) =>
+                                GridViewScreen(dataMovies: dataMovies),
+                            loading: () => const ShimmerLoading(),
+                            error: (err, stack) => const Center(
+                                child:
+                                    Icon(Icons.error, color: Colors.white30)),
+                          ),
                       _buildSectionHeader(
                         'movie.tvShows',
                         () {
@@ -591,10 +610,13 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         },
                       ),
                       ref.watch(tvShowsMoviesProvider).when(
-                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
-                        loading: () => const ShimmerLoading(),
-                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
-                      ),
+                            data: (dataMovies) =>
+                                GridViewScreen(dataMovies: dataMovies),
+                            loading: () => const ShimmerLoading(),
+                            error: (err, stack) => const Center(
+                                child:
+                                    Icon(Icons.error, color: Colors.white30)),
+                          ),
                       _buildSectionHeader(
                         'movie.vietsub',
                         () {
@@ -613,10 +635,13 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         },
                       ),
                       ref.watch(vietSubMoviesProvider).when(
-                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
-                        loading: () => const ShimmerLoading(),
-                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
-                      ),
+                            data: (dataMovies) =>
+                                GridViewScreen(dataMovies: dataMovies),
+                            loading: () => const ShimmerLoading(),
+                            error: (err, stack) => const Center(
+                                child:
+                                    Icon(Icons.error, color: Colors.white30)),
+                          ),
                       _buildSectionHeader(
                         'movie.narrated',
                         () {
@@ -635,10 +660,13 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         },
                       ),
                       ref.watch(narratedMoviesProvider).when(
-                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
-                        loading: () => const ShimmerLoading(),
-                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
-                      ),
+                            data: (dataMovies) =>
+                                GridViewScreen(dataMovies: dataMovies),
+                            loading: () => const ShimmerLoading(),
+                            error: (err, stack) => const Center(
+                                child:
+                                    Icon(Icons.error, color: Colors.white30)),
+                          ),
                       _buildSectionHeader(
                         'movie.dubbed',
                         () {
@@ -657,10 +685,13 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         },
                       ),
                       ref.watch(dubbedMoviesProvider).when(
-                        data: (dataMovies) => GridViewScreen(dataMovies: dataMovies),
-                        loading: () => const ShimmerLoading(),
-                        error: (err, stack) => const Center(child: Icon(Icons.error, color: Colors.white30)),
-                      ),
+                            data: (dataMovies) =>
+                                GridViewScreen(dataMovies: dataMovies),
+                            loading: () => const ShimmerLoading(),
+                            error: (err, stack) => const Center(
+                                child:
+                                    Icon(Icons.error, color: Colors.white30)),
+                          ),
                     ].animate(interval: 200.ms).fadeIn(duration: 500.ms),
                   ),
                 ),

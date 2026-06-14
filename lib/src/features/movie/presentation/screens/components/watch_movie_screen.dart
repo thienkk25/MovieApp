@@ -76,17 +76,9 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
     _countdown.dispose();
     WakelockPlus.disable();
 
-    final playerToDispose = _player;
     try {
-      playerToDispose.stop();
+      _player.dispose();
     } catch (_) {}
-
-    // Safely dispose of the player to free native memory and release native callbacks
-    Future.delayed(const Duration(milliseconds: 300), () async {
-      try {
-        await playerToDispose.dispose();
-      } catch (_) {}
-    });
 
     super.dispose();
   }
