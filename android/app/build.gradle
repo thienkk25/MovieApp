@@ -8,11 +8,9 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file("key.properties")
+def keystorePropertiesFile = file("C:/Users/thien/develop/SigningConfigs/key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-} else {
-    println("Warning: key.properties not found, release signing will be skipped")
 }
 
 
