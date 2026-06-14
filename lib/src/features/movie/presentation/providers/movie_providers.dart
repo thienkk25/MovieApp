@@ -162,7 +162,7 @@ final dubbedMoviesProvider = FutureProvider<Map>((ref) async {
 });
 
 // --- State Providers ---
-final wasWatchEpisodeMovies = StateProvider.autoDispose<int>((ref) => -1);
+final wasWatchEpisodeMovies = StateProvider<int>((ref) => -1);
 final isClickWatchEpisodeMovies = StateProvider.autoDispose<bool>((ref) => false);
 final isClickLWatchEpisodeLinkMovies = StateProvider.autoDispose<String?>((ref) => null);
 final isCollapsedReadMore = StateProvider.autoDispose<bool>((ref) => true);

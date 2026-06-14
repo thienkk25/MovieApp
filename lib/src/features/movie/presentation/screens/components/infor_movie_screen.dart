@@ -47,6 +47,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
     super.initState();
   }
   void loadData() {
+    ref.read(wasWatchEpisodeMovies.notifier).state = -1;
     singleDetailMovies =
         ref.read(getMovieDetailUseCaseProvider).call(widget.slugMovie);
     episodeHistoryMovies =
@@ -702,14 +703,13 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           children: [
                             InkWell(
                               onTap: () {
-                                scrollController.position.animateTo(0,
-                                    duration: Durations.long1,
-                                    curve: Curves.linear);
+                                if (scrollController.hasClients) {
+                                  scrollController.animateTo(0,
+                                      duration: Durations.long1,
+                                      curve: Curves.linear);
+                                }
                                 ref.read(wasWatchEpisodeMovies.notifier).state =
                                     1;
-                                ref
-                                    .read(isClickWatchEpisodeMovies.notifier)
-                                    .state = true;
 
                                 ref
                                         .read(isClickLWatchEpisodeLinkMovies
@@ -717,6 +717,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         .state =
                                     dataInforMovie!['episodes'][0]
                                         ['server_data'][0]['link_m3u8'];
+
+                                ref
+                                    .read(isClickWatchEpisodeMovies.notifier)
+                                    .state = true;
 
                                 addHistoryWatchMovies(
                                     dataInforMovie['movie']['name'],
@@ -739,17 +743,16 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                             ),
                             InkWell(
                               onTap: () {
-                                scrollController.position.animateTo(0,
-                                    duration: Durations.long1,
-                                    curve: Curves.linear);
+                                if (scrollController.hasClients) {
+                                  scrollController.animateTo(0,
+                                      duration: Durations.long1,
+                                      curve: Curves.linear);
+                                }
                                 final int size = dataInforMovie!['episodes'][0]
                                         ['server_data']
                                     .length;
                                 ref.read(wasWatchEpisodeMovies.notifier).state =
                                     size;
-                                ref
-                                    .read(isClickWatchEpisodeMovies.notifier)
-                                    .state = true;
 
                                 ref
                                         .read(isClickLWatchEpisodeLinkMovies
@@ -757,6 +760,11 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         .state =
                                     dataInforMovie['episodes'][0]['server_data']
                                         [size - 1]['link_m3u8'];
+
+                                ref
+                                    .read(isClickWatchEpisodeMovies.notifier)
+                                    .state = true;
+
                                 addHistoryWatchMovies(
                                     dataInforMovie['movie']['name'],
                                     widget.slugMovie,
@@ -779,47 +787,36 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           ],
                         ),
                       ),
-                      FutureBuilder<Map?>(
-                          future: episodeHistoryMovies,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            }
-                            if (snapshot.hasError || !snapshot.hasData) {
-                              return const SizedBox();
-                            }
-                            return Consumer(
-                              builder: (context, ref, child) {
-                                final watchedEpisode = ref.watch(wasWatchEpisodeMovies);
-                                if (watchedEpisode == -1) {
-                                  return const SizedBox();
-                                }
-                                return TextButton(
-                                  onPressed: () {
-                                    ref.read(isCollapsedReadMore.notifier).state = true;
-                                    final episodeIndex = watchedEpisode - 1;
-                                    final targetOffset = itemEpisodeOffsets[episodeIndex] ?? 0.0;
-                                    if (scrollController.hasClients) {
-                                      scrollController.animateTo(
-                                        targetOffset,
-                                        duration: Durations.long1,
-                                        curve: Curves.linear,
-                                      );
-                                    }
-                                  },
-                                  style: const ButtonStyle(
-                                      padding: WidgetStatePropertyAll(
-                                          EdgeInsetsGeometry.all(0))),
-                                  child: Text('historyScreen.watchedEpisode'
-                                      .tr(args: [
-                                    'movie.episode'
-                                        .plural(watchedEpisode)
-                                  ])),
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final watchedEpisode = ref.watch(wasWatchEpisodeMovies);
+                          if (watchedEpisode == -1) {
+                            return const SizedBox();
+                          }
+                          return TextButton(
+                            onPressed: () {
+                              ref.read(isCollapsedReadMore.notifier).state = true;
+                              final episodeIndex = watchedEpisode - 1;
+                              final targetOffset = itemEpisodeOffsets[episodeIndex] ?? 0.0;
+                              if (scrollController.hasClients) {
+                                scrollController.animateTo(
+                                  targetOffset,
+                                  duration: Durations.long1,
+                                  curve: Curves.linear,
                                 );
-                              },
-                            );
-                          }),
+                              }
+                            },
+                            style: const ButtonStyle(
+                                padding: WidgetStatePropertyAll(
+                                    EdgeInsetsGeometry.all(0))),
+                            child: Text('historyScreen.watchedEpisode'
+                                .tr(args: [
+                              'movie.episode'
+                                  .plural(watchedEpisode)
+                            ])),
+                          );
+                        },
+                      ),
                       const Text('movieDetail.episodeList').tr(),
                       GridView.builder(
                         physics: const NeverScrollableScrollPhysics(),
@@ -852,14 +849,13 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                           return Consumer(
                             builder: (context, ref, child) => InkWell(
                               onTap: () {
-                                scrollController.position.animateTo(0,
-                                    duration: Durations.long1,
-                                    curve: Curves.linear);
+                                if (scrollController.hasClients) {
+                                  scrollController.animateTo(0,
+                                      duration: Durations.long1,
+                                      curve: Curves.linear);
+                                }
                                 ref.read(wasWatchEpisodeMovies.notifier).state =
                                     index + 1;
-                                ref
-                                    .read(isClickWatchEpisodeMovies.notifier)
-                                    .state = true;
 
                                 ref
                                         .read(isClickLWatchEpisodeLinkMovies
@@ -867,6 +863,11 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         .state =
                                     dataInforMovie!['episodes'][0]
                                         ['server_data'][index]['link_m3u8'];
+
+                                ref
+                                    .read(isClickWatchEpisodeMovies.notifier)
+                                    .state = true;
+
                                 addHistoryWatchMovies(
                                     dataInforMovie['movie']['name'],
                                     widget.slugMovie,

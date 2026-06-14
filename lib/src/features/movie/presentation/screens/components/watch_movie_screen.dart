@@ -10,6 +10,9 @@ import 'package:movie_app/src/core/configs/overlay_screen.dart';
 import 'package:movie_app/src/features/movie/presentation/providers/movie_providers.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+Player? _globalPlayer;
+VideoController? _globalVideoController;
+
 class WatchMovieScreen extends ConsumerStatefulWidget {
   final String slugMovie;
   final Map<dynamic, dynamic> dataInforMovie;
@@ -34,16 +37,20 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
 
   @override
   void initState() {
-    _player = Player(
-        configuration: const PlayerConfiguration(bufferSize: 64 * 1024 * 1024));
-    _videoController = VideoController(_player);
+    if (_globalPlayer == null) {
+      _globalPlayer = Player(
+          configuration: const PlayerConfiguration(bufferSize: 64 * 1024 * 1024));
+      _globalVideoController = VideoController(_globalPlayer!);
 
-    final platform = _player.platform;
-    try {
-      if (platform.runtimeType.toString().contains('NativePlayer')) {
-        (platform as dynamic).setProperty('hr-seek', 'no');
-      }
-    } catch (_) {}
+      final platform = _globalPlayer!.platform;
+      try {
+        if (platform.runtimeType.toString().contains('NativePlayer')) {
+          (platform as dynamic).setProperty('hr-seek', 'no');
+        }
+      } catch (_) {}
+    }
+    _player = _globalPlayer!;
+    _videoController = _globalVideoController!;
 
     _playingSubscription = _player.stream.playing.listen((event) {
       if (event) {
@@ -94,14 +101,6 @@ class _WatchMovieScreenState extends ConsumerState<WatchMovieScreen> {
     try {
       _player.stop();
     } catch (_) {}
-
-    final playerToDispose = _player;
-    // Delay the FFI disposal to allow the GPU/native surface cleanup callbacks to settle.
-    Future.delayed(const Duration(milliseconds: 1000), () async {
-      try {
-        await playerToDispose.dispose();
-      } catch (_) {}
-    });
 
     _isAutoNexting.dispose();
     _countdown.dispose();
