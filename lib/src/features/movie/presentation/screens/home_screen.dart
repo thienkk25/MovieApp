@@ -24,83 +24,67 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
       extendBody: true,
       body: IndexedStack(
         index: selectedIndex,
         children: pages,
       ),
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 5),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          height: 72,
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F111D).withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 1.2,
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(25),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: NavigationBarTheme(
-              data: NavigationBarThemeData(
-                backgroundColor: isDark
-                    ? Colors.black.withValues(alpha: 0.6)
-                    : Colors.white.withValues(alpha: 0.85),
-                indicatorColor:
-                    theme.colorScheme.primary.withValues(alpha: 0.2),
-                labelTextStyle: WidgetStateProperty.all(
-                  TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
               ),
-              child: NavigationBar(
-                selectedIndex: selectedIndex,
-                elevation: 0,
-                height: 70,
-                animationDuration: const Duration(milliseconds: 400),
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                onDestinationSelected: (index) {
-                  setState(() {
-                    selectedIndex = index;
-                  });
-                },
-                destinations: [
-                  _buildDestination(
-                    icon: Icons.home_outlined,
-                    selectedIcon: Icons.home_rounded,
-                    label: 'app.home'.tr(),
-                    isSelected: selectedIndex == 0,
-                  ),
-                  _buildDestination(
-                    icon: Icons.favorite_outline,
-                    selectedIcon: Icons.favorite_rounded,
-                    label: 'app.favorites'.tr(),
-                    isSelected: selectedIndex == 1,
-                  ),
-                  _buildDestination(
-                    icon: Icons.search,
-                    selectedIcon: Icons.search_rounded,
-                    label: 'app.search'.tr(),
-                    isSelected: selectedIndex == 2,
-                  ),
-                  _buildDestination(
-                    icon: Icons.manage_accounts_outlined,
-                    selectedIcon: Icons.manage_accounts_rounded,
-                    label: 'app.account'.tr(),
-                    isSelected: selectedIndex == 3,
-                  ),
-                ],
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(
+                      index: 0,
+                      icon: Icons.home_outlined,
+                      selectedIcon: Icons.home_rounded,
+                      label: 'app.home'.tr(),
+                    ),
+                    _buildNavItem(
+                      index: 1,
+                      icon: Icons.favorite_outline,
+                      selectedIcon: Icons.favorite_rounded,
+                      label: 'app.favorites'.tr(),
+                    ),
+                    _buildNavItem(
+                      index: 2,
+                      icon: Icons.search,
+                      selectedIcon: Icons.search_rounded,
+                      label: 'app.search'.tr(),
+                    ),
+                    _buildNavItem(
+                      index: 3,
+                      icon: Icons.manage_accounts_outlined,
+                      selectedIcon: Icons.manage_accounts_rounded,
+                      label: 'app.account'.tr(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -109,27 +93,78 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  NavigationDestination _buildDestination({
+  Widget _buildNavItem({
+    required int index,
     required IconData icon,
     required IconData selectedIcon,
     required String label,
-    required bool isSelected,
   }) {
-    return NavigationDestination(
-      icon: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        transitionBuilder: (child, anim) => ScaleTransition(
-          scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack),
-          child: child,
-        ),
-        child: Icon(
-          isSelected ? selectedIcon : icon,
-          key: ValueKey(isSelected),
-          size: isSelected ? 28 : 24,
-          color: isSelected ? Colors.blueAccent : Colors.grey,
+    final isSelected = selectedIndex == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedIndex = index;
+        });
+      },
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedScale(
+        scale: isSelected ? 1.05 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: isSelected
+                    ? Colors.orangeAccent.withValues(alpha: 0.12)
+                    : Colors.transparent,
+                border: Border.all(
+                  color: isSelected
+                      ? Colors.orangeAccent.withValues(alpha: 0.2)
+                      : Colors.transparent,
+                  width: 1,
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: Colors.orangeAccent.withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        )
+                      ]
+                    : null,
+              ),
+              child: Icon(
+                isSelected ? selectedIcon : icon,
+                color: isSelected ? Colors.orangeAccent : Colors.white30,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? Colors.white : Colors.white30,
+                letterSpacing: isSelected ? 0.3 : 0.1,
+                shadows: isSelected
+                    ? [
+                        Shadow(
+                          color: Colors.orangeAccent.withValues(alpha: 0.3),
+                          blurRadius: 4,
+                        ),
+                      ]
+                    : null,
+              ),
+            ),
+          ],
         ),
       ),
-      label: label,
     );
   }
 }
