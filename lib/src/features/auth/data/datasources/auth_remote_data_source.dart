@@ -111,14 +111,41 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserCredential> signInWithFacebook() async {
-    final LoginResult result = await _facebookAuth.login(
+    bool isCancelled = false;
+    try {
+      final LoginResult result = await _facebookAuth.login(
+        permissions: ['email', 'public_profile'],
+      );
+      if (result.status == LoginStatus.success) {
+        final OAuthCredential credential =
+            FacebookAuthProvider.credential(result.accessToken!.tokenString);
+        return _firebaseAuth.signInWithCredential(credential);
+      }
+      
+      if (result.status == LoginStatus.cancelled) {
+        isCancelled = true;
+      }
+    } catch (e) {
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('cancel') || errStr.contains('user_cancelled')) {
+        isCancelled = true;
+      }
+    }
+
+    if (isCancelled) {
+      throw Exception('Facebook sign in cancelled');
+    }
+
+    // Native login failed (e.g. no native app, wrong key hash), fall back to web/browser login
+    final LoginResult webResult = await _facebookAuth.login(
       permissions: ['email', 'public_profile'],
+      loginBehavior: LoginBehavior.webOnly,
     );
-    if (result.status == LoginStatus.success) {
+    if (webResult.status == LoginStatus.success) {
       final OAuthCredential credential =
-          FacebookAuthProvider.credential(result.accessToken!.tokenString);
+          FacebookAuthProvider.credential(webResult.accessToken!.tokenString);
       return _firebaseAuth.signInWithCredential(credential);
     }
-    throw Exception('Facebook sign in failed: ${result.message}');
+    throw Exception(webResult.message ?? 'Facebook login failed');
   }
 }
