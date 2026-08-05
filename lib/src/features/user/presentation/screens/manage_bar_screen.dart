@@ -75,7 +75,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 ),
               ),
             ),
-            trailing ?? const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 20),
+            trailing ??
+                const Icon(Icons.chevron_right_rounded,
+                    color: Colors.white38, size: 20),
           ],
         ),
       ),
@@ -98,23 +100,25 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
               Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(height: 16),
               ListTile(
                 title: Text(
                   'settingsScreen.notifications.on'.tr(),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w500),
                 ),
                 trailing: isNotification
-                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    ? const Icon(Icons.check_circle_rounded,
+                        color: Colors.orangeAccent)
                     : null,
                 onTap: () async {
                   Navigator.pop(context);
-                  OverlayScreen().showOverlay(
-                      context,
-                      'settingsScreen.notifications.on'.tr(),
-                      Colors.green,
+                  OverlayScreen().showOverlay(context,
+                      'settingsScreen.notifications.on'.tr(), Colors.green,
                       duration: 2);
                   pref.setBool("notification_enabled", true);
                   setState(() => isNotification = true);
@@ -124,17 +128,17 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
               ListTile(
                 title: Text(
                   'settingsScreen.notifications.off'.tr(),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w500),
                 ),
                 trailing: isNotification
                     ? null
-                    : const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent),
+                    : const Icon(Icons.check_circle_rounded,
+                        color: Colors.orangeAccent),
                 onTap: () async {
                   Navigator.pop(context);
-                  OverlayScreen().showOverlay(
-                      context,
-                      'settingsScreen.notifications.off'.tr(),
-                      Colors.grey,
+                  OverlayScreen().showOverlay(context,
+                      'settingsScreen.notifications.off'.tr(), Colors.grey,
                       duration: 2);
                   pref.setBool("notification_enabled", false);
                   await WorkmanagerTask.cancelNotificationTasks();
@@ -165,26 +169,30 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
               Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(height: 16),
               ListTile(
                 title: Text(
                   'settingsScreen.language.vi'.tr(),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w500),
                 ),
-                trailing: ref.watch(isLanguageProvider) == const Locale('vi', '')
-                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
-                    : null,
+                trailing:
+                    ref.watch(isLanguageProvider) == const Locale('vi', '')
+                        ? const Icon(Icons.check_circle_rounded,
+                            color: Colors.orangeAccent)
+                        : null,
                 onTap: () async {
                   Navigator.pop(context);
                   context.setLocale(const Locale('vi', ''));
-                  OverlayScreen().showOverlay(
-                      context,
-                      'settingsScreen.language.vi'.tr(),
-                      Colors.blueGrey,
+                  OverlayScreen().showOverlay(context,
+                      'settingsScreen.language.vi'.tr(), Colors.blueGrey,
                       duration: 2);
-                  ref.read(isLanguageProvider.notifier).state = const Locale('vi', '');
+                  ref.read(isLanguageProvider.notifier).state =
+                      const Locale('vi', '');
                   ref.read(currentTitle.notifier).state = 'app.home';
                   await pref.setInt("language", 0);
                 },
@@ -193,20 +201,22 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
               ListTile(
                 title: Text(
                   'settingsScreen.language.en'.tr(),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w500),
                 ),
-                trailing: ref.watch(isLanguageProvider) == const Locale('en', '')
-                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
-                    : null,
+                trailing:
+                    ref.watch(isLanguageProvider) == const Locale('en', '')
+                        ? const Icon(Icons.check_circle_rounded,
+                            color: Colors.orangeAccent)
+                        : null,
                 onTap: () async {
                   Navigator.pop(context);
                   context.setLocale(const Locale('en', ''));
-                  OverlayScreen().showOverlay(
-                      context,
-                      'settingsScreen.language.en'.tr(),
-                      Colors.blueGrey,
+                  OverlayScreen().showOverlay(context,
+                      'settingsScreen.language.en'.tr(), Colors.blueGrey,
                       duration: 2);
-                  ref.read(isLanguageProvider.notifier).state = const Locale('en', '');
+                  ref.read(isLanguageProvider.notifier).state =
+                      const Locale('en', '');
                   ref.read(currentTitle.notifier).state = 'app.home';
                   await pref.setInt("language", 1);
                 },
@@ -235,25 +245,27 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
               Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.light_mode, color: Colors.white70),
                 title: Text(
                   'settingsScreen.theme.light'.tr(),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w500),
                 ),
                 trailing: ref.watch(themeModeProvider) == ThemeMode.light
-                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    ? const Icon(Icons.check_circle_rounded,
+                        color: Colors.orangeAccent)
                     : null,
                 onTap: () async {
                   ref.read(themeModeProvider.notifier).state = ThemeMode.light;
                   Navigator.pop(context);
-                  OverlayScreen().showOverlay(
-                      context,
-                      'settingsScreen.theme.light'.tr(),
-                      Colors.blueGrey,
+                  OverlayScreen().showOverlay(context,
+                      'settingsScreen.theme.light'.tr(), Colors.blueGrey,
                       duration: 2);
                   pref.setString("themeMode", "light");
                 },
@@ -263,18 +275,18 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 leading: const Icon(Icons.dark_mode, color: Colors.white70),
                 title: Text(
                   'settingsScreen.theme.dark'.tr(),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w500),
                 ),
                 trailing: ref.watch(themeModeProvider) == ThemeMode.dark
-                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    ? const Icon(Icons.check_circle_rounded,
+                        color: Colors.orangeAccent)
                     : null,
                 onTap: () async {
                   ref.read(themeModeProvider.notifier).state = ThemeMode.dark;
                   Navigator.pop(context);
-                  OverlayScreen().showOverlay(
-                      context,
-                      'settingsScreen.theme.dark'.tr(),
-                      Colors.blueGrey,
+                  OverlayScreen().showOverlay(context,
+                      'settingsScreen.theme.dark'.tr(), Colors.blueGrey,
                       duration: 2);
                   pref.setString("themeMode", "dark");
                 },
@@ -284,18 +296,18 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 leading: const Icon(Icons.phone_android, color: Colors.white70),
                 title: Text(
                   'settingsScreen.theme.system'.tr(),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w500),
                 ),
                 trailing: ref.watch(themeModeProvider) == ThemeMode.system
-                    ? const Icon(Icons.check_circle_rounded, color: Colors.orangeAccent)
+                    ? const Icon(Icons.check_circle_rounded,
+                        color: Colors.orangeAccent)
                     : null,
                 onTap: () async {
                   ref.read(themeModeProvider.notifier).state = ThemeMode.system;
                   Navigator.pop(context);
-                  OverlayScreen().showOverlay(
-                      context,
-                      'settingsScreen.theme.system'.tr(),
-                      Colors.blueGrey,
+                  OverlayScreen().showOverlay(context,
+                      'settingsScreen.theme.system'.tr(), Colors.blueGrey,
                       duration: 2);
                   pref.setString("themeMode", "auto");
                 },
@@ -328,11 +340,13 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.history_rounded, size: 64, color: Colors.white30),
+                    const Icon(Icons.history_rounded,
+                        size: 64, color: Colors.white30),
                     const SizedBox(height: 12),
                     Text(
                       'historyScreen.emptyMessage'.tr(),
-                      style: const TextStyle(fontSize: 16, color: Colors.white30),
+                      style:
+                          const TextStyle(fontSize: 16, color: Colors.white30),
                     ),
                   ],
                 ),
@@ -349,7 +363,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 Container(
                   width: 40,
                   height: 4,
-                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                  decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2)),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -358,7 +374,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                     Row(
                       spacing: 8,
                       children: [
-                        const Icon(Icons.history_rounded, size: 26, color: Colors.orangeAccent),
+                        const Icon(Icons.history_rounded,
+                            size: 26, color: Colors.orangeAccent),
                         Text(
                           'historyScreen.title'.tr(),
                           style: const TextStyle(
@@ -370,7 +387,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                      icon: const Icon(Icons.close_rounded,
+                          color: Colors.white70),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -388,7 +406,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => InforMovieScreen(slugMovie: item['slug']),
+                            builder: (_) =>
+                                InforMovieScreen(slugMovie: item['slug']),
                           ),
                         ),
                         onLongPress: () {
@@ -414,7 +433,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                     ),
                                     const SizedBox(height: 20),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
                                       children: [
                                         ElevatedButton.icon(
                                           onPressed: () {
@@ -422,26 +442,34 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (_) => InforMovieScreen(slugMovie: item['slug']),
+                                                builder: (_) =>
+                                                    InforMovieScreen(
+                                                        slugMovie:
+                                                            item['slug']),
                                               ),
                                             );
                                           },
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.orangeAccent,
+                                            backgroundColor:
+                                                Colors.orangeAccent,
                                             foregroundColor: Colors.white,
                                           ),
-                                          icon: const Icon(Icons.play_arrow_rounded),
+                                          icon: const Icon(
+                                              Icons.play_arrow_rounded),
                                           label: Text('app.watch'.tr()),
                                         ),
                                         OutlinedButton.icon(
                                           style: OutlinedButton.styleFrom(
-                                            backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
-                                            side: const BorderSide(color: Colors.redAccent),
+                                            backgroundColor: Colors.redAccent
+                                                .withValues(alpha: 0.1),
+                                            side: const BorderSide(
+                                                color: Colors.redAccent),
                                             foregroundColor: Colors.redAccent,
                                           ),
                                           onPressed: () async {
                                             final result = await ref
-                                                .read(removeHistoryWatchMovieUseCaseProvider)
+                                                .read(
+                                                    removeHistoryWatchMovieUseCaseProvider)
                                                 .call(item['slug']);
                                             if (!context.mounted) return;
                                             Navigator.pop(context);
@@ -452,7 +480,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                                   Colors.green,
                                                   duration: 3);
                                               ref
-                                                  .read(historyMoviesNotifierProvider.notifier)
+                                                  .read(
+                                                      historyMoviesNotifierProvider
+                                                          .notifier)
                                                   .removeState(item['slug']);
                                             } else {
                                               OverlayScreen().showOverlay(
@@ -462,7 +492,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                                   duration: 3);
                                             }
                                           },
-                                          icon: const Icon(Icons.delete_outline_rounded),
+                                          icon: const Icon(
+                                              Icons.delete_outline_rounded),
                                           label: Text('app.del'.tr()),
                                         ),
                                       ],
@@ -477,7 +508,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             color: Colors.white.withValues(alpha: 0.04),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.08)),
                           ),
                           child: Row(
                             children: [
@@ -491,19 +523,23 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   height: 90,
                                   width: 65,
                                   fit: BoxFit.cover,
-                                  progressIndicatorBuilder: (context, url, progress) =>
-                                      const Center(child: CircularProgressIndicator()),
+                                  progressIndicatorBuilder:
+                                      (context, url, progress) => const Center(
+                                          child: CircularProgressIndicator()),
                                   errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error, size: 40, color: Colors.white24),
+                                      const Icon(Icons.error,
+                                          size: 40, color: Colors.white24),
                                   memCacheHeight: 150,
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         item['name'],
@@ -518,7 +554,10 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                       const SizedBox(height: 6),
                                       Text(
                                         'historyScreen.watchedEpisode'.tr(
-                                          args: ['movie.episode'.plural(item['episode'])],
+                                          args: [
+                                            'movie.episode'
+                                                .plural(item['episode'])
+                                          ],
                                         ),
                                         style: const TextStyle(
                                           color: Colors.orangeAccent,
@@ -530,7 +569,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   ),
                                 ),
                               ),
-                              const Icon(Icons.chevron_right_rounded, size: 20, color: Colors.white38),
+                              const Icon(Icons.chevron_right_rounded,
+                                  size: 20, color: Colors.white38),
                               const SizedBox(width: 12),
                             ],
                           ),
@@ -559,10 +599,12 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 48),
+              const Icon(Icons.logout_rounded,
+                  color: Colors.redAccent, size: 48),
               const SizedBox(height: 16),
               Text(
-                'settingsScreen.notifications.title'.tr(), // Just a header or "Log Out"
+                'settingsScreen.notifications.title'
+                    .tr(), // Just a header or "Log Out"
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -593,7 +635,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: Text('navigation.cancel'.tr(), style: const TextStyle(color: Colors.white70)),
+                      child: Text('navigation.cancel'.tr(),
+                          style: const TextStyle(color: Colors.white70)),
                     ),
                   ),
                   Expanded(
@@ -610,7 +653,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                         Navigator.pop(context);
                         signOut();
                       },
-                      child: Text('navigation.ok'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text('navigation.ok'.tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -671,7 +715,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                  border:
+                      Border.all(color: Colors.white.withValues(alpha: 0.08)),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
@@ -720,7 +765,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                  border:
+                      Border.all(color: Colors.white.withValues(alpha: 0.08)),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
@@ -728,7 +774,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                     icon: Icons.exit_to_app_rounded,
                     title: 'profileScreen.logout'.tr(),
                     onTap: () => _showLogoutConfirmDialog(),
-                    trailing: const Icon(Icons.chevron_right_rounded, color: Colors.redAccent, size: 20),
+                    trailing: const Icon(Icons.chevron_right_rounded,
+                        color: Colors.redAccent, size: 20),
                   ),
                 ),
               ),
@@ -776,6 +823,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),

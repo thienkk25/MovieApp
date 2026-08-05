@@ -7,11 +7,11 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = file("C:/Users/thien/develop/SigningConfigs/key.properties")
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-}
+// def keystoreProperties = new Properties()
+// def keystorePropertiesFile = file("C:/Users/thien/develop/SigningConfigs/key.properties")
+// if (keystorePropertiesFile.exists()) {
+//     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+// }
 
 
 android {
@@ -43,26 +43,34 @@ android {
     }
 
     signingConfigs {
-        release {
-            if (keystoreProperties) {
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-            }
-        }
+        // release {
+        //     if (keystoreProperties) {
+        //         storeFile file(keystoreProperties['storeFile'])
+        //         storePassword keystoreProperties['storePassword']
+        //         keyAlias keystoreProperties['keyAlias']
+        //         keyPassword keystoreProperties['keyPassword']
+        //     }
+        // }
     }
 
 
     buildTypes {
-        release {
-            signingConfig signingConfigs.release
-            minifyEnabled true
-            shrinkResources  true
-            debuggable false
-	        jniDebuggable false
+        debug {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+            debuggable true
+            jniDebuggable true
             multiDexEnabled true
         }
+        // release {
+        //     signingConfig signingConfigs.release
+        //     minifyEnabled true
+        //     shrinkResources  true
+        //     debuggable false
+	    //     jniDebuggable false
+        //     multiDexEnabled true
+        // }
     }
 }
 
