@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/movie/data/models/movie_model.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/filter_sidebar_movie_screen.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
@@ -61,31 +62,32 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
       responsiveColumnCount = 5;
     }
 
+    final colors = context.appColors;
     return Scaffold(
       key: ValueKey(ref.watch(isLanguageProvider)),
-      backgroundColor: const Color(0xFF090A0F),
+      backgroundColor: colors.scaffoldBg,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF090A0F),
-                Color(0xFF10121D),
+                colors.appBarBg,
+                colors.appBarBgSecondary,
               ],
             ),
           ),
         ),
         title: Text(
           'search.title'.tr(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
-            color: Colors.white,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -93,9 +95,13 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
       body: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF090A0F), Color(0xFF141622), Color(0xFF090A0F)],
+              colors: [
+                colors.gradientStart,
+                colors.gradientMid,
+                colors.gradientEnd
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -113,10 +119,9 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                     child: Container(
                       height: 52,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .06),
+                        color: colors.inputFill,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                            color: Colors.white.withValues(alpha: .12)),
+                        border: Border.all(color: colors.inputBorder),
                       ),
                       child: SearchBar(
                         controller: searchController,
@@ -126,18 +131,17 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             const WidgetStatePropertyAll(Colors.transparent),
                         leading: const Icon(Icons.search,
                             color: Colors.orangeAccent),
-                        textStyle: const WidgetStatePropertyAll(
-                          TextStyle(color: Colors.white, fontSize: 16),
+                        textStyle: WidgetStatePropertyAll(
+                          TextStyle(color: colors.inputText, fontSize: 16),
                         ),
                         hintStyle: WidgetStatePropertyAll(
-                          TextStyle(
-                              color: Colors.white70.withValues(alpha: 0.5)),
+                          TextStyle(color: colors.inputHint),
                         ),
                         trailing: [
                           if (searchController.text.isNotEmpty)
                             IconButton(
-                              icon: const Icon(Icons.clear,
-                                  color: Colors.white70),
+                              icon: Icon(Icons.clear,
+                                  color: colors.iconSecondary),
                               onPressed: () {
                                 searchController.clear();
                               },
@@ -173,10 +177,10 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                       child: Container(
                         margin: const EdgeInsets.only(right: 6),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: colors.inputFill,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: colors.border,
                           ),
                         ),
                         child: InkWell(
@@ -216,10 +220,10 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                                     color: Colors.orangeAccent, size: 20),
                                 Text(
                                   'movie.genre'.tr(),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                               ],
@@ -237,13 +241,13 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             margin: const EdgeInsets.only(left: 6),
                             decoration: BoxDecoration(
                               color: hasFilter
-                                  ? Colors.orange.withValues(alpha: 0.1)
-                                  : Colors.white.withValues(alpha: 0.05),
+                                  ? Colors.orangeAccent.withValues(alpha: 0.1)
+                                  : colors.inputFill,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
                                 color: hasFilter
                                     ? Colors.orangeAccent.withValues(alpha: 0.4)
-                                    : Colors.white.withValues(alpha: 0.1),
+                                    : colors.border,
                               ),
                             ),
                             child: InkWell(
@@ -263,7 +267,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                                         fontWeight: FontWeight.w600,
                                         color: hasFilter
                                             ? Colors.orangeAccent
-                                            : Colors.white,
+                                            : colors.textPrimary,
                                       ),
                                     ),
                                     Icon(
@@ -273,7 +277,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                                       size: 20,
                                       color: hasFilter
                                           ? Colors.orangeAccent
-                                          : Colors.white54,
+                                          : colors.iconInactive,
                                     ),
                                   ],
                                 ),
@@ -321,8 +325,8 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             child: Center(
                               child: Text(
                                 'search.noResult'.tr(),
-                                style: const TextStyle(
-                                  color: Colors.white54,
+                                style: TextStyle(
+                                  color: colors.textTertiary,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -370,9 +374,9 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                                   },
                                 );
                               } else {
-                                return const Center(
-                                  child:
-                                      Icon(Icons.error, color: Colors.white24),
+                                return Center(
+                                  child: Icon(Icons.error,
+                                      color: colors.iconInactive),
                                 );
                               }
                             },
@@ -388,10 +392,11 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
   Future<void> showFilterModal(BuildContext context, WidgetRef ref) async {
     final currentFilter = ref.read(searchFilterProvider);
 
+    final colors = context.appColors;
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF141622),
+      backgroundColor: colors.sheetBg,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -404,13 +409,11 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide:
-                    BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                borderSide: BorderSide(color: colors.border),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide:
-                    BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                borderSide: BorderSide(color: colors.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -438,7 +441,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white24,
+                        color: colors.iconInactive,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -447,10 +450,10 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                   Center(
                     child: Text(
                       'filter.search'.tr(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: colors.textPrimary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -467,7 +470,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                                 child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
                             return Text('Lỗi: ${snapshot.error}',
-                                style: const TextStyle(color: Colors.white70));
+                                style: TextStyle(color: colors.textSecondary));
                           } else if (!snapshot.hasData ||
                               snapshot.data!.isEmpty) {
                             return const Text("Không có dữ liệu",
@@ -478,7 +481,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
 
                           return DropdownButtonFormField<String>(
                             initialValue: currentFilter.category,
-                            dropdownColor: const Color(0xFF1D1F30),
+                            dropdownColor: colors.sheetBg,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 15),
                             decoration: decoration('filter.category'.tr()),
@@ -494,7 +497,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                                   value: e['slug'] as String,
                                   child: Text(e['name'] as String,
                                       style:
-                                          const TextStyle(color: Colors.white)),
+                                          TextStyle(color: colors.textPrimary)),
                                 ),
                               )
                             ],
@@ -513,7 +516,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                                 child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
                             return Text('Lỗi: ${snapshot.error}',
-                                style: const TextStyle(color: Colors.white70));
+                                style: TextStyle(color: colors.textSecondary));
                           } else if (!snapshot.hasData ||
                               snapshot.data!.isEmpty) {
                             return const Text("Không có dữ liệu",
@@ -524,7 +527,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
 
                           return DropdownButtonFormField<String>(
                             initialValue: currentFilter.country,
-                            dropdownColor: const Color(0xFF1D1F30),
+                            dropdownColor: colors.sheetBg,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 15),
                             decoration: decoration('filter.country'.tr()),
@@ -540,7 +543,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                                   value: e['slug'] as String,
                                   child: Text(e['name'] as String,
                                       style:
-                                          const TextStyle(color: Colors.white)),
+                                          TextStyle(color: colors.textPrimary)),
                                 ),
                               )
                             ],
@@ -552,7 +555,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                       ),
                       DropdownButtonFormField<int>(
                         initialValue: currentFilter.year,
-                        dropdownColor: const Color(0xFF1D1F30),
+                        dropdownColor: colors.sheetBg,
                         style:
                             const TextStyle(color: Colors.white, fontSize: 15),
                         decoration: decoration('filter.year'.tr()),
@@ -567,7 +570,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                             (i) => DropdownMenuItem<int>(
                               value: DateTime.now().year - i,
                               child: Text('${DateTime.now().year - i}',
-                                  style: const TextStyle(color: Colors.white)),
+                                  style: TextStyle(color: colors.textPrimary)),
                             ),
                           ),
                         ],
@@ -576,7 +579,7 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
                       ),
                       DropdownButtonFormField<String>(
                         initialValue: currentFilter.sortLang,
-                        dropdownColor: const Color(0xFF1D1F30),
+                        dropdownColor: colors.sheetBg,
                         style:
                             const TextStyle(color: Colors.white, fontSize: 15),
                         decoration: decoration('app.language'.tr()),

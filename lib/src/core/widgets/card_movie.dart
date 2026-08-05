@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/movie/data/models/movie_model.dart';
 
 class CardMovie extends StatelessWidget {
@@ -31,18 +32,20 @@ class CardMovie extends StatelessWidget {
               offset: const Offset(0, 4),
             ),
           ],
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+            colors: [
+              context.appColors.headerGradientStart,
+              context.appColors.headerGradientMid,
+              context.appColors.headerGradientEnd,
+            ],
           ),
         ),
         child: Stack(
           children: [
             CachedNetworkImage(
-              imageUrl: isLink
-                  ? movie.posterUrl.toString()
-                  : "https://phimimg.com/${movie.posterUrl}",
+              imageUrl: _resolveImageUrl(movie.posterUrl ?? ''),
               progressIndicatorBuilder: (context, url, progress) =>
                   const Center(
                 child: CircularProgressIndicator(color: Colors.orangeAccent),
@@ -202,4 +205,13 @@ class CardMovie extends StatelessWidget {
       ),
     );
   }
+
+  /// Auto-detect if URL is absolute or relative and resolve accordingly.
+  static String resolveImageUrl(String url) {
+    if (url.isEmpty) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return 'https://phimimg.com/$url';
+  }
+
+  String _resolveImageUrl(String url) => resolveImageUrl(url);
 }

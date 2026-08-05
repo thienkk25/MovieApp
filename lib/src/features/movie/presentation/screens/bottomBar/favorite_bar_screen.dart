@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/movie/data/models/movie_model.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
 import 'package:movie_app/src/core/configs/overlay_screen.dart';
@@ -33,6 +34,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
     final data = ref.watch(getFavoriteMoviesNotifierProvider);
     final dataFavorites = data.values.toList();
     final sizeWidth = MediaQuery.of(context).size.width;
+    final colors = context.appColors;
 
     int columnCount = sizeWidth < 600
         ? 2
@@ -47,32 +49,32 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF090A0F),
-                Color(0xFF10121D),
+                colors.appBarBg,
+                colors.appBarBgSecondary,
               ],
             ),
           ),
         ),
         title: Text(
           'favoritesScreen.title'.tr(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
-            color: Colors.white,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF090A0F), Color(0xFF141622), Color(0xFF090A0F)],
+            colors: [colors.gradientStart, colors.gradientMid, colors.gradientEnd],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -98,21 +100,20 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                   isFullScreen: false,
                   barHintText: 'search.hint'.tr(),
                   barElevation: const WidgetStatePropertyAll(0),
-                  barBackgroundColor: WidgetStatePropertyAll(
-                      Colors.white.withValues(alpha: 0.06)),
+                  barBackgroundColor: WidgetStatePropertyAll(colors.inputFill),
                   barOverlayColor: WidgetStatePropertyAll(
-                      Colors.white.withValues(alpha: 0.05)),
-                  barTextStyle: const WidgetStatePropertyAll(
-                    TextStyle(color: Colors.white, fontSize: 16),
+                      colors.inputFill.withValues(alpha: 0.8)),
+                  barTextStyle: WidgetStatePropertyAll(
+                    TextStyle(color: colors.inputText, fontSize: 16),
                   ),
                   barHintStyle: WidgetStatePropertyAll(
-                    TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                    TextStyle(color: colors.inputHint),
                   ),
                   barShape: WidgetStatePropertyAll(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                       side: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.12),
+                        color: colors.inputBorder,
                         width: 1,
                       ),
                     ),
@@ -129,7 +130,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                         ListTile(
                           title: Text(
                             'search.noResult'.tr(),
-                            style: const TextStyle(color: Colors.white70),
+                            style: TextStyle(color: colors.textSecondary),
                           ),
                         )
                       ];
@@ -139,7 +140,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.05),
+                              color: colors.divider,
                             ),
                           ),
                         ),
@@ -147,7 +148,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                           leading: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: CachedNetworkImage(
-                              imageUrl: movie['poster_url'],
+                              imageUrl: CardMovie.resolveImageUrl(movie['poster_url'] ?? ''),
                               width: 45,
                               height: 60,
                               fit: BoxFit.cover,
@@ -155,8 +156,8 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                           ),
                           title: Text(
                             movie['name'],
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colors.textPrimary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -223,8 +224,8 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                             const SizedBox(height: 16),
                             Text(
                               'favoritesScreen.emptyMessage'.tr(),
-                              style: const TextStyle(
-                                color: Colors.white70,
+                              style: TextStyle(
+                                color: colors.textSecondary,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -233,8 +234,8 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                             const SizedBox(height: 6),
                             Text(
                               'search.hint'.tr(),
-                              style: const TextStyle(
-                                color: Colors.white30,
+                              style: TextStyle(
+                                color: colors.textTertiary,
                                 fontSize: 13,
                               ),
                             ),
@@ -250,6 +251,7 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
   }
 
   void _confirmRemove(String slug) {
+    final colors = context.appColors;
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -258,10 +260,10 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1C29),
+            color: colors.dialogBg,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: colors.border,
               width: 1,
             ),
             boxShadow: [
@@ -290,19 +292,19 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
               const SizedBox(height: 16),
               Text(
                 'settingsScreen.notifications.title'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: colors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
               Text(
                 'dialog.confirmFavorite'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white70,
+                  color: colors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -312,9 +314,9 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white70,
+                        foregroundColor: colors.textSecondary,
                         side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: colors.border,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

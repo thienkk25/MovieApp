@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:movie_app/src/core/configs/overlay_screen.dart';
 import 'package:movie_app/src/features/auth/presentation/screens/forgot_screen.dart';
@@ -38,27 +39,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     required Widget prefixIcon,
     Widget? suffixIcon,
   }) {
+    final colors = context.appColors;
     return InputDecoration(
       labelText: labelText,
-      labelStyle: const TextStyle(color: Colors.white38, fontSize: 14),
+      labelStyle: TextStyle(color: colors.inputHint, fontSize: 14),
       floatingLabelStyle: const TextStyle(color: Colors.orangeAccent),
       prefixIcon: prefixIcon,
       prefixIconColor: WidgetStateColor.resolveWith((states) =>
           states.contains(WidgetState.focused)
               ? Colors.orangeAccent
-              : Colors.white38),
+              : colors.inputHint),
       suffixIcon: suffixIcon,
       suffixIconColor: WidgetStateColor.resolveWith((states) =>
           states.contains(WidgetState.focused)
               ? Colors.orangeAccent
-              : Colors.white38),
+              : colors.inputHint),
       filled: true,
-      fillColor: Colors.white.withValues(alpha: 0.04),
+      fillColor: colors.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: colors.inputBorder,
           width: 1.2,
         ),
       ),
@@ -134,8 +136,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: const Color(0xFF090A0F),
+      backgroundColor: colors.scaffoldBg,
       body: Stack(
         children: [
           _buildGlassDecoration(),
@@ -178,10 +181,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           const SizedBox(height: 16),
                           Text(
                             'loginScreen.title'.tr(),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: colors.textPrimary,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -196,7 +199,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           TextFormField(
                             controller: emailController,
                             keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                          style: TextStyle(color: colors.textPrimary, fontSize: 15),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'errors.emailRequired'.tr();
@@ -214,7 +217,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           TextFormField(
                             controller: pwController,
                             obscureText: obscureText,
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: TextStyle(color: colors.textPrimary, fontSize: 15),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'errors.passwordRequired'.tr();
@@ -300,7 +303,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       children: [
                         Text(
                           'loginScreen.noAccount'.tr(),
-                          style: const TextStyle(color: Colors.white38, fontSize: 13),
+                          style: TextStyle(color: colors.textTertiary, fontSize: 13),
                         ),
                         const SizedBox(width: 4),
                         GestureDetector(
@@ -322,15 +325,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 32),
                     Row(
                       children: [
-                        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
+                        Expanded(child: Divider(color: colors.divider)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             'app.or'.tr(),
-                            style: const TextStyle(color: Colors.white30, fontSize: 12),
+                            style: TextStyle(color: colors.textTertiary, fontSize: 12),
                           ),
                         ),
-                        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
+                        Expanded(child: Divider(color: colors.divider)),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -344,9 +347,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         height: 50,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          color: Colors.white.withValues(alpha: 0.04),
+                          color: colors.inputFill,
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.08),
+                            color: colors.inputBorder,
                             width: 1.2,
                           ),
                         ),
@@ -361,8 +364,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             const SizedBox(width: 10),
                             Text(
                               'loginScreen.loginWith'.tr(args: ["Google"]),
-                              style: const TextStyle(
-                                color: Colors.white70,
+                              style: TextStyle(
+                                color: colors.textSecondary,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -420,6 +423,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Widget _buildLoadingIndicator() {
+    final colors = context.appColors;
     return Center(
       child: Container(
         padding: const EdgeInsets.all(28),
@@ -427,7 +431,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           color: const Color(0xFF141622),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: colors.border,
             width: 1.2,
           ),
           boxShadow: [

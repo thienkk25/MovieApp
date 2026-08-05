@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 
 class ShimmerLoading extends StatelessWidget {
   const ShimmerLoading({super.key});
@@ -7,6 +8,7 @@ class ShimmerLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double sizeWidth = MediaQuery.of(context).size.width;
+    final colors = context.appColors;
 
     int responsiveColumnCount;
     int? itemCount;
@@ -43,8 +45,8 @@ class ShimmerLoading extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Shimmer.fromColors(
-                baseColor: Colors.grey.shade300,
-                highlightColor: Colors.grey.shade100,
+                baseColor: colors.shimmerBase,
+                highlightColor: colors.shimmerHighlight,
                 child: Container(
                   height: 200,
                   width: double.infinity,
@@ -53,20 +55,20 @@ class ShimmerLoading extends StatelessWidget {
                       topLeft: Radius.circular(5),
                       topRight: Radius.circular(5),
                     ),
-                    color: Colors.grey.shade300,
+                    color: colors.shimmerBase,
                   ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.white,
+                  baseColor: colors.shimmerBase,
+                  highlightColor: colors.shimmerHighlight,
                   child: Container(
                     height: 10,
                     width: MediaQuery.of(context).size.width / 3,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: colors.shimmerBase,
                     ),
                   ),
                 ),

@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:movie_app/src/core/configs/overlay_screen.dart';
 
@@ -37,27 +38,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     required Widget prefixIcon,
     Widget? suffixIcon,
   }) {
+    final colors = context.appColors;
     return InputDecoration(
       labelText: labelText,
-      labelStyle: const TextStyle(color: Colors.white38, fontSize: 14),
+      labelStyle: TextStyle(color: colors.inputHint, fontSize: 14),
       floatingLabelStyle: const TextStyle(color: Colors.orangeAccent),
       prefixIcon: prefixIcon,
       prefixIconColor: WidgetStateColor.resolveWith((states) =>
           states.contains(WidgetState.focused)
               ? Colors.orangeAccent
-              : Colors.white38),
+              : colors.inputHint),
       suffixIcon: suffixIcon,
       suffixIconColor: WidgetStateColor.resolveWith((states) =>
           states.contains(WidgetState.focused)
               ? Colors.orangeAccent
-              : Colors.white38),
+              : colors.inputHint),
       filled: true,
-      fillColor: Colors.white.withValues(alpha: 0.04),
+      fillColor: colors.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: colors.inputBorder,
           width: 1.2,
         ),
       ),
@@ -133,13 +135,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: const Color(0xFF090A0F),
+      backgroundColor: colors.scaffoldBg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white70, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: colors.iconSecondary, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -185,10 +188,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           const SizedBox(height: 16),
                           Text(
                             'registerScreen.title'.tr(),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: colors.textPrimary,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -203,7 +206,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           TextFormField(
                             controller: emailController,
                             keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: TextStyle(color: colors.textPrimary, fontSize: 15),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'errors.emailRequired'.tr();
@@ -221,7 +224,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           TextFormField(
                             controller: pwController,
                             obscureText: obscureText,
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: TextStyle(color: colors.textPrimary, fontSize: 15),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'errors.passwordRequired'.tr();
@@ -250,7 +253,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           TextFormField(
                             controller: rePwController,
                             obscureText: obscureText,
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: TextStyle(color: colors.textPrimary, fontSize: 15),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'errors.passwordRequired'.tr();
@@ -320,7 +323,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       children: [
                         Text(
                           'registerScreen.haveAccount'.tr(),
-                          style: const TextStyle(color: Colors.white38, fontSize: 13),
+                          style: TextStyle(color: colors.textTertiary, fontSize: 13),
                         ),
                         const SizedBox(width: 4),
                         GestureDetector(
@@ -347,6 +350,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Widget _buildLoadingIndicator() {
+    final colors = context.appColors;
     return Center(
       child: Container(
         padding: const EdgeInsets.all(28),
@@ -354,7 +358,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           color: const Color(0xFF141622),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: colors.border,
             width: 1.2,
           ),
           boxShadow: [

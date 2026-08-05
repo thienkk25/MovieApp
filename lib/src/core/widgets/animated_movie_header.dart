@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 
 class AnimatedMovieHeader extends StatefulWidget {
   final String profilePicture;
@@ -52,15 +53,16 @@ class _AnimatedMovieHeaderState extends State<AnimatedMovieHeader>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
       child: Container(
         height: 120,
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+            colors: [colors.headerGradientStart, colors.headerGradientMid, colors.headerGradientEnd],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

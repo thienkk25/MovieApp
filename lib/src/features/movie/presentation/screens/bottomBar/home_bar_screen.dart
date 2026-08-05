@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/movie/data/models/movie_model.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
 import 'package:movie_app/src/core/widgets/shimmer_loading.dart';
@@ -128,6 +129,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   }
 
   Widget _buildSectionHeader(String titleKey, VoidCallback onTap) {
+    final colors = context.appColors;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -147,10 +149,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
             Expanded(
               child: Text(
                 titleKey.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: colors.textPrimary,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -159,10 +161,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "movie.genre".tr(), // Localized or general view all
+                  "movie.genre".tr(),
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: colors.textTertiary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -170,7 +172,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 12,
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: colors.textTertiary,
                 ),
               ],
             ),
@@ -185,11 +187,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
     final historyList = historyMap.values.toList();
     if (historyList.isEmpty) return const SizedBox();
 
-    const titleColor = Colors.white;
-    final cardBg = Colors.white.withValues(alpha: .04);
-    final borderColor = Colors.white.withValues(alpha: .08);
-    const textColor = Colors.white;
-    const iconColor = Colors.white30;
+    final colors = context.appColors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,10 +207,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
               const SizedBox(width: 8),
               Text(
                 'historyScreen.title'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: titleColor,
+                  color: colors.textPrimary,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -231,9 +229,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                 width: 240,
                 margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
-                  color: cardBg,
+                  color: colors.cardBg.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: borderColor, width: 1),
+                  border: Border.all(color: colors.border, width: 1),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -256,10 +254,10 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             fit: StackFit.expand,
                             children: [
                               CachedNetworkImage(
-                                imageUrl: movie['poster_url'],
+                                imageUrl: CardMovie.resolveImageUrl(movie['poster_url'] ?? ''),
                                 fit: BoxFit.cover,
                                 errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error, color: iconColor),
+                                    Icon(Icons.error, color: colors.iconInactive),
                               ),
                               Container(
                                 decoration: BoxDecoration(
@@ -294,8 +292,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                   movie['name'] ?? '',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: textColor,
+                                  style: TextStyle(
+                                    color: colors.textPrimary,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                   ),
@@ -344,20 +342,21 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
   @override
   Widget build(BuildContext context) {
     final hasPadingBottom = MediaQuery.of(context).padding.bottom;
+    final colors = context.appColors;
     return Scaffold(
       key: ValueKey(ref.watch(isLanguageProvider)),
-      backgroundColor: const Color(0xFF090A0F),
+      backgroundColor: colors.scaffoldBg,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF090A0F),
-                Color(0xFF10121D),
+                colors.appBarBg,
+                colors.appBarBgSecondary,
               ],
             ),
           ),
@@ -365,11 +364,11 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
         title: Consumer(
           builder: (context, ref, _) => Text(
             ref.watch(currentTitle).tr(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.8,
-              color: Colors.white,
+              color: colors.textPrimary,
             ),
           ),
         ),
@@ -399,7 +398,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                 fit: StackFit.expand,
                                 children: [
                                   CachedNetworkImage(
-                                    imageUrl: items[currentPage]['poster_url'],
+                                    imageUrl: CardMovie.resolveImageUrl(items[currentPage]['poster_url'] ?? ''),
                                     fit: BoxFit.cover,
                                     width: double.infinity,
                                     height: double.infinity,
@@ -411,7 +410,7 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                                         end: Alignment.bottomCenter,
                                         colors: [
                                           Colors.black.withValues(alpha: .5),
-                                          const Color(0xFF090A0F),
+                                          colors.scaffoldBg,
                                         ],
                                       ),
                                     ),
@@ -507,8 +506,8 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                         },
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
-                        error: (err, stack) => const Center(
-                            child: Icon(Icons.error, color: Colors.white30)),
+                        error: (err, stack) => Center(
+                            child: Icon(Icons.error, color: colors.iconInactive)),
                       ),
                 ),
                 _buildContinueWatching(),
@@ -538,9 +537,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             data: (dataMovies) =>
                                 GridViewScreen(dataMovies: dataMovies),
                             loading: () => const ShimmerLoading(),
-                            error: (err, stack) => const Center(
+                            error: (err, stack) => Center(
                                 child:
-                                    Icon(Icons.error, color: Colors.white30)),
+                                    Icon(Icons.error, color: colors.iconInactive)),
                           ),
                       _buildSectionHeader(
                         'movie.drama',
@@ -563,9 +562,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             data: (dataMovies) =>
                                 GridViewScreen(dataMovies: dataMovies),
                             loading: () => const ShimmerLoading(),
-                            error: (err, stack) => const Center(
+                            error: (err, stack) => Center(
                                 child:
-                                    Icon(Icons.error, color: Colors.white30)),
+                                    Icon(Icons.error, color: colors.iconInactive)),
                           ),
                       _buildSectionHeader(
                         'movie.cartoon',
@@ -588,9 +587,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             data: (dataMovies) =>
                                 GridViewScreen(dataMovies: dataMovies),
                             loading: () => const ShimmerLoading(),
-                            error: (err, stack) => const Center(
+                            error: (err, stack) => Center(
                                 child:
-                                    Icon(Icons.error, color: Colors.white30)),
+                                    Icon(Icons.error, color: colors.iconInactive)),
                           ),
                       _buildSectionHeader(
                         'movie.tvShows',
@@ -613,9 +612,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             data: (dataMovies) =>
                                 GridViewScreen(dataMovies: dataMovies),
                             loading: () => const ShimmerLoading(),
-                            error: (err, stack) => const Center(
+                            error: (err, stack) => Center(
                                 child:
-                                    Icon(Icons.error, color: Colors.white30)),
+                                    Icon(Icons.error, color: colors.iconInactive)),
                           ),
                       _buildSectionHeader(
                         'movie.vietsub',
@@ -638,9 +637,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             data: (dataMovies) =>
                                 GridViewScreen(dataMovies: dataMovies),
                             loading: () => const ShimmerLoading(),
-                            error: (err, stack) => const Center(
+                            error: (err, stack) => Center(
                                 child:
-                                    Icon(Icons.error, color: Colors.white30)),
+                                    Icon(Icons.error, color: colors.iconInactive)),
                           ),
                       _buildSectionHeader(
                         'movie.narrated',
@@ -663,9 +662,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             data: (dataMovies) =>
                                 GridViewScreen(dataMovies: dataMovies),
                             loading: () => const ShimmerLoading(),
-                            error: (err, stack) => const Center(
+                            error: (err, stack) => Center(
                                 child:
-                                    Icon(Icons.error, color: Colors.white30)),
+                                    Icon(Icons.error, color: colors.iconInactive)),
                           ),
                       _buildSectionHeader(
                         'movie.dubbed',
@@ -688,9 +687,9 @@ class _HomeBarScreenState extends ConsumerState<HomeBarScreen> {
                             data: (dataMovies) =>
                                 GridViewScreen(dataMovies: dataMovies),
                             loading: () => const ShimmerLoading(),
-                            error: (err, stack) => const Center(
+                            error: (err, stack) => Center(
                                 child:
-                                    Icon(Icons.error, color: Colors.white30)),
+                                    Icon(Icons.error, color: colors.iconInactive)),
                           ),
                     ].animate(interval: 200.ms).fadeIn(duration: 500.ms),
                   ),

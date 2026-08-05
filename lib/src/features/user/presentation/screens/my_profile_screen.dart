@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/movie/presentation/providers/movie_providers.dart';
 import 'package:movie_app/src/features/auth/presentation/providers/auth_providers.dart';
 
@@ -49,15 +50,16 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0E1117),
+      backgroundColor: colors.scaffoldBg,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF141E30), Color(0xFF243B55)],
+              colors: [colors.headerGradientStart, colors.headerGradientEnd],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -72,6 +74,7 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
           ),
         ),
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -82,13 +85,16 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
                   width: double.infinity,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFF141E30), Color(0xFF243B55)],
+                      colors: [
+                        colors.headerGradientStart,
+                        colors.headerGradientEnd
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.vertical(
+                    borderRadius: const BorderRadius.vertical(
                       bottom: Radius.circular(30),
                     ),
                   ),
@@ -223,29 +229,30 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
   }
 
   Widget _infoTile(String title, String value) {
+    final colors = context.appColors;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1E1F25), Color(0xFF16181D)],
+        gradient: LinearGradient(
+          colors: [colors.infoTileGradientStart, colors.infoTileGradientEnd],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: colors.infoTileBorder),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title,
-              style: const TextStyle(color: Colors.white70, fontSize: 15)),
+              style: TextStyle(color: colors.textSecondary, fontSize: 15)),
           Flexible(
             child: Text(
               value.isNotEmpty ? value : "—",
               textAlign: TextAlign.right,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: colors.textPrimary,
                 fontWeight: FontWeight.w500,
                 fontSize: 15,
                 overflow: TextOverflow.ellipsis,

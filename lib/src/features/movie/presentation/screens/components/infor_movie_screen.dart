@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/movie/data/models/movie_model.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/view_more_screen.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/watch_movie_screen.dart';
@@ -83,6 +84,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   Widget build(BuildContext context) {
     ref.watch(isClickLWatchEpisodeLinkMovies);
     final double height = MediaQuery.of(context).size.width / (16 / 9);
+    final colors = context.appColors;
 
     final dataFavorites = ref.watch(getFavoriteMoviesNotifierProvider);
     final isFavorite = dataFavorites.containsKey(widget.slugMovie);
@@ -91,17 +93,18 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
       future: singleDetailMovies,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-              backgroundColor: Color(0xFF0A0B10),
-              body: Center(
+          return Scaffold(
+              backgroundColor: colors.scaffoldBgSecondary,
+              body: const Center(
                   child: CircularProgressIndicator(color: Colors.orange)));
         }
         if (snapshot.hasError) {
           return Scaffold(
-            backgroundColor: const Color(0xFF0A0B10),
+            backgroundColor: colors.scaffoldBgSecondary,
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
+              iconTheme: IconThemeData(color: colors.textPrimary),
               title: const Icon(Icons.error, color: Colors.redAccent),
               centerTitle: true,
             ),
@@ -121,10 +124,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
         }
         if (!snapshot.hasData || snapshot.data == null) {
           return Scaffold(
-              backgroundColor: const Color(0xFF0A0B10),
+              backgroundColor: colors.scaffoldBgSecondary,
               body: Center(
-                  child: const Text('errors.notFound',
-                          style: TextStyle(color: Colors.white70))
+                  child: Text('errors.notFound',
+                          style: TextStyle(color: colors.textSecondary))
                       .tr()));
         }
 
@@ -134,7 +137,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
         final serverData = hasEpisodes ? episodes[0]['server_data'] : null;
 
         return Scaffold(
-          backgroundColor: const Color(0xFF0A0B10),
+          backgroundColor: colors.scaffoldBgSecondary,
           body: Stack(
             children: [
               // Immersive Blurred Poster Backdrop
@@ -149,25 +152,25 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                     imageFilter: ImageFilter.blur(
                         sigmaX: 30, sigmaY: 30, tileMode: TileMode.decal),
                     child: CachedNetworkImage(
-                      imageUrl: dataInforMovie['movie']['poster_url'] ?? '',
+                      imageUrl: CardMovie.resolveImageUrl(dataInforMovie['movie']['poster_url'] ?? ''),
                       fit: BoxFit.cover,
                       errorWidget: (context, url, error) => const SizedBox(),
                     ),
                   ),
                 ),
               ),
-              // Linear Gradient overlay to blend backdrop to deep dark background
+              // Linear Gradient overlay to blend backdrop to background
               Positioned.fill(
                 child: Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Color(0xFF0A0B10),
+                        colors.scaffoldBgSecondary,
                       ],
-                      stops: [0.0, 0.45],
+                      stops: const [0.0, 0.45],
                     ),
                   ),
                 ),
@@ -180,7 +183,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                     return [
                       SliverAppBar(
                         backgroundColor: innerBoxIsScrolled
-                            ? const Color(0xFF0A0B10)
+                            ? colors.scaffoldBgSecondary
                             : Colors.transparent,
                         pinned: true,
                         elevation: 0,
@@ -319,25 +322,23 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 12, vertical: 8),
                                             decoration: BoxDecoration(
-                                              color: Colors.white
-                                                  .withValues(alpha: .08),
+                                              color: colors.inputFill,
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               border: Border.all(
-                                                  color: Colors.white
-                                                      .withValues(alpha: .1)),
+                                                  color: colors.border),
                                             ),
                                             child: Row(
                                               children: [
-                                                const Icon(Icons.arrow_back_ios,
+                                                Icon(Icons.arrow_back_ios,
                                                     size: 12,
-                                                    color: Colors.white),
+                                                    color: colors.textPrimary),
                                                 const SizedBox(width: 4),
                                                 Text(
                                                     'player.previousEpisode'
                                                         .tr(),
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
+                                                    style: TextStyle(
+                                                        color: colors.textPrimary,
                                                         fontSize: 13)),
                                               ],
                                             ),
@@ -346,10 +347,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         Text(
                                           'movie.episode'.plural(
                                               ref.watch(wasWatchEpisodeMovies)),
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.white),
+                                              color: colors.textPrimary),
                                         ),
                                         InkWell(
                                           onTap: () {
@@ -392,25 +393,23 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 12, vertical: 8),
                                             decoration: BoxDecoration(
-                                              color: Colors.white
-                                                  .withValues(alpha: .08),
+                                              color: colors.inputFill,
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               border: Border.all(
-                                                  color: Colors.white
-                                                      .withValues(alpha: .1)),
+                                                  color: colors.border),
                                             ),
                                             child: Row(
                                               children: [
                                                 Text('player.nextEpisode'.tr(),
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
+                                                    style: TextStyle(
+                                                        color: colors.textPrimary,
                                                         fontSize: 13)),
                                                 const SizedBox(width: 4),
-                                                const Icon(
+                                                Icon(
                                                     Icons.arrow_forward_ios,
                                                     size: 12,
-                                                    color: Colors.white),
+                                                    color: colors.textPrimary),
                                               ],
                                             ),
                                           ),
@@ -426,12 +425,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
-                                        color:
-                                            Colors.white.withValues(alpha: .04),
+                                        color: colors.inputFill,
                                         borderRadius: BorderRadius.circular(10),
                                         border: Border.all(
-                                            color: Colors.white
-                                                .withValues(alpha: .06)),
+                                            color: colors.border),
                                       ),
                                       child: Row(
                                         mainAxisAlignment:
@@ -439,9 +436,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                         children: [
                                           Row(
                                             children: [
-                                              const Text('player.server',
+                                              Text('player.server',
                                                       style: TextStyle(
-                                                          color: Colors.white70,
+                                                          color: colors.textSecondary,
                                                           fontSize: 13))
                                                   .tr(),
                                               const SizedBox(width: 8),
@@ -496,9 +493,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   fit: StackFit.expand,
                                   children: [
                                     CachedNetworkImage(
-                                      imageUrl: dataInforMovie['movie']
+                                      imageUrl: CardMovie.resolveImageUrl(dataInforMovie['movie']
                                               ['thumb_url'] ??
-                                          '',
+                                          ''),
                                       fit: BoxFit.cover,
                                       progressIndicatorBuilder:
                                           (context, url, progress) =>
@@ -517,9 +514,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                           end: Alignment.bottomCenter,
                                           colors: [
                                             Colors.black.withValues(alpha: .3),
-                                            const Color(0xFF0A0B10)
+                                            colors.scaffoldBgSecondary
                                                 .withValues(alpha: .8),
-                                            const Color(0xFF0A0B10),
+                                            colors.scaffoldBgSecondary,
                                           ],
                                         ),
                                       ),
@@ -533,8 +530,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             onTap: () {
                                               int episodeToPlay = ref
                                                   .read(wasWatchEpisodeMovies);
-                                              if (episodeToPlay == -1)
+                                              if (episodeToPlay == -1) {
                                                 episodeToPlay = 1;
+                                              }
                                               ref
                                                   .read(wasWatchEpisodeMovies
                                                       .notifier)
@@ -596,10 +594,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               horizontal: 12, vertical: 8),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: .03),
+                            color: colors.cardBg.withValues(alpha: .6),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                                color: Colors.white.withValues(alpha: .06),
+                                color: colors.border,
                                 width: 1),
                           ),
                           child: Column(
@@ -611,9 +609,9 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: CachedNetworkImage(
-                                      imageUrl: dataInforMovie['movie']
+                                      imageUrl: CardMovie.resolveImageUrl(dataInforMovie['movie']
                                               ['poster_url'] ??
-                                          '',
+                                          ''),
                                       width: 80,
                                       height: 115,
                                       fit: BoxFit.cover,
@@ -635,10 +633,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                       children: [
                                         Text(
                                           dataInforMovie['movie']['name'] ?? '',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                            color: colors.textPrimary,
                                             letterSpacing: 0.3,
                                           ),
                                         ),
@@ -650,8 +648,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w500,
-                                            color: Colors.white
-                                                .withValues(alpha: .5),
+                                            color: colors.textTertiary,
                                             fontStyle: FontStyle.italic,
                                           ),
                                         ),
@@ -666,15 +663,14 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                                       horizontal: 6,
                                                       vertical: 2),
                                               decoration: BoxDecoration(
-                                                color: Colors.white
-                                                    .withValues(alpha: .08),
+                                                color: colors.inputFill,
                                                 borderRadius:
                                                     BorderRadius.circular(4),
                                               ),
                                               child: Text(
                                                 "${dataInforMovie['movie']['year'] ?? ''}",
-                                                style: const TextStyle(
-                                                    color: Colors.white70,
+                                                style: TextStyle(
+                                                    color: colors.textSecondary,
                                                     fontSize: 11,
                                                     fontWeight:
                                                         FontWeight.w600),
@@ -803,19 +799,17 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 10, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: Colors.white
-                                                .withValues(alpha: .06),
+                                            color: colors.inputFill,
                                             borderRadius:
                                                 BorderRadius.circular(6),
                                             border: Border.all(
-                                                color: Colors.white
-                                                    .withValues(alpha: .08)),
+                                                color: colors.border),
                                           ),
                                           child: Center(
                                             child: Text(
                                               genre['name'],
-                                              style: const TextStyle(
-                                                  color: Colors.white70,
+                                              style: TextStyle(
+                                                  color: colors.textSecondary,
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w600),
                                             ),
@@ -826,13 +820,13 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                   },
                                 ),
                               ),
-                              const Divider(height: 24, color: Colors.white12),
-                              const Text(
+                              Divider(height: 24, color: colors.divider),
+                              Text(
                                 'movieDetail.description',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
-                                    color: Colors.white),
+                                    color: colors.textPrimary),
                               ).tr(),
                               const SizedBox(height: 6),
                               Consumer(
@@ -851,8 +845,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             ? TextOverflow.ellipsis
                                             : TextOverflow.visible,
                                         style: TextStyle(
-                                            color: Colors.white
-                                                .withValues(alpha: .6),
+                                            color: colors.textSecondary,
                                             fontSize: 13,
                                             height: 1.4),
                                       ),
@@ -1097,10 +1090,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            const Text(
+                                            Text(
                                               "Lịch sử xem gần đây",
                                               style: TextStyle(
-                                                  color: Colors.white,
+                                                  color: colors.textPrimary,
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.bold),
                                             ),
@@ -1112,8 +1105,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                                         .plural(watchedEpisode)
                                                   ]),
                                               style: TextStyle(
-                                                  color: Colors.white
-                                                      .withValues(alpha: .6),
+                                                  color: colors.textTertiary,
                                                   fontSize: 11),
                                             ),
                                           ],
@@ -1149,12 +1141,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               const Icon(Icons.play_circle_outline,
                                   color: Colors.orangeAccent, size: 18),
                               const SizedBox(width: 6),
-                              const Text(
+                              Text(
                                 'movieDetail.episodeList',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
-                                    color: Colors.white),
+                                    color: colors.textPrimary),
                               ).tr(),
                             ],
                           ),
@@ -1230,14 +1222,12 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                             : null,
                                         color: isCurrent
                                             ? null
-                                            : Colors.white
-                                                .withValues(alpha: .05),
+                                            : colors.inputFill,
                                         border: Border.all(
                                           color: isCurrent
                                               ? Colors.orangeAccent
                                                   .withValues(alpha: .5)
-                                              : Colors.white
-                                                  .withValues(alpha: .08),
+                                              : colors.border,
                                           width: 1,
                                         ),
                                         boxShadow: [
@@ -1256,7 +1246,7 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                                           style: TextStyle(
                                             color: isCurrent
                                                 ? Colors.white
-                                                : Colors.white70,
+                                                : colors.textSecondary,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 14,
                                           ),
@@ -1286,10 +1276,10 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
                               const SizedBox(width: 6),
                               Text(
                                 'movieDetail.relatedMovies'.tr(),
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
-                                    color: Colors.white),
+                                    color: colors.textPrimary),
                               ),
                             ],
                           ),
@@ -1377,20 +1367,21 @@ class _InforMovieScreenState extends ConsumerState<InforMovieScreen> {
   }
 
   Widget _buildMetaInfoItem(IconData icon, String label, String value) {
+    final colors = context.appColors;
     return Column(
       children: [
-        Icon(icon, color: Colors.white30, size: 20),
+        Icon(icon, color: colors.textTertiary, size: 20),
         const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
-              color: Colors.white.withValues(alpha: .4), fontSize: 11),
+              color: colors.textTertiary, fontSize: 11),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(
-              color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600),
+          style: TextStyle(
+              color: colors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600),
         ),
       ],
     );

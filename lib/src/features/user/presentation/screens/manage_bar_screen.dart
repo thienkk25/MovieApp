@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:movie_app/src/core/widgets/card_movie.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
 import 'package:movie_app/src/features/user/presentation/screens/my_profile_screen.dart';
 import 'package:movie_app/src/core/configs/overlay_screen.dart';
@@ -57,6 +59,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
     required VoidCallback onTap,
     Widget? trailing,
   }) {
+    final colors = context.appColors;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -68,16 +71,16 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: colors.textPrimary,
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
             trailing ??
-                const Icon(Icons.chevron_right_rounded,
-                    color: Colors.white38, size: 20),
+                Icon(Icons.chevron_right_rounded,
+                    color: colors.iconInactive, size: 20),
           ],
         ),
       ),
@@ -87,7 +90,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
   void _showNotificationSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF141622),
+      backgroundColor: context.appColors.sheetBg,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -101,15 +104,15 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: context.appColors.iconInactive,
                     borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(height: 16),
               ListTile(
                 title: Text(
                   'settingsScreen.notifications.on'.tr(),
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: context.appColors.textPrimary, fontWeight: FontWeight.w500),
                 ),
                 trailing: isNotification
                     ? const Icon(Icons.check_circle_rounded,
@@ -124,12 +127,12 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   setState(() => isNotification = true);
                 },
               ),
-              const Divider(height: 1, color: Colors.white10),
+              Divider(height: 1, color: context.appColors.divider),
               ListTile(
                 title: Text(
                   'settingsScreen.notifications.off'.tr(),
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: context.appColors.textPrimary, fontWeight: FontWeight.w500),
                 ),
                 trailing: isNotification
                     ? null
@@ -156,7 +159,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
   void _showLanguageSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF141622),
+      backgroundColor: context.appColors.sheetBg,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -170,15 +173,15 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: context.appColors.iconInactive,
                     borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(height: 16),
               ListTile(
                 title: Text(
                   'settingsScreen.language.vi'.tr(),
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: context.appColors.textPrimary, fontWeight: FontWeight.w500),
                 ),
                 trailing:
                     ref.watch(isLanguageProvider) == const Locale('vi', '')
@@ -197,12 +200,12 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   await pref.setInt("language", 0);
                 },
               ),
-              const Divider(height: 1, color: Colors.white10),
+              Divider(height: 1, color: context.appColors.divider),
               ListTile(
                 title: Text(
                   'settingsScreen.language.en'.tr(),
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: context.appColors.textPrimary, fontWeight: FontWeight.w500),
                 ),
                 trailing:
                     ref.watch(isLanguageProvider) == const Locale('en', '')
@@ -232,7 +235,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
   void _showThemeSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF141622),
+      backgroundColor: context.appColors.sheetBg,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -246,16 +249,16 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: context.appColors.iconInactive,
                     borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.light_mode, color: Colors.white70),
+                leading: Icon(Icons.light_mode, color: context.appColors.iconSecondary),
                 title: Text(
                   'settingsScreen.theme.light'.tr(),
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: context.appColors.textPrimary, fontWeight: FontWeight.w500),
                 ),
                 trailing: ref.watch(themeModeProvider) == ThemeMode.light
                     ? const Icon(Icons.check_circle_rounded,
@@ -270,13 +273,13 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   pref.setString("themeMode", "light");
                 },
               ),
-              const Divider(height: 1, color: Colors.white10),
+              Divider(height: 1, color: context.appColors.divider),
               ListTile(
-                leading: const Icon(Icons.dark_mode, color: Colors.white70),
+                leading: Icon(Icons.dark_mode, color: context.appColors.iconSecondary),
                 title: Text(
                   'settingsScreen.theme.dark'.tr(),
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: context.appColors.textPrimary, fontWeight: FontWeight.w500),
                 ),
                 trailing: ref.watch(themeModeProvider) == ThemeMode.dark
                     ? const Icon(Icons.check_circle_rounded,
@@ -291,13 +294,13 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   pref.setString("themeMode", "dark");
                 },
               ),
-              const Divider(height: 1, color: Colors.white10),
+              Divider(height: 1, color: context.appColors.divider),
               ListTile(
-                leading: const Icon(Icons.phone_android, color: Colors.white70),
+                leading: Icon(Icons.phone_android, color: context.appColors.iconSecondary),
                 title: Text(
                   'settingsScreen.theme.system'.tr(),
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: context.appColors.textPrimary, fontWeight: FontWeight.w500),
                 ),
                 trailing: ref.watch(themeModeProvider) == ThemeMode.system
                     ? const Icon(Icons.check_circle_rounded,
@@ -324,7 +327,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF141622),
+      backgroundColor: context.appColors.sheetBg,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -341,12 +344,12 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.history_rounded,
-                        size: 64, color: Colors.white30),
+                        size: 64, color: Colors.orangeAccent),
                     const SizedBox(height: 12),
                     Text(
                       'historyScreen.emptyMessage'.tr(),
                       style:
-                          const TextStyle(fontSize: 16, color: Colors.white30),
+                          TextStyle(fontSize: 16, color: context.appColors.textTertiary),
                     ),
                   ],
                 ),
@@ -364,7 +367,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                      color: Colors.white24,
+                      color: context.appColors.iconInactive,
                       borderRadius: BorderRadius.circular(2)),
                 ),
                 const SizedBox(height: 12),
@@ -378,22 +381,22 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                             size: 26, color: Colors.orangeAccent),
                         Text(
                           'historyScreen.title'.tr(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: context.appColors.textPrimary,
                           ),
                         ),
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded,
-                          color: Colors.white70),
+                      icon: Icon(Icons.close_rounded,
+                          color: context.appColors.iconSecondary),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
-                const Divider(color: Colors.white10),
+                Divider(color: context.appColors.divider),
                 Expanded(
                   child: ListView.separated(
                     itemCount: dataHistory.length,
@@ -414,7 +417,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                           showDialog(
                             context: context,
                             builder: (context) => Dialog(
-                              backgroundColor: const Color(0xFF1C1E2D),
+                              backgroundColor: context.appColors.dialogBg,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -425,10 +428,10 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   children: [
                                     Text(
                                       item['name'],
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
-                                          color: Colors.white),
+                                          color: context.appColors.textPrimary),
                                       textAlign: TextAlign.center,
                                     ),
                                     const SizedBox(height: 20),
@@ -507,9 +510,9 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
-                            color: Colors.white.withValues(alpha: 0.04),
+                            color: context.appColors.cardBg.withValues(alpha: 0.6),
                             border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.08)),
+                                color: context.appColors.border),
                           ),
                           child: Row(
                             children: [
@@ -519,7 +522,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   bottomLeft: Radius.circular(16),
                                 ),
                                 child: CachedNetworkImage(
-                                  imageUrl: item['poster_url'],
+                                  imageUrl: CardMovie.resolveImageUrl(item['poster_url'] ?? ''),
                                   height: 90,
                                   width: 65,
                                   fit: BoxFit.cover,
@@ -545,10 +548,10 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                         item['name'],
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                          color: context.appColors.textPrimary,
                                         ),
                                       ),
                                       const SizedBox(height: 6),
@@ -569,8 +572,8 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   ),
                                 ),
                               ),
-                              const Icon(Icons.chevron_right_rounded,
-                                  size: 20, color: Colors.white38),
+                              Icon(Icons.chevron_right_rounded,
+                                  size: 20, color: context.appColors.iconInactive),
                               const SizedBox(width: 12),
                             ],
                           ),
@@ -592,7 +595,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
       context: context,
       barrierDismissible: true,
       builder: (context) => Dialog(
-        backgroundColor: const Color(0xFF1C1E2D),
+        backgroundColor: context.appColors.dialogBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -605,19 +608,19 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
               Text(
                 'settingsScreen.notifications.title'
                     .tr(), // Just a header or "Log Out"
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: context.appColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 'dialog.confirmLogout'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
-                  color: Colors.white70,
+                  color: context.appColors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -628,7 +631,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white24),
+                        side: BorderSide(color: context.appColors.border),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -636,7 +639,7 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                       ),
                       onPressed: () => Navigator.pop(context),
                       child: Text('navigation.cancel'.tr(),
-                          style: const TextStyle(color: Colors.white70)),
+                          style: TextStyle(color: context.appColors.textSecondary)),
                     ),
                   ),
                   Expanded(
@@ -668,30 +671,31 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: const Color(0xFF090A0F),
+      backgroundColor: colors.scaffoldBg,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF090A0F),
-                Color(0xFF10121D),
+                colors.appBarBg,
+                colors.appBarBgSecondary,
               ],
             ),
           ),
         ),
         title: Text(
           'app.information'.tr(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
-            color: Colors.white,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -713,10 +717,10 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.04),
+                  color: colors.cardBg.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(16),
                   border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                      Border.all(color: colors.border),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
@@ -732,25 +736,25 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
                                   builder: (_) => const MyProfileScreen()));
                         },
                       ),
-                      const Divider(height: 1, color: Colors.white10),
+                      Divider(height: 1, color: colors.divider),
                       _buildSettingItem(
                         icon: Icons.notifications_none_rounded,
                         title: 'settingsScreen.notifications.title'.tr(),
                         onTap: () => _showNotificationSheet(),
                       ),
-                      const Divider(height: 1, color: Colors.white10),
+                      Divider(height: 1, color: colors.divider),
                       _buildSettingItem(
                         icon: Icons.translate_rounded,
                         title: 'app.language'.tr(),
                         onTap: () => _showLanguageSheet(),
                       ),
-                      const Divider(height: 1, color: Colors.white10),
+                      Divider(height: 1, color: colors.divider),
                       _buildSettingItem(
                         icon: Icons.dark_mode_outlined,
                         title: 'settingsScreen.theme.title'.tr(),
                         onTap: () => _showThemeSheet(),
                       ),
-                      const Divider(height: 1, color: Colors.white10),
+                      Divider(height: 1, color: colors.divider),
                       _buildSettingItem(
                         icon: Icons.history_rounded,
                         title: 'historyScreen.title'.tr(),
@@ -763,10 +767,10 @@ class _ManageBarScreenState extends ConsumerState<ManageBarScreen> {
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.04),
+                  color: colors.cardBg.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(16),
                   border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                      Border.all(color: colors.border),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),

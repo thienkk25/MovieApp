@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/movie/data/models/movie_model.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
 import 'package:movie_app/src/core/widgets/shimmer_loading.dart';
@@ -151,7 +152,7 @@ class _ViewMoreScreenState extends ConsumerState<ViewMoreScreen> {
                   return MovieItemWidget(
                     id: dataMovies[index]['_id'],
                     slugMovie: dataMovies[index]['slug'],
-                    imageUrl: dataMovies[index]['poster_url'],
+                    imageUrl: CardMovie.resolveImageUrl(dataMovies[index]['poster_url'] ?? ''),
                     lang: dataMovies[index]['lang'],
                     name: dataMovies[index]['name'],
                     episodeCurrent: dataMovies[index]['episode_current'],
@@ -183,6 +184,7 @@ class SimpleLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Container(
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -191,8 +193,8 @@ class SimpleLoading extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Shimmer.fromColors(
-            baseColor: Colors.grey.shade300,
-            highlightColor: Colors.grey.shade100,
+            baseColor: colors.shimmerBase,
+            highlightColor: colors.shimmerHighlight,
             child: Container(
               height: 200,
               width: double.infinity,
@@ -201,20 +203,20 @@ class SimpleLoading extends StatelessWidget {
                   topLeft: Radius.circular(5),
                   topRight: Radius.circular(5),
                 ),
-                color: Colors.grey.shade300,
+                color: colors.shimmerBase,
               ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: Shimmer.fromColors(
-              baseColor: Colors.grey.shade300,
-              highlightColor: Colors.white,
+              baseColor: colors.shimmerBase,
+              highlightColor: colors.shimmerHighlight,
               child: Container(
                 height: 10,
                 width: MediaQuery.of(context).size.width / 3,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colors.shimmerBase,
                 ),
               ),
             ),

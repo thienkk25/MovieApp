@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/bottomBar/favorite_bar_screen.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/bottomBar/home_bar_screen.dart';
 import 'package:movie_app/src/features/user/presentation/screens/manage_bar_screen.dart';
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
       extendBody: true,
       body: IndexedStack(
@@ -36,15 +38,15 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 72,
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F111D).withValues(alpha: 0.85),
+            color: colors.navBarBg,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: colors.navBarBorder,
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.5),
+                color: colors.navBarShadow,
                 blurRadius: 24,
                 offset: const Offset(0, 10),
               ),
@@ -100,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required String label,
   }) {
     final isSelected = selectedIndex == index;
+    final colors = context.appColors;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -140,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Icon(
                 isSelected ? selectedIcon : icon,
-                color: isSelected ? Colors.orangeAccent : Colors.white30,
+                color: isSelected ? Colors.orangeAccent : colors.iconInactive,
                 size: 24,
               ),
             ),
@@ -150,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : Colors.white30,
+                color: isSelected ? colors.textPrimary : colors.iconInactive,
                 letterSpacing: isSelected ? 0.3 : 0.1,
                 shadows: isSelected
                     ? [

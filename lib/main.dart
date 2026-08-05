@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -63,6 +64,30 @@ void callbackDispatcher() {
         "📺 Có gì mới nè",
         "🚀 Tin tức phim nhanh nhất",
         "❤️ Dành cho bạn",
+        "✨ Khám phá phim mới",
+        "🎥 Đêm nay xem gì?",
+        "🌟 Phim hay mỗi ngày",
+        "🎞️ Movie Time!",
+        "💥 Blockbuster đang chờ",
+        "🎉 Cuối tuần xem phim thôi",
+        "🍕 Chill cùng phim hay",
+        "🌙 Đêm nay có phim mới",
+        "🎬 Không thể bỏ lỡ!",
+        "🏆 Top phim hôm nay",
+        "📢 Phim mới vừa cập bến",
+        "🎁 Món quà giải trí dành cho bạn",
+        "🔥 Xu hướng phim mới",
+        "⭐ Bộ phim tiếp theo đang đợi",
+        "🎭 Hành trình điện ảnh bắt đầu",
+        "🎬 Xem ngay kẻo lỡ",
+        "🎉 Phim hot hôm nay",
+        "🍀 Đã đến giờ giải trí",
+        "💫 Movie App nhớ bạn rồi!",
+        "🎊 Có phim mới dành riêng cho bạn",
+        "📽️ Rạp phim trong túi bạn",
+        "🎈 Một bộ phim tuyệt vời đang chờ",
+        "🍿 Chuẩn bị bắp rang chưa?",
+        "🎥 Hôm nay xem gì nào?",
       ];
 
       final List<String> bodies = [
@@ -70,9 +95,42 @@ void callbackDispatcher() {
         "Phim mới cập nhật rồi, xem ngay thôi nào!",
         "Nhiều phim hot đang chờ bạn đó!",
         "Nhớ thư giãn với phim hay nào!",
-        "Hôm nay người đẹp xem phim gì chưa?",
-        "Cập nhật phim nhanh như chớp, mở app xem ngay đi thôi!",
+        "Hôm nay xem phim gì chưa?",
+        "Cập nhật phim nhanh như chớp, mở app xem ngay!",
         "Phim hay đang đợi bạn khám phá!",
+        "Một bộ phim thú vị vừa được thêm vào.",
+        "Có phim mới đúng gu của bạn đó!",
+        "Dành vài phút thư giãn với Movie App nhé.",
+        "Kho phim vừa có thêm nhiều nội dung hấp dẫn.",
+        "Đừng để bộ phim yêu thích trôi qua nhé!",
+        "Mở app và khám phá những bộ phim nổi bật hôm nay.",
+        "Hàng loạt phim mới đã sẵn sàng để bạn thưởng thức.",
+        "Đã đến lúc xem một bộ phim thật hay rồi!",
+        "Top phim thịnh hành đang chờ bạn.",
+        "Có rất nhiều lựa chọn thú vị hôm nay.",
+        "Bỏng ngô đã sẵn sàng chưa? Phim cũng vậy!",
+        "Thư giãn sau một ngày dài với một bộ phim nhé.",
+        "Phim mới cập nhật liên tục mỗi ngày.",
+        "Đừng quên quay lại để khám phá nội dung mới.",
+        "Bạn còn nhiều bộ phim chưa xem đó!",
+        "Tiếp tục bộ phim đang xem chỉ với một chạm.",
+        "Danh sách yêu thích của bạn đang chờ.",
+        "Khám phá những bộ phim được xem nhiều nhất hôm nay.",
+        "Có thể bạn sẽ tìm thấy bộ phim yêu thích tiếp theo.",
+        "Một thế giới giải trí đang chờ bạn khám phá.",
+        "Xem ngay những bộ phim đang được yêu thích.",
+        "Movie App đã chuẩn bị những bộ phim hấp dẫn cho bạn.",
+        "Giờ là lúc tận hưởng những phút giây giải trí.",
+        "Đừng để tối nay thiếu một bộ phim hay!",
+        "Hàng loạt nội dung mới vừa được cập nhật.",
+        "Mở app để xem những bộ phim mới nhất.",
+        "Kho phim luôn có điều bất ngờ dành cho bạn.",
+        "Một bộ phim hay có thể làm ngày của bạn tuyệt vời hơn.",
+        "Giải trí chưa bao giờ dễ dàng đến thế.",
+        "Bạn đã bỏ lỡ vài bộ phim rất hấp dẫn đấy!",
+        "Movie App nhớ bạn, quay lại xem phim nhé!",
+        "Có rất nhiều điều thú vị đang chờ bạn khám phá.",
+        "Bắt đầu buổi xem phim ngay bây giờ nào!",
       ];
 
       final random = Random();
@@ -202,8 +260,9 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    Widget home =
-        ref.watch(isUserUseCaseProvider).call() ? const HomeScreen() : const LoginScreen();
+    Widget home = ref.watch(isUserUseCaseProvider).call()
+        ? const HomeScreen()
+        : const LoginScreen();
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
@@ -213,20 +272,32 @@ class _MyAppState extends ConsumerState<MyApp> {
       locale: ref.watch(isLanguageProvider),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.white,
+          seedColor: Colors.orange,
           brightness: Brightness.light,
         ),
+        scaffoldBackgroundColor: AppColors.light.scaffoldBg,
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColors.light.appBarBg,
+          foregroundColor: AppColors.light.textPrimary,
+          elevation: 0,
+        ),
+        dividerColor: AppColors.light.divider,
+        extensions: const [AppColors.light],
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.white,
+          seedColor: Colors.orange,
           brightness: Brightness.dark,
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
+        scaffoldBackgroundColor: AppColors.dark.scaffoldBg,
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColors.dark.appBarBg,
+          foregroundColor: AppColors.dark.textPrimary,
+          elevation: 0,
         ),
+        dividerColor: AppColors.dark.divider,
+        extensions: const [AppColors.dark],
         useMaterial3: true,
       ),
       themeMode: ref.watch(themeModeProvider),
@@ -258,7 +329,8 @@ Future<void> _cleanUpMediaKitTempFiles() async {
         for (final entity in entities) {
           if (entity is File) {
             final filename = p.basename(entity.path);
-            if (filename.startsWith('com.alexmercerind.media_kit.NativeReferenceHolder.')) {
+            if (filename.startsWith(
+                'com.alexmercerind.media_kit.NativeReferenceHolder.')) {
               try {
                 await entity.delete();
               } catch (_) {}
