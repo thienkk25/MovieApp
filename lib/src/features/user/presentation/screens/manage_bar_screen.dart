@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -102,19 +101,7 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
                           );
                         },
                       ),
-                      Divider(height: 1, color: colors.divider),
-                      BlocBuilder<SettingsCubit, SettingsState>(
-                        builder: (context, settingsState) {
-                          return _buildTile(
-                            icon: Icons.language_rounded,
-                            title: 'Ngôn ngữ',
-                            subtitle: settingsState.locale.languageCode == 'vi'
-                                ? 'Tiếng Việt'
-                                : 'English',
-                            onTap: () => _showLanguageModal(context),
-                          );
-                        },
-                      ),
+
                       Divider(height: 1, color: colors.divider),
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, settingsState) {
@@ -280,47 +267,7 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
     );
   }
 
-  void _showLanguageModal(BuildContext context) {
-    final cubit = context.read<SettingsCubit>();
-    final colors = context.appColors;
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: colors.sheetBg,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 16),
-              ListTile(
-                title: Text('Tiếng Việt',
-                    style: TextStyle(color: colors.textPrimary)),
-                onTap: () {
-                  cubit.setLocale(const Locale('vi', ''));
-                  context.setLocale(const Locale('vi', ''));
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('English',
-                    style: TextStyle(color: colors.textPrimary)),
-                onTap: () {
-                  cubit.setLocale(const Locale('en', ''));
-                  context.setLocale(const Locale('en', ''));
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 12),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   void _showNotificationModal(BuildContext context) {
     final cubit = context.read<SettingsCubit>();
