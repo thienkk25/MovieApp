@@ -106,12 +106,12 @@ class AppColors extends ThemeExtension<AppColors> {
   //  DARK THEME — preserves existing hardcoded values
   // ═══════════════════════════════════════════════════════
   static const dark = AppColors(
-    scaffoldBg: Color(0xFF090A0F),
-    scaffoldBgSecondary: Color(0xFF0A0B10),
-    appBarBg: Color(0xFF090A0F),
-    appBarBgSecondary: Color(0xFF10121D),
-    cardBg: Color(0xFF0F2027),
-    surfaceBg: Color(0xFF141622),
+    scaffoldBg: Color(0xFF0A0B10),
+    scaffoldBgSecondary: Color(0xFF0E1017),
+    appBarBg: Color(0xFF0A0B10),
+    appBarBgSecondary: Color(0xFF12141F),
+    cardBg: Color(0xFF151824),
+    surfaceBg: Color(0xFF181B2A),
 
     textPrimary: Colors.white,
     textSecondary: Colors.white70,

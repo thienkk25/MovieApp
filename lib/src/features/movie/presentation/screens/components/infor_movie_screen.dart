@@ -64,9 +64,17 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                 ),
               ),
               body: Center(
-                child: Text(
-                  state.errorMessage ?? 'Không thể tải thông tin phim',
-                  style: const TextStyle(color: Colors.white70),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline_rounded,
+                        color: Colors.redAccent, size: 54),
+                    const SizedBox(height: 14),
+                    Text(
+                      state.errorMessage ?? 'Không thể tải thông tin phim',
+                      style: const TextStyle(color: Colors.white70, fontSize: 15),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -84,11 +92,11 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: MediaQuery.of(context).size.height * 0.5,
+                height: MediaQuery.of(context).size.height * 0.55,
                 child: Opacity(
-                  opacity: 0.25,
+                  opacity: 0.35,
                   child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                    imageFilter: ImageFilter.blur(sigmaX: 35, sigmaY: 35),
                     child: CachedNetworkImage(
                       imageUrl: imageUrl,
                       fit: BoxFit.cover,
@@ -96,6 +104,8 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                   ),
                 ),
               ),
+
+              // Gradient Overlay Fade to Dark Scaffold
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -103,27 +113,38 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.3),
+                        colors.scaffoldBgSecondary.withValues(alpha: 0.85),
                         colors.scaffoldBgSecondary,
                       ],
-                      stops: const [0.0, 0.45],
+                      stops: const [0.0, 0.35, 0.65],
                     ),
                   ),
                 ),
               ),
 
-              // Foreground Scrollable View
+              // Scrollable Content
               SafeArea(
                 child: CustomScrollView(
                   physics: const BouncingScrollPhysics(),
                   slivers: [
+                    // Sticky Header Bar with Title & Favorite Action
                     SliverAppBar(
                       backgroundColor: Colors.transparent,
                       elevation: 0,
                       pinned: true,
                       leading: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white),
+                        icon: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.15)),
+                          ),
+                          child: const Icon(Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white, size: 16),
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                       title: Text(
@@ -136,12 +157,23 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                       ),
                       actions: [
                         IconButton(
-                          icon: Icon(
-                            state.isFavorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color:
-                                state.isFavorite ? Colors.redAccent : Colors.white,
+                          icon: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.15)),
+                            ),
+                            child: Icon(
+                              state.isFavorite
+                                  ? Icons.favorite_rounded
+                                  : Icons.favorite_border_rounded,
+                              color: state.isFavorite
+                                  ? Colors.redAccent
+                                  : Colors.white,
+                              size: 20,
+                            ),
                           ),
                           onPressed: () => context
                               .read<MovieDetailBloc>()
@@ -150,32 +182,53 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                       ],
                     ),
 
-                    // Player or Poster Banner with Big Play Button
+                    // Media Player Banner or Large Hero Poster
                     SliverToBoxAdapter(
                       child: Column(
                         children: [
+                          const SizedBox(height: 10),
                           if (isWatching && detail.episodes.isNotEmpty) ...[
                             AspectRatio(
                               aspectRatio: 16 / 9,
-                              child: WatchMovieWidget(
-                                detail: detail,
-                                serverIndex: state.selectedServerIndex,
-                                episodeIndex: state.selectedEpisodeIndex,
+                              child: Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          Colors.amber.withValues(alpha: 0.15),
+                                      blurRadius: 20,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: WatchMovieWidget(
+                                  detail: detail,
+                                  serverIndex: state.selectedServerIndex,
+                                  episodeIndex: state.selectedEpisodeIndex,
+                                ),
                               ),
                             ),
                           ] else ...[
                             AspectRatio(
                               aspectRatio: 16 / 9,
                               child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 16),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 16),
                                 clipBehavior: Clip.antiAlias,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.12),
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.5),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 8),
+                                      color: Colors.black.withValues(alpha: 0.6),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 10),
                                     ),
                                   ],
                                 ),
@@ -187,7 +240,16 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                       fit: BoxFit.cover,
                                     ),
                                     Container(
-                                      color: Colors.black.withValues(alpha: 0.35),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            Colors.black.withValues(alpha: 0.2),
+                                            Colors.black.withValues(alpha: 0.65),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                     Center(
                                       child: GestureDetector(
@@ -195,24 +257,29 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                           setState(() => isWatching = true);
                                         },
                                         child: Container(
-                                          width: 64,
-                                          height: 64,
+                                          width: 70,
+                                          height: 70,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: Colors.amber,
+                                            gradient: const LinearGradient(
+                                              colors: [
+                                                Color(0xFFFFC107),
+                                                Color(0xFFFF8F00)
+                                              ],
+                                            ),
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.amber
-                                                    .withValues(alpha: 0.4),
-                                                blurRadius: 20,
-                                                spreadRadius: 4,
+                                                    .withValues(alpha: 0.5),
+                                                blurRadius: 25,
+                                                spreadRadius: 6,
                                               ),
                                             ],
                                           ),
                                           child: const Icon(
                                             Icons.play_arrow_rounded,
                                             color: Colors.black,
-                                            size: 40,
+                                            size: 46,
                                           ),
                                         ),
                                       ),
@@ -223,16 +290,25 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                             ),
                           ],
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 22),
 
-                          // Main Info Card
+                          // Main Info Container Card
                           Container(
                             margin: const EdgeInsets.symmetric(horizontal: 16),
-                            padding: const EdgeInsets.all(18),
+                            padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
                               color: colors.cardBg,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: colors.border),
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(
+                                color: colors.border.withValues(alpha: 0.8),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,8 +317,9 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                   movie.name,
                                   style: TextStyle(
                                     fontSize: 22,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w900,
                                     color: colors.textPrimary,
+                                    letterSpacing: 0.3,
                                   ),
                                 ),
                                 if (movie.originName.isNotEmpty) ...[
@@ -257,20 +334,31 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                   ),
                                 ],
 
-                                const SizedBox(height: 14),
+                                const SizedBox(height: 16),
 
-                                Row(
+                                // Badges Row
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
                                   children: [
-                                    _buildBadge(movie.quality, Colors.amber),
-                                    const SizedBox(width: 8),
-                                    _buildBadge(
-                                        '${movie.year}', Colors.blueAccent),
-                                    const SizedBox(width: 8),
-                                    _buildBadge(movie.lang, Colors.greenAccent),
+                                    if (movie.quality.isNotEmpty)
+                                      _buildBadge(movie.quality, Colors.amber),
+                                    if (movie.year > 0)
+                                      _buildBadge(
+                                          '${movie.year}', Colors.blueAccent),
+                                    if (movie.lang.isNotEmpty)
+                                      _buildBadge(
+                                          movie.lang, Colors.greenAccent),
+                                    if (movie.episodeCurrent.isNotEmpty)
+                                      _buildBadge(
+                                          movie.episodeCurrent, Colors.purpleAccent),
                                   ],
                                 ),
 
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 18),
+                                Divider(
+                                    color: colors.border.withValues(alpha: 0.5)),
+                                const SizedBox(height: 14),
 
                                 Text(
                                   'Nội dung phim',
@@ -280,12 +368,14 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                     color: colors.textPrimary,
                                   ),
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 8),
                                 Text(
-                                  detail.content.replaceAll(RegExp(r'<[^>]*>'), ''),
+                                  detail.content
+                                      .replaceAll(RegExp(r'<[^>]*>'), '')
+                                      .trim(),
                                   style: TextStyle(
                                     fontSize: 14,
-                                    height: 1.5,
+                                    height: 1.6,
                                     color: colors.textSecondary,
                                   ),
                                 ),
@@ -295,31 +385,119 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
 
                           const SizedBox(height: 20),
 
-                          // Episode Selector Section
+                          // Server & Episode List Section
                           if (detail.episodes.isNotEmpty)
                             Container(
                               margin: const EdgeInsets.symmetric(horizontal: 16),
-                              padding: const EdgeInsets.all(18),
+                              padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
                                 color: colors.cardBg,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: colors.border),
+                                borderRadius: BorderRadius.circular(22),
+                                border: Border.all(
+                                  color: colors.border.withValues(alpha: 0.8),
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Danh sách tập',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: colors.textPrimary,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Danh sách tập',
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.bold,
+                                          color: colors.textPrimary,
+                                        ),
+                                      ),
+                                      if (detail.episodes.length > 1)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.amber.withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            '${detail.episodes.length} Server',
+                                            style: const TextStyle(
+                                              color: Colors.amber,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 12),
+
+                                  // Server Selector Tabs (If multiple servers available)
+                                  if (detail.episodes.length > 1) ...[
+                                    const SizedBox(height: 14),
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: List.generate(
+                                          detail.episodes.length,
+                                          (sIdx) {
+                                            final serverName = detail
+                                                    .episodes[sIdx]
+                                                    .serverName
+                                                    .isNotEmpty
+                                                ? detail.episodes[sIdx].serverName
+                                                : 'Server ${sIdx + 1}';
+                                            final isSelected =
+                                                state.selectedServerIndex == sIdx;
+
+                                            return GestureDetector(
+                                              onTap: () {
+                                                context
+                                                    .read<MovieDetailBloc>()
+                                                    .add(MovieDetailEvent
+                                                        .selectEpisode(
+                                                      serverIndex: sIdx,
+                                                      episodeIndex: 0,
+                                                    ));
+                                              },
+                                              child: Container(
+                                                margin: const EdgeInsets.only(
+                                                    right: 8),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 14,
+                                                        vertical: 7),
+                                                decoration: BoxDecoration(
+                                                  color: isSelected
+                                                      ? Colors.amber
+                                                      : colors.inputFill,
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                                child: Text(
+                                                  serverName,
+                                                  style: TextStyle(
+                                                    color: isSelected
+                                                        ? Colors.black
+                                                        : colors.textSecondary,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+
+                                  const SizedBox(height: 16),
+
+                                  // Episode Grid Buttons
                                   Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
+                                    spacing: 10,
+                                    runSpacing: 10,
                                     children: List.generate(
                                       detail.episodes[state.selectedServerIndex]
                                           .serverData.length,
@@ -334,27 +512,50 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                           onTap: () {
                                             context
                                                 .read<MovieDetailBloc>()
-                                                .add(MovieDetailEvent.selectEpisode(
+                                                .add(MovieDetailEvent
+                                                    .selectEpisode(
                                                   serverIndex:
                                                       state.selectedServerIndex,
                                                   episodeIndex: idx,
                                                 ));
                                             setState(() => isWatching = true);
                                           },
-                                          child: Container(
+                                          child: AnimatedContainer(
+                                            duration:
+                                                const Duration(milliseconds: 200),
                                             padding: const EdgeInsets.symmetric(
-                                                horizontal: 14, vertical: 8),
+                                                horizontal: 16, vertical: 10),
                                             decoration: BoxDecoration(
+                                              gradient: isSelected
+                                                  ? const LinearGradient(
+                                                      colors: [
+                                                        Color(0xFFFFC107),
+                                                        Color(0xFFFF8F00)
+                                                      ],
+                                                    )
+                                                  : null,
                                               color: isSelected
-                                                  ? Colors.amber
+                                                  ? null
                                                   : colors.inputFill,
                                               borderRadius:
-                                                  BorderRadius.circular(10),
+                                                  BorderRadius.circular(12),
                                               border: Border.all(
                                                 color: isSelected
                                                     ? Colors.amber
                                                     : colors.border,
                                               ),
+                                              boxShadow: isSelected
+                                                  ? [
+                                                      BoxShadow(
+                                                        color: Colors.amber
+                                                            .withValues(
+                                                                alpha: 0.35),
+                                                        blurRadius: 10,
+                                                        offset:
+                                                            const Offset(0, 4),
+                                                      ),
+                                                    ]
+                                                  : null,
                                             ),
                                             child: Text(
                                               ep.name.isNotEmpty
@@ -398,7 +599,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Text(
         text,
