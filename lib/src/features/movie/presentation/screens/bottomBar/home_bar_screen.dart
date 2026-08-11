@@ -112,11 +112,11 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          'CINEMA',
+                          'XEM PHIM',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
-                            letterSpacing: 2,
+                            letterSpacing: 1.5,
                             color: colors.textPrimary,
                           ),
                         ),

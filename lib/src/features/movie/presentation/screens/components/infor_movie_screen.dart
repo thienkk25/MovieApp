@@ -421,7 +421,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: Text(
-                                            '${detail.episodes.length} Server',
+                                            '${detail.episodes.length} Nguồn chiếu',
                                             style: const TextStyle(
                                               color: Colors.amber,
                                               fontSize: 11,
@@ -446,7 +446,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                                     .serverName
                                                     .isNotEmpty
                                                 ? detail.episodes[sIdx].serverName
-                                                : 'Server ${sIdx + 1}';
+                                                : 'Nguồn ${sIdx + 1}';
                                             final isSelected =
                                                 state.selectedServerIndex == sIdx;
 
