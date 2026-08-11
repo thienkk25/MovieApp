@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_app/src/core/configs/overlay_screen.dart';
 import 'package:movie_app/src/core/di/injection_container.dart';
 import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/core/widgets/card_movie.dart';
@@ -105,7 +106,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                 ),
               ),
 
-              // Gradient Overlay Fade to Dark Scaffold
+              // Gradient Overlay Fade
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -123,12 +124,12 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                 ),
               ),
 
-              // Scrollable Content
+              // Scrollable View
               SafeArea(
                 child: CustomScrollView(
                   physics: const BouncingScrollPhysics(),
                   slivers: [
-                    // Sticky Header Bar with Title & Favorite Action
+                    // Sticky Header Bar
                     SliverAppBar(
                       backgroundColor: Colors.transparent,
                       elevation: 0,
@@ -165,6 +166,27 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                               border: Border.all(
                                   color: Colors.white.withValues(alpha: 0.15)),
                             ),
+                            child: const Icon(Icons.share_rounded,
+                                color: Colors.white, size: 18),
+                          ),
+                          onPressed: () {
+                            OverlayScreen().showOverlay(
+                              context,
+                              'Đã sao chép liên kết phim!',
+                              Colors.amber,
+                              duration: 2,
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.15)),
+                            ),
                             child: Icon(
                               state.isFavorite
                                   ? Icons.favorite_rounded
@@ -182,9 +204,10 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                       ],
                     ),
 
-                    // Media Player Banner or Large Hero Poster
+                    // Media Player Banner or Big Hero Poster
                     SliverToBoxAdapter(
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 10),
                           if (isWatching && detail.episodes.isNotEmpty) ...[
@@ -355,6 +378,102 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                   ],
                                 ),
 
+                                // Category Tags
+                                if (movie.categories.isNotEmpty) ...[
+                                  const SizedBox(height: 14),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 6,
+                                    children: movie.categories.map((cat) {
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: colors.inputFill,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: colors.border,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          cat,
+                                          style: TextStyle(
+                                            color: colors.textSecondary,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+
+                                // Cast & Director Info
+                                if (detail.actors.isNotEmpty ||
+                                    detail.directors.isNotEmpty) ...[
+                                  const SizedBox(height: 16),
+                                  Divider(
+                                      color:
+                                          colors.border.withValues(alpha: 0.5)),
+                                  const SizedBox(height: 12),
+
+                                  if (detail.directors.isNotEmpty) ...[
+                                    Row(
+                                      children: [
+                                        const Text(
+                                          'Đạo diễn: ',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.amber,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            detail.directors.join(', '),
+                                            style: TextStyle(
+                                              color: colors.textSecondary,
+                                              fontSize: 13,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                  ],
+
+                                  if (detail.actors.isNotEmpty) ...[
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Diễn viên: ',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.amber,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            detail.actors.join(', '),
+                                            style: TextStyle(
+                                              color: colors.textSecondary,
+                                              fontSize: 13,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+
                                 const SizedBox(height: 18),
                                 Divider(
                                     color: colors.border.withValues(alpha: 0.5)),
@@ -417,8 +536,10 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 10, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: Colors.amber.withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(8),
+                                            color: Colors.amber
+                                                .withValues(alpha: 0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                           child: Text(
                                             '${detail.episodes.length} Nguồn chiếu',
@@ -432,7 +553,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                     ],
                                   ),
 
-                                  // Server Selector Tabs (If multiple servers available)
+                                  // Server Selector Tabs
                                   if (detail.episodes.length > 1) ...[
                                     const SizedBox(height: 14),
                                     SingleChildScrollView(
@@ -577,6 +698,55 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                                 ],
                               ),
                             ),
+
+                          // Related Movies Section ("Phim cùng thể loại")
+                          if (state.relatedMovies.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                'Phim tương tự',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 240,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                itemCount: state.relatedMovies.length,
+                                itemBuilder: (context, index) {
+                                  final relMovie = state.relatedMovies[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 12),
+                                    child: SizedBox(
+                                      width: 135,
+                                      child: CardMovie(
+                                        movie: relMovie,
+                                        onTap: () {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => InforMovieScreen(
+                                                  slugMovie: relMovie.slug),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
 
                           const SizedBox(height: 40),
                         ],

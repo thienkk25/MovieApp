@@ -80,6 +80,7 @@ Future<void> initDI() async {
         getFavoriteMoviesUseCase: sl(),
         addFavoriteMovieUseCase: sl(),
         removeFavoriteMovieUseCase: sl(),
+        getCategoryMoviesUseCase: sl(),
       ));
 
   sl.registerFactory(() => MovieSearchBloc(

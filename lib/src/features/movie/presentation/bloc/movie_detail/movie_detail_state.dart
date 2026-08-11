@@ -10,6 +10,7 @@ abstract class MovieDetailState with _$MovieDetailState {
   const factory MovieDetailState({
     @Default(MovieDetailStatus.initial) MovieDetailStatus status,
     MovieDetailEntity? movieDetail,
+    @Default([]) List<MovieEntity> relatedMovies,
     @Default(false) bool isFavorite,
     @Default(0) int selectedServerIndex,
     @Default(0) int selectedEpisodeIndex,

@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$MovieDetailState {
   MovieDetailStatus get status;
   MovieDetailEntity? get movieDetail;
+  List<MovieEntity> get relatedMovies;
   bool get isFavorite;
   int get selectedServerIndex;
   int get selectedEpisodeIndex;
@@ -37,6 +38,8 @@ mixin _$MovieDetailState {
             (identical(other.status, status) || other.status == status) &&
             (identical(other.movieDetail, movieDetail) ||
                 other.movieDetail == movieDetail) &&
+            const DeepCollectionEquality()
+                .equals(other.relatedMovies, relatedMovies) &&
             (identical(other.isFavorite, isFavorite) ||
                 other.isFavorite == isFavorite) &&
             (identical(other.selectedServerIndex, selectedServerIndex) ||
@@ -48,12 +51,19 @@ mixin _$MovieDetailState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, status, movieDetail, isFavorite,
-      selectedServerIndex, selectedEpisodeIndex, errorMessage);
+  int get hashCode => Object.hash(
+      runtimeType,
+      status,
+      movieDetail,
+      const DeepCollectionEquality().hash(relatedMovies),
+      isFavorite,
+      selectedServerIndex,
+      selectedEpisodeIndex,
+      errorMessage);
 
   @override
   String toString() {
-    return 'MovieDetailState(status: $status, movieDetail: $movieDetail, isFavorite: $isFavorite, selectedServerIndex: $selectedServerIndex, selectedEpisodeIndex: $selectedEpisodeIndex, errorMessage: $errorMessage)';
+    return 'MovieDetailState(status: $status, movieDetail: $movieDetail, relatedMovies: $relatedMovies, isFavorite: $isFavorite, selectedServerIndex: $selectedServerIndex, selectedEpisodeIndex: $selectedEpisodeIndex, errorMessage: $errorMessage)';
   }
 }
 
@@ -66,6 +76,7 @@ abstract mixin class $MovieDetailStateCopyWith<$Res> {
   $Res call(
       {MovieDetailStatus status,
       MovieDetailEntity? movieDetail,
+      List<MovieEntity> relatedMovies,
       bool isFavorite,
       int selectedServerIndex,
       int selectedEpisodeIndex,
@@ -87,6 +98,7 @@ class _$MovieDetailStateCopyWithImpl<$Res>
   $Res call({
     Object? status = null,
     Object? movieDetail = freezed,
+    Object? relatedMovies = null,
     Object? isFavorite = null,
     Object? selectedServerIndex = null,
     Object? selectedEpisodeIndex = null,
@@ -101,6 +113,10 @@ class _$MovieDetailStateCopyWithImpl<$Res>
           ? _self.movieDetail
           : movieDetail // ignore: cast_nullable_to_non_nullable
               as MovieDetailEntity?,
+      relatedMovies: null == relatedMovies
+          ? _self.relatedMovies
+          : relatedMovies // ignore: cast_nullable_to_non_nullable
+              as List<MovieEntity>,
       isFavorite: null == isFavorite
           ? _self.isFavorite
           : isFavorite // ignore: cast_nullable_to_non_nullable
@@ -217,6 +233,7 @@ extension MovieDetailStatePatterns on MovieDetailState {
     TResult Function(
             MovieDetailStatus status,
             MovieDetailEntity? movieDetail,
+            List<MovieEntity> relatedMovies,
             bool isFavorite,
             int selectedServerIndex,
             int selectedEpisodeIndex,
@@ -230,6 +247,7 @@ extension MovieDetailStatePatterns on MovieDetailState {
         return $default(
             _that.status,
             _that.movieDetail,
+            _that.relatedMovies,
             _that.isFavorite,
             _that.selectedServerIndex,
             _that.selectedEpisodeIndex,
@@ -257,6 +275,7 @@ extension MovieDetailStatePatterns on MovieDetailState {
     TResult Function(
             MovieDetailStatus status,
             MovieDetailEntity? movieDetail,
+            List<MovieEntity> relatedMovies,
             bool isFavorite,
             int selectedServerIndex,
             int selectedEpisodeIndex,
@@ -269,6 +288,7 @@ extension MovieDetailStatePatterns on MovieDetailState {
         return $default(
             _that.status,
             _that.movieDetail,
+            _that.relatedMovies,
             _that.isFavorite,
             _that.selectedServerIndex,
             _that.selectedEpisodeIndex,
@@ -295,6 +315,7 @@ extension MovieDetailStatePatterns on MovieDetailState {
     TResult? Function(
             MovieDetailStatus status,
             MovieDetailEntity? movieDetail,
+            List<MovieEntity> relatedMovies,
             bool isFavorite,
             int selectedServerIndex,
             int selectedEpisodeIndex,
@@ -307,6 +328,7 @@ extension MovieDetailStatePatterns on MovieDetailState {
         return $default(
             _that.status,
             _that.movieDetail,
+            _that.relatedMovies,
             _that.isFavorite,
             _that.selectedServerIndex,
             _that.selectedEpisodeIndex,
@@ -323,16 +345,27 @@ class _MovieDetailState implements MovieDetailState {
   const _MovieDetailState(
       {this.status = MovieDetailStatus.initial,
       this.movieDetail,
+      final List<MovieEntity> relatedMovies = const [],
       this.isFavorite = false,
       this.selectedServerIndex = 0,
       this.selectedEpisodeIndex = 0,
-      this.errorMessage});
+      this.errorMessage})
+      : _relatedMovies = relatedMovies;
 
   @override
   @JsonKey()
   final MovieDetailStatus status;
   @override
   final MovieDetailEntity? movieDetail;
+  final List<MovieEntity> _relatedMovies;
+  @override
+  @JsonKey()
+  List<MovieEntity> get relatedMovies {
+    if (_relatedMovies is EqualUnmodifiableListView) return _relatedMovies;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_relatedMovies);
+  }
+
   @override
   @JsonKey()
   final bool isFavorite;
@@ -361,6 +394,8 @@ class _MovieDetailState implements MovieDetailState {
             (identical(other.status, status) || other.status == status) &&
             (identical(other.movieDetail, movieDetail) ||
                 other.movieDetail == movieDetail) &&
+            const DeepCollectionEquality()
+                .equals(other._relatedMovies, _relatedMovies) &&
             (identical(other.isFavorite, isFavorite) ||
                 other.isFavorite == isFavorite) &&
             (identical(other.selectedServerIndex, selectedServerIndex) ||
@@ -372,12 +407,19 @@ class _MovieDetailState implements MovieDetailState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, status, movieDetail, isFavorite,
-      selectedServerIndex, selectedEpisodeIndex, errorMessage);
+  int get hashCode => Object.hash(
+      runtimeType,
+      status,
+      movieDetail,
+      const DeepCollectionEquality().hash(_relatedMovies),
+      isFavorite,
+      selectedServerIndex,
+      selectedEpisodeIndex,
+      errorMessage);
 
   @override
   String toString() {
-    return 'MovieDetailState(status: $status, movieDetail: $movieDetail, isFavorite: $isFavorite, selectedServerIndex: $selectedServerIndex, selectedEpisodeIndex: $selectedEpisodeIndex, errorMessage: $errorMessage)';
+    return 'MovieDetailState(status: $status, movieDetail: $movieDetail, relatedMovies: $relatedMovies, isFavorite: $isFavorite, selectedServerIndex: $selectedServerIndex, selectedEpisodeIndex: $selectedEpisodeIndex, errorMessage: $errorMessage)';
   }
 }
 
@@ -392,6 +434,7 @@ abstract mixin class _$MovieDetailStateCopyWith<$Res>
   $Res call(
       {MovieDetailStatus status,
       MovieDetailEntity? movieDetail,
+      List<MovieEntity> relatedMovies,
       bool isFavorite,
       int selectedServerIndex,
       int selectedEpisodeIndex,
@@ -413,6 +456,7 @@ class __$MovieDetailStateCopyWithImpl<$Res>
   $Res call({
     Object? status = null,
     Object? movieDetail = freezed,
+    Object? relatedMovies = null,
     Object? isFavorite = null,
     Object? selectedServerIndex = null,
     Object? selectedEpisodeIndex = null,
@@ -427,6 +471,10 @@ class __$MovieDetailStateCopyWithImpl<$Res>
           ? _self.movieDetail
           : movieDetail // ignore: cast_nullable_to_non_nullable
               as MovieDetailEntity?,
+      relatedMovies: null == relatedMovies
+          ? _self._relatedMovies
+          : relatedMovies // ignore: cast_nullable_to_non_nullable
+              as List<MovieEntity>,
       isFavorite: null == isFavorite
           ? _self.isFavorite
           : isFavorite // ignore: cast_nullable_to_non_nullable

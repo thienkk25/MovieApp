@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_app/src/core/usecase/usecase.dart';
+import 'package:movie_app/src/features/movie/domain/entities/movie_entity.dart';
 import 'package:movie_app/src/features/movie/domain/usecases/movie_usecases.dart';
 import 'movie_detail_event.dart';
 import 'movie_detail_state.dart';
@@ -9,12 +10,14 @@ class MovieDetailBloc extends Bloc<MovieDetailEvent, MovieDetailState> {
   final GetFavoriteMoviesUseCase getFavoriteMoviesUseCase;
   final AddFavoriteMovieUseCase addFavoriteMovieUseCase;
   final RemoveFavoriteMovieUseCase removeFavoriteMovieUseCase;
+  final GetCategoryMoviesUseCase getCategoryMoviesUseCase;
 
   MovieDetailBloc({
     required this.getMovieDetailUseCase,
     required this.getFavoriteMoviesUseCase,
     required this.addFavoriteMovieUseCase,
     required this.removeFavoriteMovieUseCase,
+    required this.getCategoryMoviesUseCase,
   }) : super(const MovieDetailState()) {
     on<FetchMovieDetail>(_onFetchMovieDetail);
     on<ToggleFavorite>(_onToggleFavorite);
@@ -47,9 +50,27 @@ class MovieDetailBloc extends Bloc<MovieDetailEvent, MovieDetailState> {
       isFav = favs.any((m) => m.slug == event.slug);
     }
 
+    // Fetch Related Movies by Category / Type
+    List<MovieEntity> relatedList = [];
+    final categoryType = detail.movie.categories.isNotEmpty
+        ? detail.movie.categories.first
+        : (detail.movie.quality.contains('Bộ') ? 'Phim Bộ' : 'Phim Lẻ');
+
+    final relatedRes = await getCategoryMoviesUseCase(CategoryMoviesParams(
+      type: categoryType,
+      limit: 10,
+    ));
+    if (relatedRes.isRight()) {
+      relatedList = relatedRes
+          .getOrElse(() => [])
+          .where((m) => m.slug != event.slug)
+          .toList();
+    }
+
     emit(state.copyWith(
       status: MovieDetailStatus.success,
       movieDetail: detail,
+      relatedMovies: relatedList,
       isFavorite: isFav,
       selectedServerIndex: 0,
       selectedEpisodeIndex: 0,
