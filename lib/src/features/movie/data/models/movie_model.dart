@@ -1,319 +1,177 @@
-class MovieModel {
-  final bool? status;
-  final String? msg;
-  final MovieData? movie;
-  final List<Episode>? episodes;
+import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../domain/entities/movie_entity.dart';
 
-  MovieModel({
-    this.status,
-    this.msg,
-    this.movie,
-    this.episodes,
-  });
+part 'movie_model.freezed.dart';
+part 'movie_model.g.dart';
 
-  factory MovieModel.fromJson(Map<String, dynamic> json) => MovieModel(
-        status: json["status"],
-        msg: json["msg"],
-        movie: json["movie"] != null ? MovieData.fromJson(json["movie"]) : null,
-        episodes: json["episodes"] != null
-            ? List<Episode>.from(
-                json["episodes"].map((x) => Episode.fromJson(x)))
-            : null,
-      );
-
-  Map<String, dynamic> toJson() => {
-        "status": status,
-        "msg": msg,
-        "movie": movie?.toJson(),
-        "episodes": episodes != null
-            ? List<dynamic>.from(episodes!.map((x) => x.toJson()))
-            : null,
-      };
+String? _parseStringNullable(dynamic value) {
+  if (value == null) return null;
+  return value.toString();
 }
 
-class MovieData {
-  final TMDB? tmdb;
-  final IMDB? imdb;
-  final CreatedModified? created;
-  final CreatedModified? modified;
-  final String? id;
-  final String? name;
-  final String? slug;
-  final String? originName;
-  final String? content;
-  final String? type;
-  final String? status;
-  final String? posterUrl;
-  final String? thumbUrl;
-  final bool? isCopyright;
-  final bool? subDocquyen;
-  final bool? chieurap;
-  final String? trailerUrl;
-  final String? time;
-  final String? episodeCurrent;
-  final String? episodeTotal;
-  final String? quality;
-  final String? lang;
-  final String? notify;
-  final String? showtimes;
-  final int? year;
-  final int? view;
-  final List<String>? actor;
-  final List<String>? director;
-  final List<Category>? category;
-  final List<Country>? country;
-
-  MovieData({
-    this.tmdb,
-    this.imdb,
-    this.created,
-    this.modified,
-    this.id,
-    this.name,
-    this.slug,
-    this.originName,
-    this.content,
-    this.type,
-    this.status,
-    this.posterUrl,
-    this.thumbUrl,
-    this.isCopyright,
-    this.subDocquyen,
-    this.chieurap,
-    this.trailerUrl,
-    this.time,
-    this.episodeCurrent,
-    this.episodeTotal,
-    this.quality,
-    this.lang,
-    this.notify,
-    this.showtimes,
-    this.year,
-    this.view,
-    this.actor,
-    this.director,
-    this.category,
-    this.country,
-  });
-
-  factory MovieData.fromJson(Map<String, dynamic> json) => MovieData(
-        tmdb: json["tmdb"] != null ? TMDB.fromJson(json["tmdb"]) : null,
-        imdb: json["imdb"] != null ? IMDB.fromJson(json["imdb"]) : null,
-        created: json["created"] != null
-            ? CreatedModified.fromJson(json["created"])
-            : null,
-        modified: json["modified"] != null
-            ? CreatedModified.fromJson(json["modified"])
-            : null,
-        id: json["_id"] ?? "",
-        name: json["name"] ?? "",
-        slug: json["slug"] ?? "",
-        originName: json["origin_name"] ?? "",
-        content: json["content"] ?? "",
-        type: json["type"] ?? "",
-        status: json["status"] ?? "",
-        posterUrl: json["poster_url"] ?? "",
-        thumbUrl: json["thumb_url"] ?? "",
-        isCopyright: json["is_copyright"] ?? false,
-        subDocquyen: json["sub_docquyen"] ?? false,
-        chieurap: json["chieurap"] ?? false,
-        trailerUrl: json["trailer_url"] ?? "",
-        time: json["time"] ?? "",
-        episodeCurrent: json["episode_current"] ?? "",
-        episodeTotal: json["episode_total"] ?? "",
-        quality: json["quality"] ?? "",
-        lang: json["lang"] ?? "",
-        notify: json["notify"] ?? "",
-        showtimes: json["showtimes"] ?? "",
-        year: json["year"] ?? 0,
-        view: json["view"] ?? 0,
-        actor: json["actor"] != null
-            ? List<String>.from(json["actor"].map((x) => x))
-            : [],
-        director: json["director"] != null
-            ? List<String>.from(json["director"].map((x) => x))
-            : [],
-        category: json["category"] != null
-            ? List<Category>.from(
-                json["category"].map((x) => Category.fromJson(x)))
-            : [],
-        country: json["country"] != null
-            ? List<Country>.from(
-                json["country"].map((x) => Country.fromJson(x)))
-            : [],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "tmdb": tmdb?.toJson(),
-        "imdb": imdb?.toJson(),
-        "created": created?.toJson(),
-        "modified": modified?.toJson(),
-        "_id": id,
-        "name": name,
-        "slug": slug,
-        "origin_name": originName,
-        "content": content,
-        "type": type,
-        "status": status,
-        "poster_url": posterUrl,
-        "thumb_url": thumbUrl,
-        "is_copyright": isCopyright,
-        "sub_docquyen": subDocquyen,
-        "chieurap": chieurap,
-        "trailer_url": trailerUrl,
-        "time": time,
-        "episode_current": episodeCurrent,
-        "episode_total": episodeTotal,
-        "quality": quality,
-        "lang": lang,
-        "notify": notify,
-        "showtimes": showtimes,
-        "year": year,
-        "view": view,
-        "actor": actor,
-        "director": director,
-        "category": List<dynamic>.from(
-            category == null ? {} : category!.map((x) => x.toJson())),
-        "country": List<dynamic>.from(
-            country == null ? {} : country!.map((x) => x.toJson())),
-      };
+int? _parseIntNullable(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }
 
-class TMDB {
-  final String? type;
-  final String? id;
-  final dynamic season;
-  final double? voteAverage;
-  final int? voteCount;
-
-  TMDB({this.type, this.id, this.season, this.voteAverage, this.voteCount});
-
-  factory TMDB.fromJson(Map<String, dynamic> json) => TMDB(
-        type: json["type"],
-        id: json["id"],
-        season: json["season"],
-        voteAverage: json["vote_average"] != null
-            ? json["vote_average"].toDouble()
-            : 0.0,
-        voteCount: json["vote_count"] ?? 0,
-      );
-
-  Map<String, dynamic> toJson() => {
-        "type": type,
-        "id": id,
-        "season": season,
-        "vote_average": voteAverage,
-        "vote_count": voteCount,
-      };
+List<String>? _parseStringListNullable(dynamic value) {
+  if (value == null) return null;
+  if (value is List) {
+    return value.map((e) => e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
+  }
+  if (value is String && value.isNotEmpty) {
+    return [value];
+  }
+  return null;
 }
 
-class IMDB {
-  final String? id;
+@freezed
+abstract class MovieModel with _$MovieModel {
+  const MovieModel._();
 
-  IMDB({this.id});
+  const factory MovieModel({
+    dynamic status,
+    @JsonKey(fromJson: _parseStringNullable) String? msg,
+    MovieDataModel? movie,
+    List<EpisodeModel>? episodes,
+  }) = _MovieModel;
 
-  factory IMDB.fromJson(Map<String, dynamic> json) => IMDB(id: json["id"]);
+  factory MovieModel.fromJson(Map<String, dynamic> json) =>
+      _$MovieModelFromJson(json);
 
-  Map<String, dynamic> toJson() => {"id": id};
+  MovieDetailEntity? toEntity() {
+    if (movie == null) return null;
+    final movieEntity = movie!.toEntity();
+    return MovieDetailEntity(
+      movie: movieEntity,
+      content: movie?.content ?? '',
+      trailerUrl: movie?.trailerUrl ?? '',
+      actors: movie?.actor ?? [],
+      directors: movie?.director ?? [],
+      episodes: episodes?.map((e) => e.toEntity()).toList() ?? [],
+    );
+  }
 }
 
-class CreatedModified {
-  final DateTime? time;
+@freezed
+abstract class MovieDataModel with _$MovieDataModel {
+  const MovieDataModel._();
 
-  CreatedModified({this.time});
+  const factory MovieDataModel({
+    @JsonKey(name: '_id', fromJson: _parseStringNullable) String? id,
+    @JsonKey(fromJson: _parseStringNullable) String? name,
+    @JsonKey(fromJson: _parseStringNullable) String? slug,
+    @JsonKey(name: 'origin_name', fromJson: _parseStringNullable) String? originName,
+    @JsonKey(fromJson: _parseStringNullable) String? content,
+    @JsonKey(fromJson: _parseStringNullable) String? type,
+    dynamic status,
+    @JsonKey(name: 'poster_url', fromJson: _parseStringNullable) String? posterUrl,
+    @JsonKey(name: 'thumb_url', fromJson: _parseStringNullable) String? thumbUrl,
+    @JsonKey(name: 'trailer_url', fromJson: _parseStringNullable) String? trailerUrl,
+    @JsonKey(fromJson: _parseStringNullable) String? time,
+    @JsonKey(name: 'episode_current', fromJson: _parseStringNullable) String? episodeCurrent,
+    @JsonKey(name: 'episode_total', fromJson: _parseStringNullable) String? episodeTotal,
+    @JsonKey(fromJson: _parseStringNullable) String? quality,
+    @JsonKey(fromJson: _parseStringNullable) String? lang,
+    @JsonKey(fromJson: _parseIntNullable) int? year,
+    @JsonKey(fromJson: _parseIntNullable) int? view,
+    @JsonKey(fromJson: _parseStringListNullable) List<String>? actor,
+    @JsonKey(fromJson: _parseStringListNullable) List<String>? director,
+    List<CategoryModel>? category,
+    List<CountryModel>? country,
+  }) = _MovieDataModel;
 
-  factory CreatedModified.fromJson(Map<String, dynamic> json) =>
-      CreatedModified(
-          time: json["time"] != null ? DateTime.parse(json["time"]) : null);
+  factory MovieDataModel.fromJson(Map<String, dynamic> json) =>
+      _$MovieDataModelFromJson(json);
 
-  Map<String, dynamic> toJson() => {"time": time?.toIso8601String()};
+  MovieEntity toEntity() {
+    return MovieEntity(
+      id: id ?? '',
+      name: name ?? '',
+      slug: slug ?? '',
+      originName: originName ?? '',
+      posterUrl: posterUrl ?? '',
+      thumbUrl: thumbUrl ?? '',
+      year: year ?? 0,
+      quality: quality ?? '',
+      lang: lang ?? '',
+      time: time ?? '',
+      episodeCurrent: episodeCurrent ?? '',
+      categories: category?.map((c) => c.name ?? '').where((n) => n.isNotEmpty).toList() ?? [],
+      view: view ?? 0,
+    );
+  }
 }
 
-class Category {
-  final String? id;
-  final String? name;
-  final String? slug;
+@freezed
+abstract class CategoryModel with _$CategoryModel {
+  const factory CategoryModel({
+    @JsonKey(fromJson: _parseStringNullable) String? id,
+    @JsonKey(fromJson: _parseStringNullable) String? name,
+    @JsonKey(fromJson: _parseStringNullable) String? slug,
+  }) = _CategoryModel;
 
-  Category({this.id, this.name, this.slug});
-
-  factory Category.fromJson(Map<String, dynamic> json) => Category(
-        id: json["id"],
-        name: json["name"],
-        slug: json["slug"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "slug": slug,
-      };
+  factory CategoryModel.fromJson(Map<String, dynamic> json) =>
+      _$CategoryModelFromJson(json);
 }
 
-class Country {
-  final String? id;
-  final String? name;
-  final String? slug;
+@freezed
+abstract class CountryModel with _$CountryModel {
+  const factory CountryModel({
+    @JsonKey(fromJson: _parseStringNullable) String? id,
+    @JsonKey(fromJson: _parseStringNullable) String? name,
+    @JsonKey(fromJson: _parseStringNullable) String? slug,
+  }) = _CountryModel;
 
-  Country({this.id, this.name, this.slug});
-
-  factory Country.fromJson(Map<String, dynamic> json) => Country(
-        id: json["id"],
-        name: json["name"],
-        slug: json["slug"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "slug": slug,
-      };
+  factory CountryModel.fromJson(Map<String, dynamic> json) =>
+      _$CountryModelFromJson(json);
 }
 
-class Episode {
-  final String? serverName;
-  final List<ServerData>? serverData;
+@freezed
+abstract class EpisodeModel with _$EpisodeModel {
+  const EpisodeModel._();
 
-  Episode({this.serverName, this.serverData});
+  const factory EpisodeModel({
+    @JsonKey(name: 'server_name', fromJson: _parseStringNullable) String? serverName,
+    @JsonKey(name: 'server_data') List<ServerDataModel>? serverData,
+  }) = _EpisodeModel;
 
-  factory Episode.fromJson(Map<String, dynamic> json) => Episode(
-        serverName: json["server_name"],
-        serverData: json["server_data"] != null
-            ? List<ServerData>.from(
-                json["server_data"].map((x) => ServerData.fromJson(x)))
-            : [],
-      );
+  factory EpisodeModel.fromJson(Map<String, dynamic> json) =>
+      _$EpisodeModelFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        "server_name": serverName,
-        "server_data": serverData != null
-            ? List<dynamic>.from(serverData!.map((x) => x.toJson()))
-            : [],
-      };
+  EpisodeEntity toEntity() {
+    return EpisodeEntity(
+      serverName: serverName ?? '',
+      serverData: serverData?.map((s) => s.toEntity()).toList() ?? [],
+    );
+  }
 }
 
-class ServerData {
-  final String? name;
-  final String? slug;
-  final String? filename;
-  final String? linkEmbed;
-  final String? linkM3u8;
+@freezed
+abstract class ServerDataModel with _$ServerDataModel {
+  const ServerDataModel._();
 
-  ServerData(
-      {this.name, this.slug, this.filename, this.linkEmbed, this.linkM3u8});
+  const factory ServerDataModel({
+    @JsonKey(fromJson: _parseStringNullable) String? name,
+    @JsonKey(fromJson: _parseStringNullable) String? slug,
+    @JsonKey(fromJson: _parseStringNullable) String? filename,
+    @JsonKey(name: 'link_embed', fromJson: _parseStringNullable) String? linkEmbed,
+    @JsonKey(name: 'link_m3u8', fromJson: _parseStringNullable) String? linkM3u8,
+  }) = _ServerDataModel;
 
-  factory ServerData.fromJson(Map<String, dynamic> json) => ServerData(
-        name: json["name"],
-        slug: json["slug"],
-        filename: json["filename"],
-        linkEmbed: json["link_embed"],
-        linkM3u8: json["link_m3u8"],
-      );
+  factory ServerDataModel.fromJson(Map<String, dynamic> json) =>
+      _$ServerDataModelFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        "name": name,
-        "slug": slug,
-        "filename": filename,
-        "link_embed": linkEmbed,
-        "link_m3u8": linkM3u8,
-      };
+  ServerDataEntity toEntity() {
+    return ServerDataEntity(
+      name: name ?? '',
+      slug: slug ?? '',
+      filename: filename ?? '',
+      linkEmbed: linkEmbed ?? '',
+      linkM3u8: linkM3u8 ?? '',
+    );
+  }
 }

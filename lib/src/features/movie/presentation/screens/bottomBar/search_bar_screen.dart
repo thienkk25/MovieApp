@@ -1,88 +1,48 @@
 import 'dart:async';
-import 'dart:ui';
-
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_app/src/core/theme/app_colors.dart';
-import 'package:movie_app/src/features/movie/data/models/movie_model.dart';
-import 'package:movie_app/src/features/movie/presentation/screens/components/filter_sidebar_movie_screen.dart';
-import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
 import 'package:movie_app/src/core/widgets/card_movie.dart';
-import 'package:movie_app/src/features/movie/presentation/providers/movie_providers.dart';
-import 'package:movie_app/src/core/providers/core_providers.dart';
+import 'package:movie_app/src/features/movie/presentation/bloc/movie_search/movie_search_bloc.dart';
+import 'package:movie_app/src/features/movie/presentation/bloc/movie_search/movie_search_event.dart';
+import 'package:movie_app/src/features/movie/presentation/bloc/movie_search/movie_search_state.dart';
+import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
 
-class SearchBarScreen extends ConsumerStatefulWidget {
+class SearchBarScreen extends StatefulWidget {
   const SearchBarScreen({super.key});
 
   @override
-  ConsumerState<SearchBarScreen> createState() => _SearchBarScreenState();
+  State<SearchBarScreen> createState() => _SearchBarScreenState();
 }
 
-class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
+class _SearchBarScreenState extends State<SearchBarScreen> {
   final TextEditingController searchController = TextEditingController();
-  late Future<Map> futureNewlyUpdatedMovies;
-  late Future<List> futureCategoryMovies;
-  late Future<List> futureCountryMovies;
-  final int pageMovie = 1;
-  final int limitMovie = 12;
-  final String sortType = "desc";
-  final String country = "";
-  final int year = 0;
   Timer? timer;
-  Map dataSearch = {};
+
   @override
   void initState() {
-    futureNewlyUpdatedMovies =
-        ref.read(getNewlyUpdatedMoviesV3UseCaseProvider).call(page: 2);
-    futureCategoryMovies = ref.read(categoryMoviesProvider.future);
-    futureCountryMovies = ref.read(countryMoviesProvider.future);
     super.initState();
+    context.read<MovieSearchBloc>().add(const MovieSearchEvent.executeSearch());
   }
 
   @override
   void dispose() {
+    searchController.dispose();
     timer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    double sizeWidth = MediaQuery.of(context).size.width;
-
-    int responsiveColumnCount;
-
-    if (sizeWidth < 600) {
-      responsiveColumnCount = 2;
-    } else if (sizeWidth <= 800) {
-      responsiveColumnCount = 3;
-    } else if (sizeWidth <= 1200) {
-      responsiveColumnCount = 4;
-    } else {
-      responsiveColumnCount = 5;
-    }
-
     final colors = context.appColors;
+
     return Scaffold(
-      key: ValueKey(ref.watch(isLanguageProvider)),
       backgroundColor: colors.scaffoldBg,
       appBar: AppBar(
-        elevation: 0,
         backgroundColor: Colors.transparent,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                colors.appBarBg,
-                colors.appBarBgSecondary,
-              ],
-            ),
-          ),
-        ),
+        elevation: 0,
         title: Text(
-          'search.title'.tr(),
+          'Tìm kiếm phim',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -92,625 +52,348 @@ class _SearchBarScreenState extends ConsumerState<SearchBarScreen> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                colors.gradientStart,
-                colors.gradientMid,
-                colors.gradientEnd
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Column(
-              spacing: 14,
-              children: [
-                ClipRRect(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            children: [
+              // Search Input Bar
+              Container(
+                height: 52,
+                decoration: BoxDecoration(
+                  color: colors.inputFill,
                   borderRadius: BorderRadius.circular(16),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                    child: Container(
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: colors.inputFill,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: colors.inputBorder),
-                      ),
-                      child: SearchBar(
-                        controller: searchController,
-                        hintText: 'search.hint'.tr(),
-                        elevation: const WidgetStatePropertyAll(0),
-                        backgroundColor:
-                            const WidgetStatePropertyAll(Colors.transparent),
-                        leading: const Icon(Icons.search,
-                            color: Colors.orangeAccent),
-                        textStyle: WidgetStatePropertyAll(
-                          TextStyle(color: colors.inputText, fontSize: 16),
-                        ),
-                        hintStyle: WidgetStatePropertyAll(
-                          TextStyle(color: colors.inputHint),
-                        ),
-                        trailing: [
-                          if (searchController.text.isNotEmpty)
-                            IconButton(
-                              icon: Icon(Icons.clear,
-                                  color: colors.iconSecondary),
-                              onPressed: () {
-                                searchController.clear();
-                              },
-                            ),
-                        ],
-                        onTapOutside: (event) =>
-                            FocusScope.of(context).unfocus(),
-                        onChanged: (value) {
-                          if (timer?.isActive ?? false) timer?.cancel();
-                          timer = Timer(
-                            const Duration(milliseconds: 300),
-                            () async {
-                              final filters = ref.read(searchFilterProvider);
-                              dataSearch = await ref
-                                  .read(searchMoviesUseCaseProvider)
-                                  .call(
-                                    keyword: value,
-                                    limit: 18,
-                                    filters: filters,
-                                  );
-                              if (mounted) setState(() {});
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+                  border: Border.all(color: colors.inputBorder),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Row(
                   children: [
+                    const SizedBox(width: 16),
+                    const Icon(Icons.search_rounded, color: Colors.amber, size: 22),
+                    const SizedBox(width: 10),
                     Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 6),
-                        decoration: BoxDecoration(
-                          color: colors.inputFill,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: colors.border,
-                          ),
+                      child: TextField(
+                        controller: searchController,
+                        style: TextStyle(color: colors.textPrimary, fontSize: 15),
+                        decoration: InputDecoration(
+                          hintText: 'Nhập tên phim, diễn viên...',
+                          hintStyle: TextStyle(color: colors.inputHint, fontSize: 14),
+                          border: InputBorder.none,
+                          isDense: true,
                         ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(14),
-                          onTap: () => showGeneralDialog(
-                            context: context,
-                            barrierDismissible: true,
-                            barrierLabel: 'filter.title'.tr(),
-                            pageBuilder: (context, anim1, anim2) {
-                              return FilterSidebarMovieScreen(
-                                futureCategoryMovies: futureCategoryMovies,
-                                futureCountryMovies: futureCountryMovies,
-                                pageMovie: pageMovie,
-                                limitMovie: limitMovie,
-                              );
-                            },
-                            transitionBuilder: (context, anim1, anim2, child) {
-                              final offsetAnimation = Tween<Offset>(
-                                begin: const Offset(-1, 0),
-                                end: Offset.zero,
-                              ).animate(CurvedAnimation(
-                                parent: anim1,
-                                curve: Curves.easeOut,
-                              ));
-                              return SlideTransition(
-                                  position: offsetAnimation, child: child);
-                            },
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              spacing: 8,
-                              children: [
-                                const Icon(Icons.category_outlined,
-                                    color: Colors.orangeAccent, size: 20),
-                                Text(
-                                  'movie.genre'.tr(),
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: colors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Consumer(
-                        builder: (context, ref, child) {
-                          final hasFilter =
-                              ref.watch(searchFilterProvider).isNotEmpty;
-                          return Container(
-                            margin: const EdgeInsets.only(left: 6),
-                            decoration: BoxDecoration(
-                              color: hasFilter
-                                  ? Colors.orangeAccent.withValues(alpha: 0.1)
-                                  : colors.inputFill,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: hasFilter
-                                    ? Colors.orangeAccent.withValues(alpha: 0.4)
-                                    : colors.border,
-                              ),
-                            ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(14),
-                              onTap: () => showFilterModal(context, ref),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 10),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  spacing: 8,
-                                  children: [
-                                    Text(
-                                      'filter.title'.tr(),
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color: hasFilter
-                                            ? Colors.orangeAccent
-                                            : colors.textPrimary,
-                                      ),
-                                    ),
-                                    Icon(
-                                      hasFilter
-                                          ? Icons.filter_alt_rounded
-                                          : Icons.filter_alt_off_rounded,
-                                      size: 20,
-                                      color: hasFilter
-                                          ? Colors.orangeAccent
-                                          : colors.iconInactive,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
+                        onChanged: (val) {
+                          if (timer?.isActive ?? false) timer?.cancel();
+                          timer = Timer(const Duration(milliseconds: 400), () {
+                            context.read<MovieSearchBloc>().add(
+                                  MovieSearchEvent.keywordChanged(val.trim()),
+                                );
+                            context
+                                .read<MovieSearchBloc>()
+                                .add(const MovieSearchEvent.executeSearch());
+                          });
                         },
                       ),
                     ),
+                    if (searchController.text.isNotEmpty)
+                      IconButton(
+                        icon: Icon(Icons.clear_rounded,
+                            color: colors.iconSecondary, size: 20),
+                        onPressed: () {
+                          searchController.clear();
+                          context.read<MovieSearchBloc>().add(
+                                const MovieSearchEvent.keywordChanged(''),
+                              );
+                          context
+                              .read<MovieSearchBloc>()
+                              .add(const MovieSearchEvent.executeSearch());
+                        },
+                      ),
                   ],
                 ),
-                dataSearch['data']?['items'] != null &&
-                        dataSearch['data']['items'].isNotEmpty
-                    ? GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: dataSearch['data']['items'].length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: responsiveColumnCount,
-                          mainAxisExtent: 260,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
+              ),
+
+              const SizedBox(height: 14),
+
+              // Filter Action Button
+              BlocBuilder<MovieSearchBloc, MovieSearchState>(
+                builder: (context, state) {
+                  final hasFilter = state.filter.isNotEmpty;
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        state.searchResults.isNotEmpty
+                            ? 'Kết quả (${state.searchResults.length})'
+                            : 'Gợi ý phim mới',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: colors.textPrimary,
                         ),
-                        itemBuilder: (context, index) {
-                          return CardMovie(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => InforMovieScreen(
-                                      slugMovie: dataSearch['data']['items']
-                                          [index]['slug'],
-                                    ),
-                                  ),
-                                );
-                              },
-                              movie: MovieData.fromJson(
-                                  dataSearch['data']['items'][index]),
-                              isLink: false);
-                        },
-                      )
-                    : dataSearch['data'] != null
-                        ? SizedBox(
-                            height: MediaQuery.of(context).size.height / 2,
-                            child: Center(
-                              child: Text(
-                                'search.noResult'.tr(),
+                      ),
+                      GestureDetector(
+                        onTap: () => _showFilterModal(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: hasFilter
+                                ? Colors.amber.withValues(alpha: 0.15)
+                                : colors.cardBg,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: hasFilter ? Colors.amber : colors.border,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.tune_rounded,
+                                size: 16,
+                                color: hasFilter ? Colors.amber : colors.textSecondary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Bộ lọc',
                                 style: TextStyle(
-                                  color: colors.textTertiary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      hasFilter ? Colors.amber : colors.textSecondary,
                                 ),
                               ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+
+              const SizedBox(height: 14),
+
+              // Search Results / Suggested Grid
+              Expanded(
+                child: BlocBuilder<MovieSearchBloc, MovieSearchState>(
+                  builder: (context, state) {
+                    if (state.status == MovieSearchStatus.loading) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: Colors.amber),
+                      );
+                    }
+
+                    if (state.searchResults.isEmpty &&
+                        state.status == MovieSearchStatus.success) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off_rounded,
+                                size: 64, color: colors.iconInactive),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Không tìm thấy phim phù hợp',
+                              style: TextStyle(
+                                color: colors.textTertiary,
+                                fontSize: 15,
+                              ),
                             ),
-                          )
-                        : FutureBuilder(
-                            future: futureNewlyUpdatedMovies,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              } else if (snapshot.hasData) {
-                                Map newlyUpdatedMovies = snapshot.data!;
-                                return GridView.builder(
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  itemCount:
-                                      newlyUpdatedMovies['items']?.length ?? 0,
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: responsiveColumnCount,
-                                    mainAxisExtent: 260,
-                                    mainAxisSpacing: 12,
-                                    crossAxisSpacing: 12,
-                                  ),
-                                  itemBuilder: (context, index) {
-                                    return CardMovie(
-                                        onTap: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (_) => InforMovieScreen(
-                                                      slugMovie:
-                                                          newlyUpdatedMovies[
-                                                                      'items']
-                                                                  [index]
-                                                              ['slug'])));
-                                        },
-                                        movie: MovieData.fromJson(
-                                            newlyUpdatedMovies['items'][index]),
-                                        isLink: true);
-                                  },
-                                );
-                              } else {
-                                return Center(
-                                  child: Icon(Icons.error,
-                                      color: colors.iconInactive),
-                                );
-                              }
-                            },
-                          )
-              ],
-            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: state.searchResults.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisExtent: 250,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemBuilder: (context, index) {
+                        final movie = state.searchResults[index];
+                        return CardMovie(
+                          movie: movie,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    InforMovieScreen(slugMovie: movie.slug),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Future<void> showFilterModal(BuildContext context, WidgetRef ref) async {
-    final currentFilter = ref.read(searchFilterProvider);
-
+  void _showFilterModal(BuildContext context) {
+    final bloc = context.read<MovieSearchBloc>();
     final colors = context.appColors;
-    await showModalBottomSheet(
+
+    showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: colors.sheetBg,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        const labelStyle = TextStyle(color: Colors.orangeAccent, fontSize: 14);
-        InputDecoration decoration(String label) => InputDecoration(
-              labelText: label,
-              labelStyle: labelStyle,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        return BlocProvider.value(
+          value: bloc,
+          child: const FilterModalWidget(),
+        );
+      },
+    );
+  }
+}
+
+class FilterModalWidget extends StatefulWidget {
+  const FilterModalWidget({super.key});
+
+  @override
+  State<FilterModalWidget> createState() => _FilterModalWidgetState();
+}
+
+class _FilterModalWidgetState extends State<FilterModalWidget> {
+  String? selectedCategory;
+  String? selectedCountry;
+  int? selectedYear;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.iconInactive,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Lọc phim nâng cao',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: colors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Year Dropdown
+          DropdownButtonFormField<int>(
+            initialValue: selectedYear,
+            dropdownColor: colors.sheetBg,
+            style: TextStyle(color: colors.textPrimary, fontSize: 15),
+            decoration: InputDecoration(
+              labelText: 'Năm phát hành',
+              labelStyle: const TextStyle(color: Colors.amber),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide(color: colors.border),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: colors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide:
-                    const BorderSide(color: Colors.orangeAccent, width: 1.5),
-              ),
-            );
-
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 18,
-              right: 18,
-              top: 20,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                spacing: 20,
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colors.iconInactive,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Center(
-                    child: Text(
-                      'filter.search'.tr(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: colors.textPrimary,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                  Column(
-                    spacing: 16,
-                    children: [
-                      FutureBuilder(
-                        future: futureCategoryMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          } else if (snapshot.hasError) {
-                            return Text('Lỗi: ${snapshot.error}',
-                                style: TextStyle(color: colors.textSecondary));
-                          } else if (!snapshot.hasData ||
-                              snapshot.data!.isEmpty) {
-                            return const Text("Không có dữ liệu",
-                                style: TextStyle(color: Colors.white70));
-                          }
-
-                          final categories = snapshot.data!;
-
-                          return DropdownButtonFormField<String>(
-                            initialValue: currentFilter.category,
-                            dropdownColor: colors.sheetBg,
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 15),
-                            decoration: decoration('filter.category'.tr()),
-                            isExpanded: true,
-                            items: [
-                              const DropdownMenuItem<String>(
-                                value: null,
-                                child: Text("Tất cả",
-                                    style: TextStyle(color: Colors.white70)),
-                              ),
-                              ...categories.map(
-                                (e) => DropdownMenuItem<String>(
-                                  value: e['slug'] as String,
-                                  child: Text(e['name'] as String,
-                                      style:
-                                          TextStyle(color: colors.textPrimary)),
-                                ),
-                              )
-                            ],
-                            onChanged: (v) => ref
-                                .read(searchFilterProvider.notifier)
-                                .setCategory(v),
-                          );
-                        },
-                      ),
-                      FutureBuilder(
-                        future: futureCountryMovies,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          } else if (snapshot.hasError) {
-                            return Text('Lỗi: ${snapshot.error}',
-                                style: TextStyle(color: colors.textSecondary));
-                          } else if (!snapshot.hasData ||
-                              snapshot.data!.isEmpty) {
-                            return const Text("Không có dữ liệu",
-                                style: TextStyle(color: Colors.white70));
-                          }
-
-                          final countries = snapshot.data!;
-
-                          return DropdownButtonFormField<String>(
-                            initialValue: currentFilter.country,
-                            dropdownColor: colors.sheetBg,
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 15),
-                            decoration: decoration('filter.country'.tr()),
-                            isExpanded: true,
-                            items: [
-                              const DropdownMenuItem<String>(
-                                value: null,
-                                child: Text("Tất cả",
-                                    style: TextStyle(color: Colors.white70)),
-                              ),
-                              ...countries.map(
-                                (e) => DropdownMenuItem<String>(
-                                  value: e['slug'] as String,
-                                  child: Text(e['name'] as String,
-                                      style:
-                                          TextStyle(color: colors.textPrimary)),
-                                ),
-                              )
-                            ],
-                            onChanged: (v) => ref
-                                .read(searchFilterProvider.notifier)
-                                .setCountry(v),
-                          );
-                        },
-                      ),
-                      DropdownButtonFormField<int>(
-                        initialValue: currentFilter.year,
-                        dropdownColor: colors.sheetBg,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 15),
-                        decoration: decoration('filter.year'.tr()),
-                        items: [
-                          const DropdownMenuItem<int>(
-                            value: null,
-                            child: Text("Tất cả",
-                                style: TextStyle(color: Colors.white70)),
-                          ),
-                          ...List.generate(
-                            DateTime.now().year - 1969,
-                            (i) => DropdownMenuItem<int>(
-                              value: DateTime.now().year - i,
-                              child: Text('${DateTime.now().year - i}',
-                                  style: TextStyle(color: colors.textPrimary)),
-                            ),
-                          ),
-                        ],
-                        onChanged: (v) =>
-                            ref.read(searchFilterProvider.notifier).setYear(v),
-                      ),
-                      DropdownButtonFormField<String>(
-                        initialValue: currentFilter.sortLang,
-                        dropdownColor: colors.sheetBg,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 15),
-                        decoration: decoration('app.language'.tr()),
-                        items: [
-                          {'label': 'Tất cả', 'value': null},
-                          {'label': 'Vietsub', 'value': 'vietsub'},
-                          {'label': 'Thuyết minh', 'value': 'thuyet-minh'},
-                          {'label': 'Lồng tiếng', 'value': 'long-tieng'},
-                        ]
-                            .map((e) => DropdownMenuItem<String>(
-                                  value: e['value'],
-                                  child: Text(e['label'] ?? 'Tất cả',
-                                      style: TextStyle(
-                                          color: e['value'] == null
-                                              ? Colors.white70
-                                              : Colors.white)),
-                                ))
-                            .toList(),
-                        onChanged: (v) => ref
-                            .read(searchFilterProvider.notifier)
-                            .setSortLang(v),
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: DropdownButtonFormField<String>(
-                              isExpanded: true,
-                              dropdownColor: const Color(0xFF1D1F30),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 14),
-                              decoration: decoration('filter.sortBy'.tr()),
-                              initialValue: currentFilter.sortField,
-                              items: const [
-                                DropdownMenuItem(
-                                    value: 'modified.time',
-                                    child: Text("Thời gian cập nhật",
-                                        style: TextStyle(color: Colors.white))),
-                                DropdownMenuItem(
-                                    value: '_id',
-                                    child: Text("ID phim",
-                                        style: TextStyle(color: Colors.white))),
-                                DropdownMenuItem(
-                                    value: 'year',
-                                    child: Text("Năm phát hành",
-                                        style: TextStyle(color: Colors.white))),
-                              ],
-                              onChanged: (v) => ref
-                                  .read(searchFilterProvider.notifier)
-                                  .setSortField(v ?? 'modified.time'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 1,
-                            child: DropdownButtonFormField<String>(
-                              isExpanded: true,
-                              dropdownColor: const Color(0xFF1D1F30),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 14),
-                              decoration: decoration(''),
-                              initialValue: currentFilter.sortType,
-                              items: const [
-                                DropdownMenuItem(
-                                    value: 'desc',
-                                    child: Text("Giảm dần",
-                                        style: TextStyle(color: Colors.white))),
-                                DropdownMenuItem(
-                                    value: 'asc',
-                                    child: Text("Tăng dần",
-                                        style: TextStyle(color: Colors.white))),
-                              ],
-                              onChanged: (v) => ref
-                                  .read(searchFilterProvider.notifier)
-                                  .setSortType(v ?? 'desc'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    spacing: 12,
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            ref.read(searchFilterProvider.notifier).clear();
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(Icons.refresh_rounded,
-                              color: Colors.orangeAccent),
-                          label: Text('filter.reset'.tr(),
-                              style:
-                                  const TextStyle(color: Colors.orangeAccent)),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.orangeAccent),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.check_rounded,
-                              color: Colors.white),
-                          label: Text('filter.apply'.tr(),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.orangeAccent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
+            items: [
+              const DropdownMenuItem<int>(
+                value: null,
+                child: Text('Tất cả năm'),
               ),
-            ),
+              ...List.generate(
+                15,
+                (i) => DropdownMenuItem<int>(
+                  value: DateTime.now().year - i,
+                  child: Text('${DateTime.now().year - i}'),
+                ),
+              ),
+            ],
+            onChanged: (val) => setState(() => selectedYear = val),
           ),
-        );
-      },
+
+          const SizedBox(height: 24),
+
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    context
+                        .read<MovieSearchBloc>()
+                        .add(const MovieSearchEvent.resetFilter());
+                    Navigator.pop(context);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.amber),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text('Đặt lại',
+                      style: TextStyle(color: Colors.amber)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    final currentFilter = context.read<MovieSearchBloc>().state.filter;
+                    context.read<MovieSearchBloc>().add(
+                          MovieSearchEvent.filterChanged(
+                            currentFilter.copyWith(
+                              year: selectedYear,
+                            ),
+                          ),
+                        );
+                    context
+                        .read<MovieSearchBloc>()
+                        .add(const MovieSearchEvent.executeSearch());
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text('Áp dụng',
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

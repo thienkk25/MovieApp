@@ -1,26 +1,25 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:movie_app/src/core/theme/app_colors.dart';
-import 'package:movie_app/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:movie_app/src/core/configs/overlay_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/configs/overlay_screen.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
-class ForgotScreen extends ConsumerStatefulWidget {
+class ForgotScreen extends StatefulWidget {
   const ForgotScreen({super.key});
 
   @override
-  ConsumerState<ForgotScreen> createState() => _ForgotScreenState();
+  State<ForgotScreen> createState() => _ForgotScreenState();
 }
 
-class _ForgotScreenState extends ConsumerState<ForgotScreen> {
-  TextEditingController emailController = TextEditingController();
-
+class _ForgotScreenState extends State<ForgotScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final GlobalKey<FormState> keyForm = GlobalKey<FormState>();
   final RegExp emailRegExp = RegExp(
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-  GlobalKey<FormState> keyForm = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -36,12 +35,9 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
     return InputDecoration(
       labelText: labelText,
       labelStyle: TextStyle(color: colors.inputHint, fontSize: 14),
-      floatingLabelStyle: const TextStyle(color: Colors.orangeAccent),
+      floatingLabelStyle: const TextStyle(color: Colors.amber),
       prefixIcon: prefixIcon,
-      prefixIconColor: WidgetStateColor.resolveWith((states) =>
-          states.contains(WidgetState.focused)
-              ? Colors.orangeAccent
-              : colors.inputHint),
+      prefixIconColor: colors.inputHint,
       filled: true,
       fillColor: colors.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -55,7 +51,7 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(
-          color: Colors.orangeAccent,
+          color: Colors.amber,
           width: 1.5,
         ),
       ),
@@ -73,7 +69,6 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
           width: 1.5,
         ),
       ),
-      errorStyle: const TextStyle(color: Colors.redAccent),
     );
   }
 
@@ -88,31 +83,12 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
             height: 250,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.orangeAccent.withValues(alpha: 0.12),
+              color: Colors.amber.withValues(alpha: 0.12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.orangeAccent.withValues(alpha: 0.12),
+                  color: Colors.amber.withValues(alpha: 0.12),
                   blurRadius: 100,
                   spreadRadius: 40,
-                ),
-              ],
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: -100,
-          left: -100,
-          child: Container(
-            width: 300,
-            height: 300,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFE91E63).withValues(alpha: 0.06),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFE91E63).withValues(alpha: 0.06),
-                  blurRadius: 120,
-                  spreadRadius: 60,
                 ),
               ],
             ),
@@ -125,220 +101,210 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    return Scaffold(
-      backgroundColor: colors.scaffoldBg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: colors.iconSecondary, size: 20),
-          onPressed: () => Navigator.pop(context),
+
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.successMessage != null) {
+          OverlayScreen().showOverlay(
+              context, state.successMessage!, Colors.green,
+              duration: 3);
+          Navigator.pop(context);
+        } else if (state.status == AuthStatus.failure) {
+          OverlayScreen().showOverlay(
+              context,
+              state.errorMessage ?? 'Có lỗi xảy ra',
+              Colors.red,
+              duration: 3);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: colors.scaffoldBg,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded,
+                color: colors.iconSecondary, size: 20),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          _buildGlassDecoration(),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.orangeAccent.withValues(alpha: 0.1),
-                              border: Border.all(
-                                color: Colors.orangeAccent.withValues(alpha: 0.2),
-                                width: 1.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.orangeAccent.withValues(alpha: 0.05),
-                                  blurRadius: 12,
-                                  spreadRadius: 2,
+        extendBodyBehindAppBar: true,
+        body: Stack(
+          children: [
+            _buildGlassDecoration(),
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.amber.withValues(alpha: 0.12),
+                                border: Border.all(
+                                  color: Colors.amber.withValues(alpha: 0.3),
+                                  width: 1.5,
                                 ),
-                              ],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.amber.withValues(alpha: 0.1),
+                                    blurRadius: 16,
+                                    spreadRadius: 3,
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.lock_reset_rounded,
+                                size: 48,
+                                color: Colors.amber,
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.lock_reset_rounded,
-                              size: 44,
-                              color: Colors.orangeAccent,
+                            const SizedBox(height: 16),
+                            Text(
+                              'Quên mật khẩu',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: colors.textPrimary,
+                                letterSpacing: 0.5,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'forgotPasswordScreen.title'.tr(),
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: colors.textPrimary,
-                              letterSpacing: 0.5,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'forgotPasswordScreen.description', // Description text if needed, or falls back to standard text.
-                            style: TextStyle(
-                              color: colors.textTertiary,
-                              fontSize: 14,
-                            ),
-                            textAlign: TextAlign.center,
-                          ).tr(),
-                        ],
-                      ).animate().fade(duration: 800.ms).slideY(begin: -0.2, end: 0, curve: Curves.easeOutQuad),
-                    ),
-                    const SizedBox(height: 36),
-                    Form(
-                      key: keyForm,
-                      child: TextFormField(
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        style: TextStyle(color: colors.textPrimary, fontSize: 15),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'errors.emailRequired'.tr();
-                          } else if (!emailRegExp.hasMatch(value)) {
-                            return 'errors.emailInvalid'.tr();
-                          }
-                          return null;
-                        },
-                        decoration: _buildInputDecoration(
-                          labelText: "Email",
-                          prefixIcon: const Icon(Icons.email_outlined, size: 20),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 36),
-                    GestureDetector(
-                      onTap: () {
-                        FocusScope.of(context).requestFocus(FocusNode());
-                        if (keyForm.currentState!.validate()) {
-                          forgot(emailController.text);
-                        }
-                      },
-                      child: Container(
-                        height: 52,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          gradient: const LinearGradient(
-                            colors: [Colors.orange, Colors.orangeAccent],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orangeAccent.withValues(alpha: 0.25),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Nhập email của bạn để nhận liên kết khôi phục mật khẩu',
+                              style: TextStyle(
+                                color: colors.textTertiary,
+                                fontSize: 14,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            'forgotPasswordScreen.sendButton'.tr(),
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              letterSpacing: 0.5,
-                            ),
+                        ).animate().fade(duration: 600.ms).slideY(
+                            begin: -0.2, end: 0, curve: Curves.easeOutQuad),
+                      ),
+                      const SizedBox(height: 36),
+                      Form(
+                        key: keyForm,
+                        child: TextFormField(
+                          controller: emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          style: TextStyle(
+                              color: colors.textPrimary, fontSize: 15),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'errors.emailRequired'.tr();
+                            } else if (!emailRegExp.hasMatch(value)) {
+                              return 'errors.emailInvalid'.tr();
+                            }
+                            return null;
+                          },
+                          decoration: _buildInputDecoration(
+                            labelText: "Email",
+                            prefixIcon:
+                                const Icon(Icons.email_outlined, size: 20),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'registerScreen.haveAccount'.tr(),
-                          style: TextStyle(color: colors.textTertiary, fontSize: 13),
-                        ),
-                        const SizedBox(width: 4),
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Text(
-                            'loginScreen.title'.tr(),
-                            style: const TextStyle(
-                              color: Colors.orangeAccent,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
+                      const SizedBox(height: 36),
+                      BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, state) {
+                          final isLoading = state.status == AuthStatus.loading;
+                          return GestureDetector(
+                            onTap: isLoading
+                                ? null
+                                : () {
+                                    FocusScope.of(context)
+                                        .requestFocus(FocusNode());
+                                    if (keyForm.currentState!.validate()) {
+                                      context.read<AuthBloc>().add(
+                                            AuthEvent.forgotPasswordRequested(
+                                              email: emailController.text.trim(),
+                                            ),
+                                          );
+                                    }
+                                  },
+                            child: Container(
+                              height: 52,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                gradient: const LinearGradient(
+                                  colors: [Colors.amber, Colors.orangeAccent],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.amber.withValues(alpha: 0.3),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: isLoading
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.black),
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Gửi liên kết khôi phục',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Quay lại',
+                            style: TextStyle(
+                                color: colors.textTertiary, fontSize: 13),
+                          ),
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: const Text(
+                              'Đăng nhập',
+                              style: TextStyle(
+                                color: Colors.amber,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ].animate(interval: 100.ms).fade(duration: 400.ms).slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad),
+                        ],
+                      ),
+                    ].animate(interval: 80.ms).fade(duration: 350.ms).slideY(
+                        begin: 0.1, end: 0, curve: Curves.easeOutQuad),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    final colors = context.appColors;
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(28),
-        decoration: BoxDecoration(
-          color: const Color(0xFF141622),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: colors.border,
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 24,
-              offset: const Offset(0, 10),
-            ),
           ],
         ),
-        child: const SizedBox(
-          width: 32,
-          height: 32,
-          child: CircularProgressIndicator(
-            strokeWidth: 3,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.orangeAccent),
-          ),
-        ),
       ),
     );
-  }
-
-  Future<void> forgot(String email) async {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) => _buildLoadingIndicator(),
-    );
-    final result = await ref.read(forgotUseCaseProvider).call(email);
-    if (!mounted) return;
-    Navigator.pop(context);
-    if (result) {
-      OverlayScreen().showOverlay(
-          context, 'success.resetPassword'.tr(), Colors.green,
-          duration: 3);
-      emailController.clear();
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) Navigator.pop(context);
-      });
-    } else {
-      OverlayScreen().showOverlay(
-          context, 'errors.resetPassword'.tr(), Colors.red,
-          duration: 3);
-    }
   }
 }
