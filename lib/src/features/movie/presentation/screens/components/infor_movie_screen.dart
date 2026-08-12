@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_app/src/core/configs/overlay_screen.dart';
@@ -219,29 +218,6 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
         ),
       ),
       actions: [
-        // Share Button → Real clipboard
-        IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.5),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-            ),
-            child:
-                const Icon(Icons.share_rounded, color: Colors.white, size: 18),
-          ),
-          onPressed: () {
-            final shareUrl = 'https://phimapi.com/phim/${movie.slug}';
-            Clipboard.setData(ClipboardData(text: shareUrl));
-            OverlayScreen().showOverlay(
-              context,
-              'Đã sao chép liên kết phim!',
-              colors.accentPrimary,
-              duration: 2,
-            );
-          },
-        ),
         // Favorite Button
         IconButton(
           icon: Container(
@@ -886,7 +862,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                     child: CardMovie(
                       movie: relMovie,
                       onTap: () {
-                        Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => InforMovieScreen(
