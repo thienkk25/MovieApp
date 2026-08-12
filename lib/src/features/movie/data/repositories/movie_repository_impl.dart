@@ -92,7 +92,11 @@ class MovieRepositoryImpl implements MovieRepository {
       Map res;
       final normalizedType = type.trim().toLowerCase();
 
-      if (normalizedType == 'phim lẻ' || normalizedType == 'phim-le') {
+      if (normalizedType == 'phim mới cập nhật' ||
+          normalizedType == 'phim mới' ||
+          normalizedType == 'phim-moi-cap-nhat') {
+        res = await remoteDataSource.newlyUpdatedMovies(page);
+      } else if (normalizedType == 'phim lẻ' || normalizedType == 'phim-le') {
         res = await remoteDataSource.singleMovies(page, limit);
       } else if (normalizedType == 'phim bộ' || normalizedType == 'phim-bo') {
         res = await remoteDataSource.dramaMovies(page, limit);
@@ -114,8 +118,9 @@ class MovieRepositoryImpl implements MovieRepository {
           normalizedType == 'long-tieng') {
         res = await remoteDataSource.dubbedMovies(page, limit);
       } else {
+        final slug = _slugifyCategory(type);
         res = await remoteDataSource.categoryDetailMovies(
-          type,
+          slug,
           page,
           limit,
           sortType,
@@ -205,5 +210,19 @@ class MovieRepositoryImpl implements MovieRepository {
     } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
+  }
+
+  String _slugifyCategory(String title) {
+    String str = title.toLowerCase().trim();
+    str = str.replaceAll(RegExp(r'[àáạảãâầấậẩẫăằắặẳẵ]'), 'a');
+    str = str.replaceAll(RegExp(r'[èéẹẻẽêềếệểễ]'), 'e');
+    str = str.replaceAll(RegExp(r'[ìíịỉĩ]'), 'i');
+    str = str.replaceAll(RegExp(r'[òóọỏõôồốộổỗơờớợởỡ]'), 'o');
+    str = str.replaceAll(RegExp(r'[ùúụủũưừứựửữ]'), 'u');
+    str = str.replaceAll(RegExp(r'[ỳýỵỷỹ]'), 'y');
+    str = str.replaceAll(RegExp(r'[đ]'), 'd');
+    str = str.replaceAll(RegExp(r'[^a-z0-9\s-]'), '');
+    str = str.replaceAll(RegExp(r'\s+'), '-');
+    return str.isEmpty ? 'phim-le' : str;
   }
 }
