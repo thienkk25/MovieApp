@@ -52,6 +52,7 @@ extension MovieFavoriteEventPatterns on MovieFavoriteEvent {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(FetchFavorites value)? fetchFavorites,
+    TResult Function(AddFavorite value)? addFavorite,
     TResult Function(RemoveFavorite value)? removeFavorite,
     required TResult orElse(),
   }) {
@@ -59,6 +60,8 @@ extension MovieFavoriteEventPatterns on MovieFavoriteEvent {
     switch (_that) {
       case FetchFavorites() when fetchFavorites != null:
         return fetchFavorites(_that);
+      case AddFavorite() when addFavorite != null:
+        return addFavorite(_that);
       case RemoveFavorite() when removeFavorite != null:
         return removeFavorite(_that);
       case _:
@@ -82,12 +85,15 @@ extension MovieFavoriteEventPatterns on MovieFavoriteEvent {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(FetchFavorites value) fetchFavorites,
+    required TResult Function(AddFavorite value) addFavorite,
     required TResult Function(RemoveFavorite value) removeFavorite,
   }) {
     final _that = this;
     switch (_that) {
       case FetchFavorites():
         return fetchFavorites(_that);
+      case AddFavorite():
+        return addFavorite(_that);
       case RemoveFavorite():
         return removeFavorite(_that);
     }
@@ -108,12 +114,15 @@ extension MovieFavoriteEventPatterns on MovieFavoriteEvent {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(FetchFavorites value)? fetchFavorites,
+    TResult? Function(AddFavorite value)? addFavorite,
     TResult? Function(RemoveFavorite value)? removeFavorite,
   }) {
     final _that = this;
     switch (_that) {
       case FetchFavorites() when fetchFavorites != null:
         return fetchFavorites(_that);
+      case AddFavorite() when addFavorite != null:
+        return addFavorite(_that);
       case RemoveFavorite() when removeFavorite != null:
         return removeFavorite(_that);
       case _:
@@ -136,6 +145,7 @@ extension MovieFavoriteEventPatterns on MovieFavoriteEvent {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? fetchFavorites,
+    TResult Function(MovieEntity movie)? addFavorite,
     TResult Function(String slug)? removeFavorite,
     required TResult orElse(),
   }) {
@@ -143,6 +153,8 @@ extension MovieFavoriteEventPatterns on MovieFavoriteEvent {
     switch (_that) {
       case FetchFavorites() when fetchFavorites != null:
         return fetchFavorites();
+      case AddFavorite() when addFavorite != null:
+        return addFavorite(_that.movie);
       case RemoveFavorite() when removeFavorite != null:
         return removeFavorite(_that.slug);
       case _:
@@ -166,12 +178,15 @@ extension MovieFavoriteEventPatterns on MovieFavoriteEvent {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() fetchFavorites,
+    required TResult Function(MovieEntity movie) addFavorite,
     required TResult Function(String slug) removeFavorite,
   }) {
     final _that = this;
     switch (_that) {
       case FetchFavorites():
         return fetchFavorites();
+      case AddFavorite():
+        return addFavorite(_that.movie);
       case RemoveFavorite():
         return removeFavorite(_that.slug);
     }
@@ -192,12 +207,15 @@ extension MovieFavoriteEventPatterns on MovieFavoriteEvent {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? fetchFavorites,
+    TResult? Function(MovieEntity movie)? addFavorite,
     TResult? Function(String slug)? removeFavorite,
   }) {
     final _that = this;
     switch (_that) {
       case FetchFavorites() when fetchFavorites != null:
         return fetchFavorites();
+      case AddFavorite() when addFavorite != null:
+        return addFavorite(_that.movie);
       case RemoveFavorite() when removeFavorite != null:
         return removeFavorite(_that.slug);
       case _:
@@ -223,6 +241,70 @@ class FetchFavorites implements MovieFavoriteEvent {
   @override
   String toString() {
     return 'MovieFavoriteEvent.fetchFavorites()';
+  }
+}
+
+/// @nodoc
+
+class AddFavorite implements MovieFavoriteEvent {
+  const AddFavorite(this.movie);
+
+  final MovieEntity movie;
+
+  /// Create a copy of MovieFavoriteEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $AddFavoriteCopyWith<AddFavorite> get copyWith =>
+      _$AddFavoriteCopyWithImpl<AddFavorite>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is AddFavorite &&
+            const DeepCollectionEquality().equals(other.movie, movie));
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(movie));
+
+  @override
+  String toString() {
+    return 'MovieFavoriteEvent.addFavorite(movie: $movie)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $AddFavoriteCopyWith<$Res>
+    implements $MovieFavoriteEventCopyWith<$Res> {
+  factory $AddFavoriteCopyWith(
+          AddFavorite value, $Res Function(AddFavorite) _then) =
+      _$AddFavoriteCopyWithImpl;
+  @useResult
+  $Res call({MovieEntity movie});
+}
+
+/// @nodoc
+class _$AddFavoriteCopyWithImpl<$Res> implements $AddFavoriteCopyWith<$Res> {
+  _$AddFavoriteCopyWithImpl(this._self, this._then);
+
+  final AddFavorite _self;
+  final $Res Function(AddFavorite) _then;
+
+  /// Create a copy of MovieFavoriteEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? movie = freezed,
+  }) {
+    return _then(AddFavorite(
+      freezed == movie
+          ? _self.movie
+          : movie // ignore: cast_nullable_to_non_nullable
+              as MovieEntity,
+    ));
   }
 }
 

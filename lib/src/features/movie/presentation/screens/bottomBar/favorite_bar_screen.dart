@@ -84,44 +84,54 @@ class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
 
               final sortedMovies = _sortMovies(state.favoriteMovies);
 
-              return Column(
-                children: [
-                  // Sort Options Bar
-                  _buildSortBar(colors, state.favoriteMovies.length),
-                  const SizedBox(height: 14),
+              return RefreshIndicator(
+                color: colors.accentPrimary,
+                onRefresh: () async {
+                  context
+                      .read<MovieFavoriteBloc>()
+                      .add(const MovieFavoriteEvent.fetchFavorites());
+                },
+                child: Column(
+                  children: [
+                    // Sort Options Bar
+                    _buildSortBar(colors, state.favoriteMovies.length),
+                    const SizedBox(height: 14),
 
-                  // Movie Grid
-                  Expanded(
-                    child: GridView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: sortedMovies.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisExtent: AppDimensions.movieCardHeight,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
+                    // Movie Grid
+                    Expanded(
+                      child: GridView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
+                        itemCount: sortedMovies.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisExtent: AppDimensions.movieCardHeight,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
+                        itemBuilder: (context, index) {
+                          final movie = sortedMovies[index];
+                          return CardMovie(
+                            movie: movie,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => InforMovieScreen(
+                                      slugMovie: movie.slug),
+                                ),
+                              );
+                            },
+                            removeFavorite: () =>
+                                _confirmRemove(context, movie.slug),
+                          );
+                        },
                       ),
-                      itemBuilder: (context, index) {
-                        final movie = sortedMovies[index];
-                        return CardMovie(
-                          movie: movie,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => InforMovieScreen(
-                                    slugMovie: movie.slug),
-                              ),
-                            );
-                          },
-                          removeFavorite: () =>
-                              _confirmRemove(context, movie.slug),
-                        );
-                      },
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             },
           ),
@@ -228,48 +238,61 @@ class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
 
   // ─── Empty State ────────────────────────────────────────
   Widget _buildEmptyState(AppColors colors) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  colors.accentGlow,
-                  colors.accentPrimary.withValues(alpha: 0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+    return RefreshIndicator(
+      color: colors.accentPrimary,
+      onRefresh: () async {
+        context
+            .read<MovieFavoriteBloc>()
+            .add(const MovieFavoriteEvent.fetchFavorites());
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.65,
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      colors.accentGlow,
+                      colors.accentPrimary.withValues(alpha: 0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Icon(
+                  Icons.favorite_border_rounded,
+                  color: colors.accentPrimary,
+                  size: 54,
+                ),
               ),
-            ),
-            child: Icon(
-              Icons.favorite_border_rounded,
-              color: colors.accentPrimary,
-              size: 54,
-            ),
+              const SizedBox(height: 20),
+              Text(
+                'Danh sách yêu thích trống',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  'Nhấn biểu tượng trái tim ở phim để lưu lại xem sau',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.bodySmall
+                      .copyWith(color: colors.textTertiary),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            'Danh sách yêu thích trống',
-            style: AppTextStyles.bodyLarge.copyWith(
-              color: colors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              'Nhấn biểu tượng trái tim ở phim để lưu lại xem sau',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodySmall
-                  .copyWith(color: colors.textTertiary),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

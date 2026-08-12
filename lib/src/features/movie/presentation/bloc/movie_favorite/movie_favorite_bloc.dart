@@ -13,7 +13,20 @@ class MovieFavoriteBloc extends Bloc<MovieFavoriteEvent, MovieFavoriteState> {
     required this.removeFavoriteMovieUseCase,
   }) : super(const MovieFavoriteState()) {
     on<FetchFavorites>(_onFetchFavorites);
+    on<AddFavorite>(_onAddFavorite);
     on<RemoveFavorite>(_onRemoveFavorite);
+  }
+
+  void _onAddFavorite(
+      AddFavorite event, Emitter<MovieFavoriteState> emit) {
+    final exists = state.favoriteMovies.any((m) => m.slug == event.movie.slug);
+    if (!exists) {
+      final updatedList = [event.movie, ...state.favoriteMovies];
+      emit(state.copyWith(
+        status: MovieFavoriteStatus.success,
+        favoriteMovies: updatedList,
+      ));
+    }
   }
 
   Future<void> _onFetchFavorites(

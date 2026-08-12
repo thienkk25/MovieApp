@@ -17,6 +17,8 @@ import 'package:movie_app/src/features/movie/presentation/bloc/movie_detail/movi
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_detail/movie_detail_state.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/watch_history/watch_history_bloc.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/watch_history/watch_history_event.dart';
+import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_bloc.dart';
+import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_event.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/watch_movie_screen.dart';
 
 class InforMovieScreen extends StatelessWidget {
@@ -257,9 +259,23 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
               size: 20,
             ),
           ),
-          onPressed: () => context
-              .read<MovieDetailBloc>()
-              .add(const MovieDetailEvent.toggleFavorite()),
+          onPressed: () {
+            final isFav = state.isFavorite;
+            context
+                .read<MovieDetailBloc>()
+                .add(const MovieDetailEvent.toggleFavorite());
+            try {
+              if (isFav) {
+                context
+                    .read<MovieFavoriteBloc>()
+                    .add(MovieFavoriteEvent.removeFavorite(movie.slug));
+              } else {
+                context
+                    .read<MovieFavoriteBloc>()
+                    .add(MovieFavoriteEvent.addFavorite(movie));
+              }
+            } catch (_) {}
+          },
         ),
       ],
     );
