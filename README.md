@@ -77,3 +77,14 @@ After v1.0.0
 - **State Caching with Riverpod**: Integrated Riverpod FutureProviders to cache category lists and movie listings, avoiding redundant API calls and increasing responsiveness.
 - **Critical Bug Fixes**: Fixed a bug causing duplicate Firestore watch history writes and resolved a notification/overlay race condition.
 - **Clean Folder Structure**: Cleaned up the folder hierarchy, renaming misspelled `compoments` directory to `components`.
+
+## What's New in v1.4.0
+
+- **Flutter BLoC & Clean Architecture**: Refactored core modules to BLoC Clean Architecture (`MovieHomeBloc`, `MovieDetailBloc`, `MovieSearchBloc`, `MovieFavoriteBloc`, `WatchHistoryBloc`).
+- **MediaKit Player Customization**: Enhanced video player with 1-tap stream refresh, quick seek (-10s / +10s), gesture controls (double tap, long press 2x speed-up), and portrait spacing optimizations.
+- **iPad & Tablet Responsive Grid**: Implemented `ResponsiveContext` extension for adaptive 2-to-6 column grid layouts across all movie views.
+- **Quick-Jump Episode History**: Added "Xem tiếp [Tên tập]" button in episode list header to automatically scroll to and play the last watched episode from Firestore/Local history.
+- **Rich Multi-Criteria Search & Filter**: Integrated 1-tap quick filter chips bar, active filter count badge (`Bộ lọc (N)`), and advanced multi-criteria filter bottom sheet (Category, Country, Language, Release Year, Sort By).
+- **Instant Real-Time Favorites**: Implemented 0ms optimistic RAM sync via `MovieFavoriteBloc` and custom app-wide `OverlayScreen` toast notifications.
+- **Google Sign-In GIS v7.x**: Upgraded to `GoogleSignIn.instance.authenticate()` with `serverClientId` configuration.
+- **100% Real API Data**: Added Vietnamese diacritic category slugification (`_slugifyCategory`) and fixed pagination link for newly updated movies section.
