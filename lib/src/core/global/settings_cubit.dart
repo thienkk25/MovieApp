@@ -8,39 +8,27 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    final themeStr = prefs.getString('themeMode') ?? 'auto';
-    final langInt = prefs.getInt('language') ?? 0;
     final notifEnabled = prefs.getBool('notification_enabled') ?? true;
 
-    ThemeMode mode = ThemeMode.system;
-    if (themeStr == 'light') mode = ThemeMode.light;
-    if (themeStr == 'dark') mode = ThemeMode.dark;
-
-    Locale loc = (langInt == 0) ? const Locale('vi', '') : const Locale('en', '');
-
     emit(state.copyWith(
-      themeMode: mode,
-      locale: loc,
+      themeMode: ThemeMode.dark,
+      locale: const Locale('vi', ''),
       isNotificationEnabled: notifEnabled,
     ));
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
     final prefs = await SharedPreferences.getInstance();
-    String str = 'auto';
-    if (mode == ThemeMode.light) str = 'light';
-    if (mode == ThemeMode.dark) str = 'dark';
-    await prefs.setString('themeMode', str);
+    await prefs.setString('themeMode', 'dark');
 
-    emit(state.copyWith(themeMode: mode));
+    emit(state.copyWith(themeMode: ThemeMode.dark));
   }
 
   Future<void> setLocale(Locale loc) async {
     final prefs = await SharedPreferences.getInstance();
-    int val = (loc.languageCode == 'vi') ? 0 : 1;
-    await prefs.setInt('language', val);
+    await prefs.setInt('language', 0);
 
-    emit(state.copyWith(locale: loc));
+    emit(state.copyWith(locale: const Locale('vi', '')));
   }
 
   Future<void> setNotificationEnabled(bool enabled) async {

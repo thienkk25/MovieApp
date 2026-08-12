@@ -79,7 +79,7 @@ Future<void> main() async {
 
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('vi', ''), Locale('en', '')],
+      supportedLocales: const [Locale('vi', '')],
       path: 'assets/translations',
       startLocale: const Locale('vi', ''),
       fallbackLocale: const Locale('vi', ''),
@@ -121,9 +121,9 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               title: 'Cinema',
               localizationsDelegates: context.localizationDelegates,
-              supportedLocales: context.supportedLocales,
-              locale: settingsState.locale,
-              themeMode: settingsState.themeMode,
+              supportedLocales: const [Locale('vi', '')],
+              locale: const Locale('vi', ''),
+              themeMode: ThemeMode.dark,
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(
                   seedColor: Colors.orange,

@@ -261,7 +261,7 @@ extension SettingsStatePatterns on SettingsState {
 
 class _SettingsState implements SettingsState {
   const _SettingsState(
-      {this.themeMode = ThemeMode.system,
+      {this.themeMode = ThemeMode.dark,
       this.locale = const Locale('vi', ''),
       this.isNotificationEnabled = true});
 

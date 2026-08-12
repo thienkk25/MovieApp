@@ -6,7 +6,7 @@ part 'settings_state.freezed.dart';
 @freezed
 abstract class SettingsState with _$SettingsState {
   const factory SettingsState({
-    @Default(ThemeMode.system) ThemeMode themeMode,
+    @Default(ThemeMode.dark) ThemeMode themeMode,
     @Default(Locale('vi', '')) Locale locale,
     @Default(true) bool isNotificationEnabled,
   }) = _SettingsState;

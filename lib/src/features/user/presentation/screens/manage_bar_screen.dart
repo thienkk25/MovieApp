@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -199,7 +198,7 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
 
                 const SizedBox(height: 30),
                 Text(
-                  'Cinema App v1.4.0 • Clean Architecture',
+                  'Movie App v1.4.0 • by Thien Nguyen',
                   style: AppTextStyles.caption
                       .copyWith(color: colors.textTertiary),
                 ),
@@ -244,24 +243,15 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
   }
 
   String _getThemeText(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.light:
-        return 'Giao diện Sáng';
-      case ThemeMode.dark:
-        return 'Giao diện Tối';
-      case ThemeMode.system:
-        return 'Theo hệ thống';
-    }
+    return 'Giao diện Tối (Mặc định)';
   }
 
   String _getLanguageText(Locale locale) {
-    if (locale.languageCode == 'vi') return 'Tiếng Việt';
-    return 'English';
+    return 'Tiếng Việt (Mặc định)';
   }
 
   // ─── Theme Modal ────────────────────────────────────────
   void _showThemeModal(BuildContext context) {
-    final cubit = context.read<SettingsCubit>();
     final colors = context.appColors;
 
     showModalBottomSheet(
@@ -278,31 +268,13 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
             children: [
               const SizedBox(height: 16),
               ListTile(
-                leading: Icon(Icons.light_mode_outlined,
-                    color: colors.accentPrimary),
-                title:
-                    Text('Sáng', style: TextStyle(color: colors.textPrimary)),
-                onTap: () {
-                  cubit.setThemeMode(ThemeMode.light);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
                 leading:
                     Icon(Icons.dark_mode_outlined, color: colors.accentPrimary),
-                title: Text('Tối', style: TextStyle(color: colors.textPrimary)),
-                onTap: () {
-                  cubit.setThemeMode(ThemeMode.dark);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.phone_android_rounded,
-                    color: colors.accentPrimary),
-                title: Text('Tự động theo hệ thống',
+                title: Text('Giao diện Tối (Đã chọn)',
                     style: TextStyle(color: colors.textPrimary)),
+                subtitle: Text('Ứng dụng hiện chỉ hỗ trợ Giao diện Tối',
+                    style: TextStyle(color: colors.textTertiary)),
                 onTap: () {
-                  cubit.setThemeMode(ThemeMode.system);
                   Navigator.pop(context);
                 },
               ),
@@ -316,7 +288,6 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
 
   // ─── Language Modal ─────────────────────────────────────
   void _showLanguageModal(BuildContext context) {
-    final cubit = context.read<SettingsCubit>();
     final colors = context.appColors;
 
     showModalBottomSheet(
@@ -334,23 +305,11 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Text('🇻🇳', style: TextStyle(fontSize: 24)),
-                title: Text('Tiếng Việt',
+                title: Text('Tiếng Việt (Đã chọn)',
                     style: TextStyle(color: colors.textPrimary)),
+                subtitle: Text('Ứng dụng hiện chỉ hỗ trợ Tiếng Việt',
+                    style: TextStyle(color: colors.textTertiary)),
                 onTap: () {
-                  const loc = Locale('vi', '');
-                  cubit.setLocale(loc);
-                  context.setLocale(loc);
-                  Navigator.pop(ctx);
-                },
-              ),
-              ListTile(
-                leading: const Text('🇺🇸', style: TextStyle(fontSize: 24)),
-                title: Text('English',
-                    style: TextStyle(color: colors.textPrimary)),
-                onTap: () {
-                  const loc = Locale('en', '');
-                  cubit.setLocale(loc);
-                  context.setLocale(loc);
                   Navigator.pop(ctx);
                 },
               ),
@@ -434,7 +393,7 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Cinema App',
+                'Movie App',
                 style: AppTextStyles.h3.copyWith(color: colors.textPrimary),
               ),
               const SizedBox(height: 4),
@@ -445,9 +404,7 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Ứng dụng xem phim miễn phí được xây dựng bằng Flutter '
-                'theo kiến trúc Clean Architecture. '
-                'Tất cả dữ liệu phim được cung cấp bởi PhimAPI.',
+                'Ứng dụng xem phim miễn phí. Tất cả dữ liệu phim được cung cấp bởi KKPhim.',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodySmall
                     .copyWith(color: colors.textSecondary),
