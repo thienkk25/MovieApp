@@ -16,6 +16,7 @@ import 'package:movie_app/src/features/movie/presentation/bloc/movie_detail/movi
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_detail/movie_detail_state.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/watch_history/watch_history_bloc.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/watch_history/watch_history_event.dart';
+import 'package:movie_app/src/features/movie/presentation/bloc/watch_history/watch_history_state.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_bloc.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_event.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/watch_movie_screen.dart';
@@ -46,6 +47,23 @@ class _InforMovieScreenContent extends StatefulWidget {
 class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
   bool isWatching = false;
   bool _isSynopsisExpanded = false;
+  final ScrollController _episodeScrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      context
+          .read<WatchHistoryBloc>()
+          .add(const WatchHistoryEvent.loadHistory());
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _episodeScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -570,130 +588,252 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
   // ─── Episode Section ────────────────────────────────────
   Widget _buildEpisodeSection(BuildContext context, MovieDetailState state,
       MovieDetailEntity detail, AppColors colors) {
-    final episodeCount =
-        detail.episodes[state.selectedServerIndex].serverData.length;
+    return BlocBuilder<WatchHistoryBloc, WatchHistoryState>(
+      builder: (context, historyState) {
+        final matches =
+            historyState.history.where((h) => h.slug == detail.movie.slug);
+        final historyEntry = matches.isEmpty ? null : matches.first;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colors.cardBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: colors.border.withValues(alpha: 0.8),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        final currentServer = detail.episodes[state.selectedServerIndex];
+        final episodeCount = currentServer.serverData.length;
+
+        final hasWatchedHistory = historyEntry != null &&
+            historyEntry.lastServerIndex < detail.episodes.length &&
+            historyEntry.lastEpisodeIndex <
+                detail.episodes[historyEntry.lastServerIndex].serverData.length;
+
+        final lastWatchedEpName = hasWatchedHistory
+            ? (historyEntry.lastEpisodeName.isNotEmpty
+                ? historyEntry.lastEpisodeName
+                : 'Tập ${historyEntry.lastEpisodeIndex + 1}')
+            : '';
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: colors.cardBg,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: colors.border.withValues(alpha: 0.8),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Danh sách tập',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colors.textPrimary,
-                ),
-              ),
-              if (detail.episodes.length > 1)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: colors.accentGlow,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                  ),
-                  child: Text(
-                    '${detail.episodes.length} Nguồn chiếu',
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: colors.accentPrimary,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Danh sách tập',
+                    style: AppTextStyles.bodyLarge.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: colors.textPrimary,
                     ),
                   ),
-                ),
-            ],
-          ),
+                  if (hasWatchedHistory)
+                    GestureDetector(
+                      onTap: () {
+                        context.read<MovieDetailBloc>().add(
+                              MovieDetailEvent.selectEpisode(
+                                serverIndex: historyEntry.lastServerIndex,
+                                episodeIndex: historyEntry.lastEpisodeIndex,
+                              ),
+                            );
+                        setState(() => isWatching = true);
+                        _saveToWatchHistory(
+                          context,
+                          episodeIndex: historyEntry.lastEpisodeIndex,
+                        );
 
-          // Server Selector Tabs
-          if (detail.episodes.length > 1) ...[
-            const SizedBox(height: 14),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(detail.episodes.length, (sIdx) {
-                  final serverName = detail.episodes[sIdx].serverName.isNotEmpty
-                      ? detail.episodes[sIdx].serverName
-                      : 'Nguồn ${sIdx + 1}';
-                  final isSelected = state.selectedServerIndex == sIdx;
+                        if (_episodeScrollController.hasClients) {
+                          final targetOffset =
+                              historyEntry.lastEpisodeIndex * 65.0;
+                          _episodeScrollController.animateTo(
+                            targetOffset.clamp(
+                              0.0,
+                              _episodeScrollController.position.maxScrollExtent,
+                            ),
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOutCubic,
+                          );
+                        }
 
-                  return GestureDetector(
-                    onTap: () {
-                      context
-                          .read<MovieDetailBloc>()
-                          .add(MovieDetailEvent.selectEpisode(
-                            serverIndex: sIdx,
-                            episodeIndex: 0,
-                          ));
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 8),
+                        OverlayScreen().showOverlay(
+                          context,
+                          'Đang phát tiếp $lastWatchedEpName',
+                          colors.accentPrimary,
+                          duration: 2,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              colors.accentPrimary,
+                              colors.accentSecondary,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.accentGlow,
+                              blurRadius: 10,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.play_circle_fill_rounded,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Xem tiếp $lastWatchedEpName',
+                              style: AppTextStyles.labelSmall.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else if (detail.episodes.length > 1)
+                    Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 7),
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? colors.accentPrimary
-                            : colors.inputFill,
+                        color: colors.accentGlow,
                         borderRadius:
-                            BorderRadius.circular(AppDimensions.radiusMd),
+                            BorderRadius.circular(AppDimensions.radiusSm),
                       ),
                       child: Text(
-                        serverName,
+                        '${detail.episodes.length} Nguồn chiếu',
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: isSelected
-                              ? colors.accentOnAccent
-                              : colors.textSecondary,
+                          color: colors.accentPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  );
-                }),
+                ],
               ),
-            ),
-          ],
 
-          const SizedBox(height: 16),
+              // Server Selector Tabs
+              if (detail.episodes.length > 1) ...[
+                const SizedBox(height: 14),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(detail.episodes.length, (sIdx) {
+                      final serverName =
+                          detail.episodes[sIdx].serverName.isNotEmpty
+                              ? detail.episodes[sIdx].serverName
+                              : 'Nguồn ${sIdx + 1}';
+                      final isSelected = state.selectedServerIndex == sIdx;
 
-          // Episode Grid/Horizontal scroll
-          if (episodeCount > 20)
-            // Horizontal scroll for many episodes
-            SizedBox(
-              height: 44,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: episodeCount,
-                itemBuilder: (context, idx) {
-                  return _buildEpisodeChip(context, state, detail, idx, colors);
-                },
-              ),
-            )
-          else
-            // Wrap grid for fewer episodes
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: List.generate(episodeCount, (idx) {
-                return _buildEpisodeChip(context, state, detail, idx, colors);
-              }),
-            ),
-        ],
-      ),
+                      return GestureDetector(
+                        onTap: () {
+                          context
+                              .read<MovieDetailBloc>()
+                              .add(MovieDetailEvent.selectEpisode(
+                                serverIndex: sIdx,
+                                episodeIndex: 0,
+                              ));
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 7),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? colors.accentPrimary
+                                : colors.inputFill,
+                            borderRadius:
+                                BorderRadius.circular(AppDimensions.radiusMd),
+                          ),
+                          child: Text(
+                            serverName,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: isSelected
+                                  ? colors.accentOnAccent
+                                  : colors.textSecondary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 16),
+
+              // Episode Grid/Horizontal scroll
+              if (episodeCount > 20)
+                SizedBox(
+                  height: 44,
+                  child: ListView.builder(
+                    controller: _episodeScrollController,
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: episodeCount,
+                    itemBuilder: (context, idx) {
+                      final isLastWatched = hasWatchedHistory &&
+                          state.selectedServerIndex ==
+                              historyEntry.lastServerIndex &&
+                          idx == historyEntry.lastEpisodeIndex;
+                      return _buildEpisodeChip(
+                        context,
+                        state,
+                        detail,
+                        idx,
+                        colors,
+                        isLastWatched: isLastWatched,
+                      );
+                    },
+                  ),
+                )
+              else
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: List.generate(episodeCount, (idx) {
+                    final isLastWatched = hasWatchedHistory &&
+                        state.selectedServerIndex ==
+                            historyEntry.lastServerIndex &&
+                        idx == historyEntry.lastEpisodeIndex;
+                    return _buildEpisodeChip(
+                      context,
+                      state,
+                      detail,
+                      idx,
+                      colors,
+                      isLastWatched: isLastWatched,
+                    );
+                  }),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildEpisodeChip(BuildContext context, MovieDetailState state,
-      MovieDetailEntity detail, int idx, AppColors colors) {
+  Widget _buildEpisodeChip(
+    BuildContext context,
+    MovieDetailState state,
+    MovieDetailEntity detail,
+    int idx,
+    AppColors colors, {
+    bool isLastWatched = false,
+  }) {
     final ep = detail.episodes[state.selectedServerIndex].serverData[idx];
     final isSelected = state.selectedEpisodeIndex == idx;
 
@@ -719,10 +859,16 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                   ],
                 )
               : null,
-          color: isSelected ? null : colors.inputFill,
+          color: isSelected
+              ? null
+              : (isLastWatched ? colors.accentGlow : colors.inputFill),
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           border: Border.all(
-            color: isSelected ? colors.accentPrimary : colors.border,
+            color: isSelected
+                ? colors.accentPrimary
+                : (isLastWatched
+                    ? colors.accentPrimary.withValues(alpha: 0.6)
+                    : colors.border),
           ),
           boxShadow: isSelected
               ? [
@@ -734,12 +880,29 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                 ]
               : null,
         ),
-        child: Text(
-          ep.name.isNotEmpty ? ep.name : 'Tập ${idx + 1}',
-          style: AppTextStyles.labelMedium.copyWith(
-            color: isSelected ? colors.accentOnAccent : colors.textPrimary,
-            fontWeight: FontWeight.bold,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isLastWatched && !isSelected) ...[
+              Icon(
+                Icons.history_rounded,
+                size: 14,
+                color: colors.accentPrimary,
+              ),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              ep.name.isNotEmpty ? ep.name : 'Tập ${idx + 1}',
+              style: AppTextStyles.labelMedium.copyWith(
+                color: isSelected
+                    ? colors.accentOnAccent
+                    : (isLastWatched
+                        ? colors.accentPrimary
+                        : colors.textPrimary),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );
