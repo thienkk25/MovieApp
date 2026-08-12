@@ -383,80 +383,101 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      // Google Button
-                      GestureDetector(
-                        onTap: () => context
-                            .read<AuthBloc>()
-                            .add(const AuthEvent.googleSignInRequested()),
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color: colors.inputFill,
-                            border: Border.all(
-                              color: colors.inputBorder,
-                              width: 1.2,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                      BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, state) {
+                          final isLoading = state.status == AuthStatus.loading;
+                          return Column(
                             children: [
-                              Image.asset(
-                                "assets/imgs/logo_google.png",
-                                height: 20,
-                                width: 20,
+                              // Google Button
+                              GestureDetector(
+                                onTap: isLoading
+                                    ? null
+                                    : () {
+                                        FocusScope.of(context)
+                                            .requestFocus(FocusNode());
+                                        context.read<AuthBloc>().add(
+                                            const AuthEvent
+                                                .googleSignInRequested());
+                                      },
+                                child: Container(
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    color: colors.inputFill,
+                                    border: Border.all(
+                                      color: colors.inputBorder,
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        "assets/imgs/logo_google.png",
+                                        height: 20,
+                                        width: 20,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        'Google',
+                                        style: TextStyle(
+                                          color: colors.textSecondary,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Google',
-                                style: TextStyle(
-                                  color: colors.textSecondary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                              const SizedBox(height: 12),
+                              // Facebook Button
+                              GestureDetector(
+                                onTap: isLoading
+                                    ? null
+                                    : () {
+                                        FocusScope.of(context)
+                                            .requestFocus(FocusNode());
+                                        context.read<AuthBloc>().add(
+                                            const AuthEvent
+                                                .facebookSignInRequested());
+                                      },
+                                child: Container(
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    color: const Color(0xFF1877F2)
+                                        .withValues(alpha: 0.1),
+                                    border: Border.all(
+                                      color: const Color(0xFF1877F2)
+                                          .withValues(alpha: 0.3),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        "assets/imgs/logo_facebook.png",
+                                        width: 20,
+                                        height: 20,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      const Text(
+                                        'Facebook',
+                                        style: TextStyle(
+                                          color: Color(0xFF1877F2),
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      // Facebook Button
-                      GestureDetector(
-                        onTap: () => context
-                            .read<AuthBloc>()
-                            .add(const AuthEvent.facebookSignInRequested()),
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color:
-                                const Color(0xFF1877F2).withValues(alpha: 0.1),
-                            border: Border.all(
-                              color: const Color(0xFF1877F2)
-                                  .withValues(alpha: 0.3),
-                              width: 1.2,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                "assets/imgs/logo_facebook.png",
-                                width: 20,
-                                height: 20,
-                              ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'Facebook',
-                                style: TextStyle(
-                                  color: Color(0xFF1877F2),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ].animate(interval: 80.ms).fade(duration: 350.ms).slideY(
                         begin: 0.1, end: 0, curve: Curves.easeOutQuad),

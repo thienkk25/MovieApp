@@ -81,6 +81,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final credential = await authRemoteDataSource.signInWithGoogle();
       final user = credential.user;
       if (user != null) {
+        try {
+          await userFirestoreDataSource.createUserDoc(user.uid, user.email ?? '');
+        } catch (_) {}
         return Right(UserEntity(
           uid: user.uid,
           email: user.email ?? '',
@@ -100,6 +103,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final credential = await authRemoteDataSource.signInWithFacebook();
       final user = credential.user;
       if (user != null) {
+        try {
+          await userFirestoreDataSource.createUserDoc(user.uid, user.email ?? '');
+        } catch (_) {}
         return Right(UserEntity(
           uid: user.uid,
           email: user.email ?? '',
