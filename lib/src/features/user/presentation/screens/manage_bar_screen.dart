@@ -1,15 +1,20 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/global/settings_cubit.dart';
 import '../../../../core/global/settings_state.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/animated_movie_header.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+
 import 'my_profile_screen.dart';
+import 'watch_history_screen.dart';
 
 class ManageBarScreen extends StatefulWidget {
   const ManageBarScreen({super.key});
@@ -40,19 +45,16 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
           elevation: 0,
           title: Text(
             'Tài khoản & Cài đặt',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.8,
-              color: colors.textPrimary,
-            ),
+            style:
+                AppTextStyles.appBarTitle.copyWith(color: colors.textPrimary),
           ),
           centerTitle: true,
         ),
         body: SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.md, vertical: 12),
             child: Column(
               children: [
                 // User Header Card
@@ -69,11 +71,11 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
 
                 const SizedBox(height: 20),
 
-                // Settings Group Tile Card
+                // Account Settings Group
                 Container(
                   decoration: BoxDecoration(
                     color: colors.cardBg,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
                     border: Border.all(color: colors.border),
                   ),
                   child: Column(
@@ -91,6 +93,33 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
                         },
                       ),
                       Divider(height: 1, color: colors.divider),
+                      _buildTile(
+                        icon: Icons.history_rounded,
+                        title: 'Lịch sử xem',
+                        subtitle: 'Các phim bạn đã xem gần đây',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const WatchHistoryScreen()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ).animate().fade(duration: 500.ms).slideY(begin: 0.1, end: 0),
+
+                const SizedBox(height: 16),
+
+                // App Settings Group
+                Container(
+                  decoration: BoxDecoration(
+                    color: colors.cardBg,
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
+                    border: Border.all(color: colors.border),
+                  ),
+                  child: Column(
+                    children: [
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, settingsState) {
                           return _buildTile(
@@ -101,7 +130,17 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
                           );
                         },
                       ),
-
+                      Divider(height: 1, color: colors.divider),
+                      BlocBuilder<SettingsCubit, SettingsState>(
+                        builder: (context, settingsState) {
+                          return _buildTile(
+                            icon: Icons.language_rounded,
+                            title: 'Ngôn ngữ',
+                            subtitle: _getLanguageText(settingsState.locale),
+                            onTap: () => _showLanguageModal(context),
+                          );
+                        },
+                      ),
                       Divider(height: 1, color: colors.divider),
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, settingsState) {
@@ -115,9 +154,16 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
                           );
                         },
                       ),
+                      Divider(height: 1, color: colors.divider),
+                      _buildTile(
+                        icon: Icons.info_outline_rounded,
+                        title: 'Về ứng dụng',
+                        subtitle: 'Phiên bản, giấy phép, thông tin',
+                        onTap: () => _showAboutDialog(context),
+                      ),
                     ],
                   ),
-                ).animate().fade(duration: 500.ms).slideY(begin: 0.1, end: 0),
+                ).animate().fade(duration: 600.ms).slideY(begin: 0.1, end: 0),
 
                 const SizedBox(height: 16),
 
@@ -125,7 +171,7 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: colors.cardBg,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
                     border: Border.all(color: colors.border),
                   ),
                   child: ListTile(
@@ -134,22 +180,19 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.redAccent.withValues(alpha: 0.1),
+                        color: colors.error.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.logout_rounded,
-                          color: Colors.redAccent, size: 20),
+                      child: Icon(Icons.logout_rounded,
+                          color: colors.error, size: 20),
                     ),
-                    title: const Text(
+                    title: Text(
                       'Đăng xuất',
-                      style: TextStyle(
-                        color: Colors.redAccent,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
+                      style: AppTextStyles.labelLarge
+                          .copyWith(color: colors.error),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded,
-                        color: Colors.redAccent),
+                    trailing:
+                        Icon(Icons.chevron_right_rounded, color: colors.error),
                     onTap: () => _confirmLogout(context),
                   ),
                 ),
@@ -157,7 +200,8 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
                 const SizedBox(height: 30),
                 Text(
                   'Cinema App v1.4.0 • Clean Architecture',
-                  style: TextStyle(color: colors.textTertiary, fontSize: 12),
+                  style: AppTextStyles.caption
+                      .copyWith(color: colors.textTertiary),
                 ),
                 const SizedBox(height: 80),
               ],
@@ -180,22 +224,18 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.amber.withValues(alpha: 0.1),
+          color: colors.accentGlow,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: Colors.amber, size: 20),
+        child: Icon(icon, color: colors.accentPrimary, size: 20),
       ),
       title: Text(
         title,
-        style: TextStyle(
-          color: colors.textPrimary,
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-        ),
+        style: AppTextStyles.labelLarge.copyWith(color: colors.textPrimary),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(color: colors.textTertiary, fontSize: 12),
+        style: AppTextStyles.caption.copyWith(color: colors.textTertiary),
       ),
       trailing: Icon(Icons.chevron_right_rounded,
           color: colors.iconInactive, size: 20),
@@ -214,6 +254,12 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
     }
   }
 
+  String _getLanguageText(Locale locale) {
+    if (locale.languageCode == 'vi') return 'Tiếng Việt';
+    return 'English';
+  }
+
+  // ─── Theme Modal ────────────────────────────────────────
   void _showThemeModal(BuildContext context) {
     final cubit = context.read<SettingsCubit>();
     final colors = context.appColors;
@@ -222,7 +268,8 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
       context: context,
       backgroundColor: colors.sheetBg,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppDimensions.sheetRadius)),
       ),
       builder: (context) {
         return SafeArea(
@@ -231,8 +278,8 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
             children: [
               const SizedBox(height: 16),
               ListTile(
-                leading:
-                    const Icon(Icons.light_mode_outlined, color: Colors.amber),
+                leading: Icon(Icons.light_mode_outlined,
+                    color: colors.accentPrimary),
                 title:
                     Text('Sáng', style: TextStyle(color: colors.textPrimary)),
                 onTap: () {
@@ -242,7 +289,7 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
               ),
               ListTile(
                 leading:
-                    const Icon(Icons.dark_mode_outlined, color: Colors.amber),
+                    Icon(Icons.dark_mode_outlined, color: colors.accentPrimary),
                 title: Text('Tối', style: TextStyle(color: colors.textPrimary)),
                 onTap: () {
                   cubit.setThemeMode(ThemeMode.dark);
@@ -250,8 +297,8 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.phone_android_rounded,
-                    color: Colors.amber),
+                leading: Icon(Icons.phone_android_rounded,
+                    color: colors.accentPrimary),
                 title: Text('Tự động theo hệ thống',
                     style: TextStyle(color: colors.textPrimary)),
                 onTap: () {
@@ -267,8 +314,55 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
     );
   }
 
+  // ─── Language Modal ─────────────────────────────────────
+  void _showLanguageModal(BuildContext context) {
+    final cubit = context.read<SettingsCubit>();
+    final colors = context.appColors;
 
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colors.sheetBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppDimensions.sheetRadius)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Text('🇻🇳', style: TextStyle(fontSize: 24)),
+                title: Text('Tiếng Việt',
+                    style: TextStyle(color: colors.textPrimary)),
+                onTap: () {
+                  const loc = Locale('vi', '');
+                  cubit.setLocale(loc);
+                  context.setLocale(loc);
+                  Navigator.pop(ctx);
+                },
+              ),
+              ListTile(
+                leading: const Text('🇺🇸', style: TextStyle(fontSize: 24)),
+                title: Text('English',
+                    style: TextStyle(color: colors.textPrimary)),
+                onTap: () {
+                  const loc = Locale('en', '');
+                  cubit.setLocale(loc);
+                  context.setLocale(loc);
+                  Navigator.pop(ctx);
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
+  // ─── Notification Modal ─────────────────────────────────
   void _showNotificationModal(BuildContext context) {
     final cubit = context.read<SettingsCubit>();
     final colors = context.appColors;
@@ -277,7 +371,8 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
       context: context,
       backgroundColor: colors.sheetBg,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppDimensions.sheetRadius)),
       ),
       builder: (context) {
         return SafeArea(
@@ -309,6 +404,74 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
     );
   }
 
+  // ─── About Dialog ───────────────────────────────────────
+  void _showAboutDialog(BuildContext context) {
+    final colors = context.appColors;
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: colors.dialogBg,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusXl)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      colors.accentPrimary,
+                      colors.accentSecondary,
+                    ],
+                  ),
+                ),
+                child: Icon(Icons.movie_creation_rounded,
+                    color: colors.accentOnAccent, size: 32),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Cinema App',
+                style: AppTextStyles.h3.copyWith(color: colors.textPrimary),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Phiên bản 1.4.0',
+                style: AppTextStyles.bodySmall
+                    .copyWith(color: colors.textTertiary),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Ứng dụng xem phim miễn phí được xây dựng bằng Flutter '
+                'theo kiến trúc Clean Architecture. '
+                'Tất cả dữ liệu phim được cung cấp bởi PhimAPI.',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodySmall
+                    .copyWith(color: colors.textSecondary),
+              ),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  showLicensePage(context: context);
+                },
+                child: Text(
+                  'Xem giấy phép nguồn mở',
+                  style: AppTextStyles.labelMedium
+                      .copyWith(color: colors.accentPrimary),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Confirm Logout ─────────────────────────────────────
   void _confirmLogout(BuildContext context) {
     final colors = context.appColors;
 
@@ -316,19 +479,18 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
       context: context,
       builder: (contextDialog) => Dialog(
         backgroundColor: colors.dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusXl)),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.logout_rounded,
-                  color: Colors.redAccent, size: 40),
+              Icon(Icons.logout_rounded, color: colors.error, size: 40),
               const SizedBox(height: 16),
               Text(
                 'Đăng xuất tài khoản?',
-                style: TextStyle(
-                  fontSize: 18,
+                style: AppTextStyles.bodyLarge.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colors.textPrimary,
                 ),
@@ -336,7 +498,8 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
               const SizedBox(height: 8),
               Text(
                 'Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?',
-                style: TextStyle(fontSize: 13, color: colors.textSecondary),
+                style: AppTextStyles.bodySmall
+                    .copyWith(color: colors.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -352,7 +515,7 @@ class _ManageBarScreenState extends State<ManageBarScreen> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: colors.error,
                       ),
                       onPressed: () {
                         Navigator.pop(contextDialog);

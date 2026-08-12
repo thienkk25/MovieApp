@@ -36,13 +36,22 @@ class MovieHomeBloc extends Bloc<MovieHomeEvent, MovieHomeState> {
     final heroList = movies.take(5).toList();
     final newlyList = movies;
 
-    final singleRes = await getCategoryMoviesUseCase(
-        const CategoryMoviesParams(type: 'Phim Lẻ'));
-    final dramaRes = await getCategoryMoviesUseCase(
-        const CategoryMoviesParams(type: 'Phim Bộ'));
+    // Fetch all sections in parallel
+    final results = await Future.wait([
+      getCategoryMoviesUseCase(
+          const CategoryMoviesParams(type: 'Phim Lẻ')),
+      getCategoryMoviesUseCase(
+          const CategoryMoviesParams(type: 'Phim Bộ')),
+      getCategoryMoviesUseCase(
+          const CategoryMoviesParams(type: 'Hoạt Hình')),
+      getCategoryMoviesUseCase(
+          const CategoryMoviesParams(type: 'TV Shows')),
+    ]);
 
-    final singleList = singleRes.getOrElse(() => []);
-    final dramaList = dramaRes.getOrElse(() => []);
+    final singleList = results[0].getOrElse(() => []);
+    final dramaList = results[1].getOrElse(() => []);
+    final cartoonList = results[2].getOrElse(() => []);
+    final tvShowsList = results[3].getOrElse(() => []);
 
     emit(state.copyWith(
       status: MovieHomeStatus.success,
@@ -50,18 +59,26 @@ class MovieHomeBloc extends Bloc<MovieHomeEvent, MovieHomeState> {
       newlyUpdatedMovies: newlyList,
       singleMovies: singleList,
       dramaMovies: dramaList,
+      cartoonMovies: cartoonList,
+      tvShowsMovies: tvShowsList,
     ));
   }
 
   Future<void> _onSelectCategory(
       SelectCategory event, Emitter<MovieHomeState> emit) async {
-    emit(state.copyWith(selectedCategorySlug: event.categorySlug));
+    emit(state.copyWith(
+      selectedCategorySlug: event.categorySlug,
+      isCategoryLoading: true,
+    ));
 
     final categoryResult = await getCategoryMoviesUseCase(
         CategoryMoviesParams(type: event.categorySlug));
 
     final catMovies = categoryResult.getOrElse(() => []);
-    emit(state.copyWith(categoryMovies: catMovies));
+    emit(state.copyWith(
+      categoryMovies: catMovies,
+      isCategoryLoading: false,
+    ));
   }
 
   Future<void> _onLoadMoreNewlyUpdated(

@@ -2,11 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_app/src/core/configs/overlay_screen.dart';
 import 'package:movie_app/src/core/theme/app_colors.dart';
+import 'package:movie_app/src/core/theme/app_dimensions.dart';
+import 'package:movie_app/src/core/theme/app_text_styles.dart';
 import 'package:movie_app/src/core/widgets/card_movie.dart';
+import 'package:movie_app/src/features/movie/domain/entities/movie_entity.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_bloc.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_event.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_state.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
+
+enum FavoriteSortType {
+  newest,
+  nameAZ,
+  year,
+}
 
 class FavoriteBarScreen extends StatefulWidget {
   const FavoriteBarScreen({super.key});
@@ -16,10 +25,28 @@ class FavoriteBarScreen extends StatefulWidget {
 }
 
 class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
+  FavoriteSortType _sortType = FavoriteSortType.newest;
+
   @override
   void initState() {
     super.initState();
-    context.read<MovieFavoriteBloc>().add(const MovieFavoriteEvent.fetchFavorites());
+    context
+        .read<MovieFavoriteBloc>()
+        .add(const MovieFavoriteEvent.fetchFavorites());
+  }
+
+  List<MovieEntity> _sortMovies(List<MovieEntity> movies) {
+    final sorted = List<MovieEntity>.from(movies);
+    switch (_sortType) {
+      case FavoriteSortType.newest:
+        return sorted; // Already sorted by add time from Firestore
+      case FavoriteSortType.nameAZ:
+        sorted.sort((a, b) => a.name.compareTo(b.name));
+        return sorted;
+      case FavoriteSortType.year:
+        sorted.sort((a, b) => b.year.compareTo(a.year));
+        return sorted;
+    }
   }
 
   @override
@@ -33,90 +60,68 @@ class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
         elevation: 0,
         title: Text(
           'Phim yêu thích',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.8,
-            color: colors.textPrimary,
-          ),
+          style: AppTextStyles.appBarTitle.copyWith(color: colors.textPrimary),
         ),
         centerTitle: true,
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.md, vertical: 12),
           child: BlocBuilder<MovieFavoriteBloc, MovieFavoriteState>(
             builder: (context, state) {
               if (state.status == MovieFavoriteStatus.loading &&
                   state.favoriteMovies.isEmpty) {
-                return const Center(
-                  child: CircularProgressIndicator(color: Colors.amber),
+                return Center(
+                  child: CircularProgressIndicator(
+                      color: colors.accentPrimary),
                 );
               }
 
               if (state.favoriteMovies.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.amber.withValues(alpha: 0.1),
-                        ),
-                        child: const Icon(
-                          Icons.favorite_border_rounded,
-                          color: Colors.amber,
-                          size: 54,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Danh sách yêu thích trống',
-                        style: TextStyle(
-                          color: colors.textSecondary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Nhấn biểu tượng trái tim ở phim để lưu lại xem sau',
-                        style: TextStyle(
-                          color: colors.textTertiary,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                return _buildEmptyState(colors);
               }
 
-              return GridView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: state.favoriteMovies.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisExtent: 250,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemBuilder: (context, index) {
-                  final movie = state.favoriteMovies[index];
-                  return CardMovie(
-                    movie: movie,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => InforMovieScreen(slugMovie: movie.slug),
-                        ),
-                      );
-                    },
-                    removeFavorite: () => _confirmRemove(context, movie.slug),
-                  );
-                },
+              final sortedMovies = _sortMovies(state.favoriteMovies);
+
+              return Column(
+                children: [
+                  // Sort Options Bar
+                  _buildSortBar(colors, state.favoriteMovies.length),
+                  const SizedBox(height: 14),
+
+                  // Movie Grid
+                  Expanded(
+                    child: GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: sortedMovies.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisExtent: AppDimensions.movieCardHeight,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemBuilder: (context, index) {
+                        final movie = sortedMovies[index];
+                        return CardMovie(
+                          movie: movie,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => InforMovieScreen(
+                                    slugMovie: movie.slug),
+                              ),
+                            );
+                          },
+                          removeFavorite: () =>
+                              _confirmRemove(context, movie.slug),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -125,6 +130,151 @@ class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
     );
   }
 
+  // ─── Sort Bar ───────────────────────────────────────────
+  Widget _buildSortBar(AppColors colors, int count) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          '$count phim đã lưu',
+          style: AppTextStyles.labelLarge.copyWith(color: colors.textPrimary),
+        ),
+        PopupMenuButton<FavoriteSortType>(
+          initialValue: _sortType,
+          color: colors.sheetBg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          ),
+          onSelected: (type) => setState(() => _sortType = type),
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: colors.cardBg,
+              borderRadius:
+                  BorderRadius.circular(AppDimensions.radiusMd),
+              border: Border.all(color: colors.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.sort_rounded,
+                    size: 16, color: colors.accentPrimary),
+                const SizedBox(width: 6),
+                Text(
+                  _sortLabel,
+                  style: AppTextStyles.labelSmall
+                      .copyWith(color: colors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: FavoriteSortType.newest,
+              child: Row(
+                children: [
+                  Icon(Icons.schedule_rounded,
+                      size: 16, color: colors.textSecondary),
+                  const SizedBox(width: 8),
+                  Text('Mới thêm',
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: colors.textPrimary)),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: FavoriteSortType.nameAZ,
+              child: Row(
+                children: [
+                  Icon(Icons.sort_by_alpha_rounded,
+                      size: 16, color: colors.textSecondary),
+                  const SizedBox(width: 8),
+                  Text('Tên A-Z',
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: colors.textPrimary)),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: FavoriteSortType.year,
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_today_rounded,
+                      size: 16, color: colors.textSecondary),
+                  const SizedBox(width: 8),
+                  Text('Năm sản xuất',
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: colors.textPrimary)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String get _sortLabel {
+    switch (_sortType) {
+      case FavoriteSortType.newest:
+        return 'Mới thêm';
+      case FavoriteSortType.nameAZ:
+        return 'Tên A-Z';
+      case FavoriteSortType.year:
+        return 'Năm';
+    }
+  }
+
+  // ─── Empty State ────────────────────────────────────────
+  Widget _buildEmptyState(AppColors colors) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  colors.accentGlow,
+                  colors.accentPrimary.withValues(alpha: 0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Icon(
+              Icons.favorite_border_rounded,
+              color: colors.accentPrimary,
+              size: 54,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Danh sách yêu thích trống',
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: colors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Nhấn biểu tượng trái tim ở phim để lưu lại xem sau',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodySmall
+                  .copyWith(color: colors.textTertiary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Remove Confirm Dialog ──────────────────────────────
   void _confirmRemove(BuildContext context, String slug) {
     final colors = context.appColors;
     showDialog(
@@ -135,19 +285,18 @@ class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: colors.dialogBg,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
             border: Border.all(color: colors.border),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.delete_outline_rounded,
-                  color: Colors.redAccent, size: 40),
+              Icon(Icons.delete_outline_rounded,
+                  color: colors.error, size: 40),
               const SizedBox(height: 12),
               Text(
                 'Bỏ yêu thích phim này?',
-                style: TextStyle(
-                  fontSize: 18,
+                style: AppTextStyles.bodyLarge.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colors.textPrimary,
                 ),
@@ -157,7 +306,8 @@ class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Navigator.pop(contextDialog),
+                      onPressed: () =>
+                          Navigator.pop(contextDialog),
                       child: const Text('Hủy'),
                     ),
                   ),
@@ -165,15 +315,14 @@ class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: colors.error,
                       ),
                       onPressed: () {
                         Navigator.pop(contextDialog);
-                        context
-                            .read<MovieFavoriteBloc>()
-                            .add(MovieFavoriteEvent.removeFavorite(slug));
-                        OverlayScreen().showOverlay(
-                            context, 'Đã xóa khỏi danh sách yêu thích', Colors.green);
+                        context.read<MovieFavoriteBloc>().add(
+                            MovieFavoriteEvent.removeFavorite(slug));
+                        OverlayScreen().showOverlay(context,
+                            'Đã xóa khỏi danh sách yêu thích', colors.success);
                       },
                       child: const Text('Xóa',
                           style: TextStyle(color: Colors.white)),

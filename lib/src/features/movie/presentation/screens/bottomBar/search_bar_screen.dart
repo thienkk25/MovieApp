@@ -2,11 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_app/src/core/theme/app_colors.dart';
+import 'package:movie_app/src/core/theme/app_dimensions.dart';
+import 'package:movie_app/src/core/theme/app_text_styles.dart';
 import 'package:movie_app/src/core/widgets/card_movie.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_search/movie_search_bloc.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_search/movie_search_event.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_search/movie_search_state.dart';
 import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchBarScreen extends StatefulWidget {
   const SearchBarScreen({super.key});
@@ -18,11 +21,27 @@ class SearchBarScreen extends StatefulWidget {
 class _SearchBarScreenState extends State<SearchBarScreen> {
   final TextEditingController searchController = TextEditingController();
   Timer? timer;
+  List<String> _recentSearches = [];
+
+  static const String _recentSearchKey = 'recent_searches';
+  static const int _maxRecentSearches = 10;
+
+  final List<_TrendingTag> _trendingTags = const [
+    _TrendingTag('Hành Động', Icons.local_fire_department_rounded),
+    _TrendingTag('Tình Cảm', Icons.favorite_rounded),
+    _TrendingTag('Kinh Dị', Icons.dark_mode_rounded),
+    _TrendingTag('Hài Hước', Icons.emoji_emotions_rounded),
+    _TrendingTag('Viễn Tưởng', Icons.rocket_launch_rounded),
+    _TrendingTag('Hoạt Hình', Icons.animation_rounded),
+    _TrendingTag('Chiến Tranh', Icons.shield_rounded),
+    _TrendingTag('Tâm Lý', Icons.psychology_rounded),
+  ];
 
   @override
   void initState() {
     super.initState();
     context.read<MovieSearchBloc>().add(const MovieSearchEvent.executeSearch());
+    _loadRecentSearches();
   }
 
   @override
@@ -30,6 +49,43 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
     searchController.dispose();
     timer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _loadRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _recentSearches = prefs.getStringList(_recentSearchKey) ?? [];
+    });
+  }
+
+  Future<void> _saveSearchKeyword(String keyword) async {
+    if (keyword.trim().isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    _recentSearches.remove(keyword);
+    _recentSearches.insert(0, keyword);
+    if (_recentSearches.length > _maxRecentSearches) {
+      _recentSearches = _recentSearches.take(_maxRecentSearches).toList();
+    }
+    await prefs.setStringList(_recentSearchKey, _recentSearches);
+    setState(() {});
+  }
+
+  Future<void> _clearRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_recentSearchKey);
+    setState(() => _recentSearches = []);
+  }
+
+  void _performSearch(String keyword) {
+    searchController.text = keyword;
+    searchController.selection = TextSelection.fromPosition(
+      TextPosition(offset: keyword.length),
+    );
+    _saveSearchKeyword(keyword);
+    context
+        .read<MovieSearchBloc>()
+        .add(MovieSearchEvent.keywordChanged(keyword.trim()));
+    context.read<MovieSearchBloc>().add(const MovieSearchEvent.executeSearch());
   }
 
   @override
@@ -43,77 +99,22 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
         elevation: 0,
         title: Text(
           'Tìm kiếm phim',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.8,
-            color: colors.textPrimary,
-          ),
+          style: AppTextStyles.appBarTitle.copyWith(color: colors.textPrimary),
         ),
         centerTitle: true,
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.md, vertical: 12),
           child: Column(
             children: [
               // Search Input Bar
-              Container(
-                height: 52,
-                decoration: BoxDecoration(
-                  color: colors.inputFill,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: colors.inputBorder),
-                ),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 16),
-                    const Icon(Icons.search_rounded, color: Colors.amber, size: 22),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        controller: searchController,
-                        style: TextStyle(color: colors.textPrimary, fontSize: 15),
-                        decoration: InputDecoration(
-                          hintText: 'Nhập tên phim, diễn viên...',
-                          hintStyle: TextStyle(color: colors.inputHint, fontSize: 14),
-                          border: InputBorder.none,
-                          isDense: true,
-                        ),
-                        onChanged: (val) {
-                          if (timer?.isActive ?? false) timer?.cancel();
-                          timer = Timer(const Duration(milliseconds: 400), () {
-                            context.read<MovieSearchBloc>().add(
-                                  MovieSearchEvent.keywordChanged(val.trim()),
-                                );
-                            context
-                                .read<MovieSearchBloc>()
-                                .add(const MovieSearchEvent.executeSearch());
-                          });
-                        },
-                      ),
-                    ),
-                    if (searchController.text.isNotEmpty)
-                      IconButton(
-                        icon: Icon(Icons.clear_rounded,
-                            color: colors.iconSecondary, size: 20),
-                        onPressed: () {
-                          searchController.clear();
-                          context.read<MovieSearchBloc>().add(
-                                const MovieSearchEvent.keywordChanged(''),
-                              );
-                          context
-                              .read<MovieSearchBloc>()
-                              .add(const MovieSearchEvent.executeSearch());
-                        },
-                      ),
-                  ],
-                ),
-              ),
+              _buildSearchBar(colors),
 
               const SizedBox(height: 14),
 
-              // Filter Action Button
+              // Filter Action Row
               BlocBuilder<MovieSearchBloc, MovieSearchState>(
                 builder: (context, state) {
                   final hasFilter = state.filter.isNotEmpty;
@@ -125,8 +126,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                         state.searchResults.isNotEmpty
                             ? 'Kết quả (${state.searchResults.length})'
                             : 'Gợi ý phim mới',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: AppTextStyles.bodyLarge.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colors.textPrimary,
                         ),
@@ -137,12 +137,14 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: hasFilter
-                                ? Colors.amber.withValues(alpha: 0.15)
-                                : colors.cardBg,
-                            borderRadius: BorderRadius.circular(12),
+                            color:
+                                hasFilter ? colors.accentGlow : colors.cardBg,
+                            borderRadius:
+                                BorderRadius.circular(AppDimensions.radiusMd),
                             border: Border.all(
-                              color: hasFilter ? Colors.amber : colors.border,
+                              color: hasFilter
+                                  ? colors.accentPrimary
+                                  : colors.border,
                             ),
                           ),
                           child: Row(
@@ -150,16 +152,17 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                               Icon(
                                 Icons.tune_rounded,
                                 size: 16,
-                                color: hasFilter ? Colors.amber : colors.textSecondary,
+                                color: hasFilter
+                                    ? colors.accentPrimary
+                                    : colors.textSecondary,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 'Bộ lọc',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color:
-                                      hasFilter ? Colors.amber : colors.textSecondary,
+                                style: AppTextStyles.labelMedium.copyWith(
+                                  color: hasFilter
+                                      ? colors.accentPrimary
+                                      : colors.textSecondary,
                                 ),
                               ),
                             ],
@@ -173,35 +176,26 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
 
               const SizedBox(height: 14),
 
-              // Search Results / Suggested Grid
+              // Content Area
               Expanded(
                 child: BlocBuilder<MovieSearchBloc, MovieSearchState>(
                   builder: (context, state) {
+                    // Show recent + trending when search is empty
+                    if (searchController.text.isEmpty &&
+                        state.searchResults.isEmpty) {
+                      return _buildDiscoveryView(colors);
+                    }
+
                     if (state.status == MovieSearchStatus.loading) {
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.amber),
+                      return Center(
+                        child: CircularProgressIndicator(
+                            color: colors.accentPrimary),
                       );
                     }
 
                     if (state.searchResults.isEmpty &&
                         state.status == MovieSearchStatus.success) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.search_off_rounded,
-                                size: 64, color: colors.iconInactive),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Không tìm thấy phim phù hợp',
-                              style: TextStyle(
-                                color: colors.textTertiary,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+                      return _buildEmptyState(colors);
                     }
 
                     return GridView.builder(
@@ -210,7 +204,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        mainAxisExtent: 250,
+                        mainAxisExtent: AppDimensions.movieCardHeight,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
                       ),
@@ -240,6 +234,216 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
     );
   }
 
+  // ─── Search Bar ─────────────────────────────────────────
+  Widget _buildSearchBar(AppColors colors) {
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: colors.inputFill,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        border: Border.all(color: colors.inputBorder),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 16),
+          Icon(Icons.search_rounded, color: colors.accentPrimary, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              controller: searchController,
+              style:
+                  AppTextStyles.bodyMedium.copyWith(color: colors.textPrimary),
+              decoration: InputDecoration(
+                hintText: 'Nhập tên phim, diễn viên...',
+                hintStyle:
+                    AppTextStyles.bodyMedium.copyWith(color: colors.inputHint),
+                border: InputBorder.none,
+                isDense: true,
+              ),
+              onChanged: (val) {
+                setState(() {}); // Rebuild for clear button
+                if (timer?.isActive ?? false) timer?.cancel();
+                timer = Timer(const Duration(milliseconds: 400), () {
+                  if (val.trim().isNotEmpty) {
+                    _saveSearchKeyword(val.trim());
+                  }
+                  context.read<MovieSearchBloc>().add(
+                        MovieSearchEvent.keywordChanged(val.trim()),
+                      );
+                  context
+                      .read<MovieSearchBloc>()
+                      .add(const MovieSearchEvent.executeSearch());
+                });
+              },
+              onSubmitted: (val) {
+                if (val.trim().isNotEmpty) {
+                  _saveSearchKeyword(val.trim());
+                }
+              },
+            ),
+          ),
+          if (searchController.text.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.clear_rounded,
+                  color: colors.iconSecondary, size: 20),
+              onPressed: () {
+                searchController.clear();
+                setState(() {});
+                context.read<MovieSearchBloc>().add(
+                      const MovieSearchEvent.keywordChanged(''),
+                    );
+                context
+                    .read<MovieSearchBloc>()
+                    .add(const MovieSearchEvent.executeSearch());
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Discovery View (Recent + Trending) ─────────────────
+  Widget _buildDiscoveryView(AppColors colors) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Recent Searches
+          if (_recentSearches.isNotEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Tìm kiếm gần đây',
+                  style: AppTextStyles.labelLarge
+                      .copyWith(color: colors.textPrimary),
+                ),
+                GestureDetector(
+                  onTap: _clearRecentSearches,
+                  child: Text(
+                    'Xóa tất cả',
+                    style: AppTextStyles.labelSmall
+                        .copyWith(color: colors.accentPrimary),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _recentSearches.map((keyword) {
+                return GestureDetector(
+                  onTap: () => _performSearch(keyword),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: colors.cardBg,
+                      borderRadius:
+                          BorderRadius.circular(AppDimensions.pillRadius),
+                      border: Border.all(color: colors.border),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.history_rounded,
+                            size: 14, color: colors.iconSecondary),
+                        const SizedBox(width: 6),
+                        Text(
+                          keyword,
+                          style: AppTextStyles.labelSmall
+                              .copyWith(color: colors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+          ],
+
+          // Trending Tags
+          Text(
+            'Thể loại phổ biến 🔥',
+            style: AppTextStyles.labelLarge.copyWith(color: colors.textPrimary),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: _trendingTags.map((tag) {
+              return GestureDetector(
+                onTap: () => _performSearch(tag.label),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colors.cardBg,
+                        colors.surfaceBg,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                    border: Border.all(color: colors.border),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(tag.icon, size: 16, color: colors.accentPrimary),
+                      const SizedBox(width: 8),
+                      Text(
+                        tag.label,
+                        style: AppTextStyles.labelMedium
+                            .copyWith(color: colors.textPrimary),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Empty State ────────────────────────────────────────
+  Widget _buildEmptyState(AppColors colors) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colors.accentGlow,
+            ),
+            child: Icon(Icons.search_off_rounded,
+                size: 48, color: colors.accentPrimary),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Không tìm thấy phim phù hợp',
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: colors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Thử tìm với từ khóa khác',
+            style: AppTextStyles.bodySmall.copyWith(color: colors.textTertiary),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showFilterModal(BuildContext context) {
     final bloc = context.read<MovieSearchBloc>();
     final colors = context.appColors;
@@ -249,7 +453,8 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
       isScrollControlled: true,
       backgroundColor: colors.sheetBg,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppDimensions.sheetRadius)),
       ),
       builder: (context) {
         return BlocProvider.value(
@@ -290,8 +495,8 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
         children: [
           Center(
             child: Container(
-              width: 40,
-              height: 4,
+              width: AppDimensions.sheetHandleWidth,
+              height: AppDimensions.sheetHandleHeight,
               decoration: BoxDecoration(
                 color: colors.iconInactive,
                 borderRadius: BorderRadius.circular(2),
@@ -301,11 +506,7 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
           const SizedBox(height: 16),
           Text(
             'Lọc phim nâng cao',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: colors.textPrimary,
-            ),
+            style: AppTextStyles.h3.copyWith(color: colors.textPrimary),
           ),
           const SizedBox(height: 20),
 
@@ -313,12 +514,12 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
           DropdownButtonFormField<int>(
             initialValue: selectedYear,
             dropdownColor: colors.sheetBg,
-            style: TextStyle(color: colors.textPrimary, fontSize: 15),
+            style: AppTextStyles.bodyMedium.copyWith(color: colors.textPrimary),
             decoration: InputDecoration(
               labelText: 'Năm phát hành',
-              labelStyle: const TextStyle(color: Colors.amber),
+              labelStyle: TextStyle(color: colors.accentPrimary),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
                 borderSide: BorderSide(color: colors.border),
               ),
             ),
@@ -351,21 +552,23 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
                     Navigator.pop(context);
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.amber),
+                    side: BorderSide(color: colors.accentPrimary),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius:
+                          BorderRadius.circular(AppDimensions.radiusLg),
                     ),
                   ),
-                  child: const Text('Đặt lại',
-                      style: TextStyle(color: Colors.amber)),
+                  child: Text('Đặt lại',
+                      style: TextStyle(color: colors.accentPrimary)),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    final currentFilter = context.read<MovieSearchBloc>().state.filter;
+                    final currentFilter =
+                        context.read<MovieSearchBloc>().state.filter;
                     context.read<MovieSearchBloc>().add(
                           MovieSearchEvent.filterChanged(
                             currentFilter.copyWith(
@@ -379,15 +582,17 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amber,
+                    backgroundColor: colors.accentPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius:
+                          BorderRadius.circular(AppDimensions.radiusLg),
                     ),
                   ),
-                  child: const Text('Áp dụng',
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
+                  child: Text('Áp dụng',
+                      style: AppTextStyles.buttonSmall.copyWith(
+                        color: colors.accentOnAccent,
+                      )),
                 ),
               ),
             ],
@@ -396,4 +601,12 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
       ),
     );
   }
+}
+
+/// Helper model for trending tags
+class _TrendingTag {
+  final String label;
+  final IconData icon;
+
+  const _TrendingTag(this.label, this.icon);
 }

@@ -9,6 +9,7 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../../features/movie/data/datasources/movie_firestore_data_source.dart';
 import '../../features/movie/data/datasources/movie_remote_data_source.dart';
+import '../../features/movie/data/datasources/watch_history_local_data_source.dart';
 import '../../features/movie/data/repositories/movie_repository_impl.dart';
 import '../../features/movie/domain/repositories/movie_repository.dart';
 import '../../features/movie/domain/usecases/movie_usecases.dart';
@@ -16,6 +17,7 @@ import '../../features/movie/presentation/bloc/movie_detail/movie_detail_bloc.da
 import '../../features/movie/presentation/bloc/movie_favorite/movie_favorite_bloc.dart';
 import '../../features/movie/presentation/bloc/movie_home/movie_home_bloc.dart';
 import '../../features/movie/presentation/bloc/movie_search/movie_search_bloc.dart';
+import '../../features/movie/presentation/bloc/watch_history/watch_history_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -28,6 +30,7 @@ Future<void> initDI() async {
   sl.registerLazySingleton<UserFirestoreDataSource>(() => UserFirestoreDataSourceImpl());
   sl.registerLazySingleton<MovieRemoteDataSource>(() => MovieRemoteDataSourceImpl());
   sl.registerLazySingleton<MovieFirestoreDataSource>(() => MovieFirestoreDataSourceImpl());
+  sl.registerLazySingleton<WatchHistoryLocalDataSource>(() => WatchHistoryLocalDataSourceImpl());
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(
@@ -90,5 +93,9 @@ Future<void> initDI() async {
   sl.registerFactory(() => MovieFavoriteBloc(
         getFavoriteMoviesUseCase: sl(),
         removeFavoriteMovieUseCase: sl(),
+      ));
+
+  sl.registerFactory(() => WatchHistoryBloc(
+        localDataSource: sl(),
       ));
 }

@@ -29,6 +29,22 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color iconSecondary;
   final Color iconInactive;
 
+  // ─── Accent ───────────────────────────────────────────
+  final Color accentPrimary;
+  final Color accentSecondary;
+  final Color accentGlow;
+  final Color accentOnAccent;
+
+  // ─── Status ───────────────────────────────────────────
+  final Color success;
+  final Color warning;
+  final Color error;
+  final Color info;
+
+  // ─── Special Badges ───────────────────────────────────
+  final Color ratingColor;
+  final Color newBadgeColor;
+
   // ─── Gradient Colors ──────────────────────────────────
   final Color gradientStart;
   final Color gradientMid;
@@ -80,6 +96,16 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.iconPrimary,
     required this.iconSecondary,
     required this.iconInactive,
+    required this.accentPrimary,
+    required this.accentSecondary,
+    required this.accentGlow,
+    required this.accentOnAccent,
+    required this.success,
+    required this.warning,
+    required this.error,
+    required this.info,
+    required this.ratingColor,
+    required this.newBadgeColor,
     required this.gradientStart,
     required this.gradientMid,
     required this.gradientEnd,
@@ -118,13 +144,26 @@ class AppColors extends ThemeExtension<AppColors> {
     textTertiary: Colors.white30,
     textOnAccent: Colors.white,
 
-    border: Color(0x14FFFFFF),       // Colors.white.withValues(alpha:0.08)
-    borderLight: Color(0x1FFFFFFF),  // Colors.white.withValues(alpha:0.12)
-    divider: Color(0x1AFFFFFF),      // Colors.white10
+    border: Color(0x14FFFFFF),
+    borderLight: Color(0x1FFFFFFF),
+    divider: Color(0x1AFFFFFF),
 
     iconPrimary: Colors.white,
     iconSecondary: Colors.white70,
     iconInactive: Colors.white30,
+
+    accentPrimary: Color(0xFFFFC107),     // Amber
+    accentSecondary: Color(0xFFFF8F00),   // Deep Orange
+    accentGlow: Color(0x66FFC107),        // Amber 40% for glow
+    accentOnAccent: Color(0xFF000000),    // Black text on amber
+
+    success: Color(0xFF00E676),
+    warning: Color(0xFFFFAB40),
+    error: Color(0xFFFF5252),
+    info: Color(0xFF448AFF),
+
+    ratingColor: Color(0xFFFFD740),
+    newBadgeColor: Color(0xFFFF5252),
 
     gradientStart: Color(0xFF090A0F),
     gradientMid: Color(0xFF141622),
@@ -134,14 +173,14 @@ class AppColors extends ThemeExtension<AppColors> {
     headerGradientMid: Color(0xFF203A43),
     headerGradientEnd: Color(0xFF2C5364),
 
-    inputFill: Color(0x0AFFFFFF),    // Colors.white.withValues(alpha:0.04)
-    inputBorder: Color(0x14FFFFFF),  // Colors.white.withValues(alpha:0.08)
+    inputFill: Color(0x0AFFFFFF),
+    inputBorder: Color(0x14FFFFFF),
     inputText: Colors.white,
-    inputHint: Color(0x61FFFFFF),    // Colors.white38
+    inputHint: Color(0x61FFFFFF),
 
-    navBarBg: Color(0xD90F111D),     // Color(0xFF0F111D).withValues(alpha:0.85)
+    navBarBg: Color(0xD90F111D),
     navBarBorder: Color(0x14FFFFFF),
-    navBarShadow: Color(0x80000000), // Colors.black.withValues(alpha:0.5)
+    navBarShadow: Color(0x80000000),
 
     sheetBg: Color(0xFF141622),
     dialogBg: Color(0xFF1A1C29),
@@ -178,6 +217,19 @@ class AppColors extends ThemeExtension<AppColors> {
     iconSecondary: Color(0xFF5A5D72),
     iconInactive: Color(0xFFB0B3C5),
 
+    accentPrimary: Color(0xFFFF9800),     // Orange
+    accentSecondary: Color(0xFFE65100),   // Deep Orange
+    accentGlow: Color(0x33FF9800),        // Orange 20% for glow
+    accentOnAccent: Colors.white,
+
+    success: Color(0xFF2E7D32),
+    warning: Color(0xFFEF6C00),
+    error: Color(0xFFC62828),
+    info: Color(0xFF1565C0),
+
+    ratingColor: Color(0xFFFFA000),
+    newBadgeColor: Color(0xFFE53935),
+
     gradientStart: Color(0xFFF5F6FA),
     gradientMid: Color(0xFFFFFFFF),
     gradientEnd: Color(0xFFF5F6FA),
@@ -191,9 +243,9 @@ class AppColors extends ThemeExtension<AppColors> {
     inputText: Color(0xFF1A1C2B),
     inputHint: Color(0xFFB0B3C5),
 
-    navBarBg: Color(0xF2FFFFFF),     // white with slight transparency
+    navBarBg: Color(0xF2FFFFFF),
     navBarBorder: Color(0xFFE0E2EB),
-    navBarShadow: Color(0x1A000000), // lighter shadow
+    navBarShadow: Color(0x1A000000),
 
     sheetBg: Color(0xFFFFFFFF),
     dialogBg: Color(0xFFFFFFFF),
@@ -224,6 +276,16 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? iconPrimary,
     Color? iconSecondary,
     Color? iconInactive,
+    Color? accentPrimary,
+    Color? accentSecondary,
+    Color? accentGlow,
+    Color? accentOnAccent,
+    Color? success,
+    Color? warning,
+    Color? error,
+    Color? info,
+    Color? ratingColor,
+    Color? newBadgeColor,
     Color? gradientStart,
     Color? gradientMid,
     Color? gradientEnd,
@@ -262,6 +324,16 @@ class AppColors extends ThemeExtension<AppColors> {
       iconPrimary: iconPrimary ?? this.iconPrimary,
       iconSecondary: iconSecondary ?? this.iconSecondary,
       iconInactive: iconInactive ?? this.iconInactive,
+      accentPrimary: accentPrimary ?? this.accentPrimary,
+      accentSecondary: accentSecondary ?? this.accentSecondary,
+      accentGlow: accentGlow ?? this.accentGlow,
+      accentOnAccent: accentOnAccent ?? this.accentOnAccent,
+      success: success ?? this.success,
+      warning: warning ?? this.warning,
+      error: error ?? this.error,
+      info: info ?? this.info,
+      ratingColor: ratingColor ?? this.ratingColor,
+      newBadgeColor: newBadgeColor ?? this.newBadgeColor,
       gradientStart: gradientStart ?? this.gradientStart,
       gradientMid: gradientMid ?? this.gradientMid,
       gradientEnd: gradientEnd ?? this.gradientEnd,
@@ -308,6 +380,16 @@ class AppColors extends ThemeExtension<AppColors> {
       iconPrimary: Color.lerp(iconPrimary, other.iconPrimary, t)!,
       iconSecondary: Color.lerp(iconSecondary, other.iconSecondary, t)!,
       iconInactive: Color.lerp(iconInactive, other.iconInactive, t)!,
+      accentPrimary: Color.lerp(accentPrimary, other.accentPrimary, t)!,
+      accentSecondary: Color.lerp(accentSecondary, other.accentSecondary, t)!,
+      accentGlow: Color.lerp(accentGlow, other.accentGlow, t)!,
+      accentOnAccent: Color.lerp(accentOnAccent, other.accentOnAccent, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      error: Color.lerp(error, other.error, t)!,
+      info: Color.lerp(info, other.info, t)!,
+      ratingColor: Color.lerp(ratingColor, other.ratingColor, t)!,
+      newBadgeColor: Color.lerp(newBadgeColor, other.newBadgeColor, t)!,
       gradientStart: Color.lerp(gradientStart, other.gradientStart, t)!,
       gradientMid: Color.lerp(gradientMid, other.gradientMid, t)!,
       gradientEnd: Color.lerp(gradientEnd, other.gradientEnd, t)!,
@@ -342,3 +424,4 @@ class AppColors extends ThemeExtension<AppColors> {
 extension AppColorsExtension on BuildContext {
   AppColors get appColors => Theme.of(this).extension<AppColors>()!;
 }
+

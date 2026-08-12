@@ -27,6 +27,8 @@ import 'src/features/movie/data/datasources/movie_remote_data_source.dart';
 import 'src/features/movie/presentation/bloc/movie_favorite/movie_favorite_bloc.dart';
 import 'src/features/movie/presentation/bloc/movie_home/movie_home_bloc.dart';
 import 'src/features/movie/presentation/bloc/movie_search/movie_search_bloc.dart';
+import 'src/features/movie/presentation/bloc/watch_history/watch_history_bloc.dart';
+import 'src/features/movie/presentation/bloc/watch_history/watch_history_event.dart';
 import 'src/features/movie/presentation/screens/home_screen.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -90,6 +92,9 @@ Future<void> main() async {
           BlocProvider(create: (_) => sl<MovieHomeBloc>()),
           BlocProvider(create: (_) => sl<MovieSearchBloc>()),
           BlocProvider(create: (_) => sl<MovieFavoriteBloc>()),
+          BlocProvider(
+              create: (_) => sl<WatchHistoryBloc>()
+                ..add(const WatchHistoryEvent.loadHistory())),
         ],
         child: const MyApp(),
       ),

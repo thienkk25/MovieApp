@@ -19,9 +19,12 @@ mixin _$MovieHomeState {
   List<MovieEntity> get newlyUpdatedMovies;
   List<MovieEntity> get singleMovies;
   List<MovieEntity> get dramaMovies;
+  List<MovieEntity> get cartoonMovies;
+  List<MovieEntity> get tvShowsMovies;
   List<MovieEntity> get categoryMovies;
   String get selectedCategorySlug;
   int get currentPage;
+  bool get isCategoryLoading;
   String? get errorMessage;
 
   /// Create a copy of MovieHomeState
@@ -47,11 +50,17 @@ mixin _$MovieHomeState {
             const DeepCollectionEquality()
                 .equals(other.dramaMovies, dramaMovies) &&
             const DeepCollectionEquality()
+                .equals(other.cartoonMovies, cartoonMovies) &&
+            const DeepCollectionEquality()
+                .equals(other.tvShowsMovies, tvShowsMovies) &&
+            const DeepCollectionEquality()
                 .equals(other.categoryMovies, categoryMovies) &&
             (identical(other.selectedCategorySlug, selectedCategorySlug) ||
                 other.selectedCategorySlug == selectedCategorySlug) &&
             (identical(other.currentPage, currentPage) ||
                 other.currentPage == currentPage) &&
+            (identical(other.isCategoryLoading, isCategoryLoading) ||
+                other.isCategoryLoading == isCategoryLoading) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage));
   }
@@ -64,14 +73,17 @@ mixin _$MovieHomeState {
       const DeepCollectionEquality().hash(newlyUpdatedMovies),
       const DeepCollectionEquality().hash(singleMovies),
       const DeepCollectionEquality().hash(dramaMovies),
+      const DeepCollectionEquality().hash(cartoonMovies),
+      const DeepCollectionEquality().hash(tvShowsMovies),
       const DeepCollectionEquality().hash(categoryMovies),
       selectedCategorySlug,
       currentPage,
+      isCategoryLoading,
       errorMessage);
 
   @override
   String toString() {
-    return 'MovieHomeState(status: $status, heroCarousel: $heroCarousel, newlyUpdatedMovies: $newlyUpdatedMovies, singleMovies: $singleMovies, dramaMovies: $dramaMovies, categoryMovies: $categoryMovies, selectedCategorySlug: $selectedCategorySlug, currentPage: $currentPage, errorMessage: $errorMessage)';
+    return 'MovieHomeState(status: $status, heroCarousel: $heroCarousel, newlyUpdatedMovies: $newlyUpdatedMovies, singleMovies: $singleMovies, dramaMovies: $dramaMovies, cartoonMovies: $cartoonMovies, tvShowsMovies: $tvShowsMovies, categoryMovies: $categoryMovies, selectedCategorySlug: $selectedCategorySlug, currentPage: $currentPage, isCategoryLoading: $isCategoryLoading, errorMessage: $errorMessage)';
   }
 }
 
@@ -87,9 +99,12 @@ abstract mixin class $MovieHomeStateCopyWith<$Res> {
       List<MovieEntity> newlyUpdatedMovies,
       List<MovieEntity> singleMovies,
       List<MovieEntity> dramaMovies,
+      List<MovieEntity> cartoonMovies,
+      List<MovieEntity> tvShowsMovies,
       List<MovieEntity> categoryMovies,
       String selectedCategorySlug,
       int currentPage,
+      bool isCategoryLoading,
       String? errorMessage});
 }
 
@@ -111,9 +126,12 @@ class _$MovieHomeStateCopyWithImpl<$Res>
     Object? newlyUpdatedMovies = null,
     Object? singleMovies = null,
     Object? dramaMovies = null,
+    Object? cartoonMovies = null,
+    Object? tvShowsMovies = null,
     Object? categoryMovies = null,
     Object? selectedCategorySlug = null,
     Object? currentPage = null,
+    Object? isCategoryLoading = null,
     Object? errorMessage = freezed,
   }) {
     return _then(_self.copyWith(
@@ -137,6 +155,14 @@ class _$MovieHomeStateCopyWithImpl<$Res>
           ? _self.dramaMovies
           : dramaMovies // ignore: cast_nullable_to_non_nullable
               as List<MovieEntity>,
+      cartoonMovies: null == cartoonMovies
+          ? _self.cartoonMovies
+          : cartoonMovies // ignore: cast_nullable_to_non_nullable
+              as List<MovieEntity>,
+      tvShowsMovies: null == tvShowsMovies
+          ? _self.tvShowsMovies
+          : tvShowsMovies // ignore: cast_nullable_to_non_nullable
+              as List<MovieEntity>,
       categoryMovies: null == categoryMovies
           ? _self.categoryMovies
           : categoryMovies // ignore: cast_nullable_to_non_nullable
@@ -149,6 +175,10 @@ class _$MovieHomeStateCopyWithImpl<$Res>
           ? _self.currentPage
           : currentPage // ignore: cast_nullable_to_non_nullable
               as int,
+      isCategoryLoading: null == isCategoryLoading
+          ? _self.isCategoryLoading
+          : isCategoryLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
       errorMessage: freezed == errorMessage
           ? _self.errorMessage
           : errorMessage // ignore: cast_nullable_to_non_nullable
@@ -256,9 +286,12 @@ extension MovieHomeStatePatterns on MovieHomeState {
             List<MovieEntity> newlyUpdatedMovies,
             List<MovieEntity> singleMovies,
             List<MovieEntity> dramaMovies,
+            List<MovieEntity> cartoonMovies,
+            List<MovieEntity> tvShowsMovies,
             List<MovieEntity> categoryMovies,
             String selectedCategorySlug,
             int currentPage,
+            bool isCategoryLoading,
             String? errorMessage)?
         $default, {
     required TResult orElse(),
@@ -272,9 +305,12 @@ extension MovieHomeStatePatterns on MovieHomeState {
             _that.newlyUpdatedMovies,
             _that.singleMovies,
             _that.dramaMovies,
+            _that.cartoonMovies,
+            _that.tvShowsMovies,
             _that.categoryMovies,
             _that.selectedCategorySlug,
             _that.currentPage,
+            _that.isCategoryLoading,
             _that.errorMessage);
       case _:
         return orElse();
@@ -302,9 +338,12 @@ extension MovieHomeStatePatterns on MovieHomeState {
             List<MovieEntity> newlyUpdatedMovies,
             List<MovieEntity> singleMovies,
             List<MovieEntity> dramaMovies,
+            List<MovieEntity> cartoonMovies,
+            List<MovieEntity> tvShowsMovies,
             List<MovieEntity> categoryMovies,
             String selectedCategorySlug,
             int currentPage,
+            bool isCategoryLoading,
             String? errorMessage)
         $default,
   ) {
@@ -317,9 +356,12 @@ extension MovieHomeStatePatterns on MovieHomeState {
             _that.newlyUpdatedMovies,
             _that.singleMovies,
             _that.dramaMovies,
+            _that.cartoonMovies,
+            _that.tvShowsMovies,
             _that.categoryMovies,
             _that.selectedCategorySlug,
             _that.currentPage,
+            _that.isCategoryLoading,
             _that.errorMessage);
       case _:
         throw StateError('Unexpected subclass');
@@ -346,9 +388,12 @@ extension MovieHomeStatePatterns on MovieHomeState {
             List<MovieEntity> newlyUpdatedMovies,
             List<MovieEntity> singleMovies,
             List<MovieEntity> dramaMovies,
+            List<MovieEntity> cartoonMovies,
+            List<MovieEntity> tvShowsMovies,
             List<MovieEntity> categoryMovies,
             String selectedCategorySlug,
             int currentPage,
+            bool isCategoryLoading,
             String? errorMessage)?
         $default,
   ) {
@@ -361,9 +406,12 @@ extension MovieHomeStatePatterns on MovieHomeState {
             _that.newlyUpdatedMovies,
             _that.singleMovies,
             _that.dramaMovies,
+            _that.cartoonMovies,
+            _that.tvShowsMovies,
             _that.categoryMovies,
             _that.selectedCategorySlug,
             _that.currentPage,
+            _that.isCategoryLoading,
             _that.errorMessage);
       case _:
         return null;
@@ -380,14 +428,19 @@ class _MovieHomeState implements MovieHomeState {
       final List<MovieEntity> newlyUpdatedMovies = const [],
       final List<MovieEntity> singleMovies = const [],
       final List<MovieEntity> dramaMovies = const [],
+      final List<MovieEntity> cartoonMovies = const [],
+      final List<MovieEntity> tvShowsMovies = const [],
       final List<MovieEntity> categoryMovies = const [],
       this.selectedCategorySlug = 'hanh-dong',
       this.currentPage = 1,
+      this.isCategoryLoading = false,
       this.errorMessage})
       : _heroCarousel = heroCarousel,
         _newlyUpdatedMovies = newlyUpdatedMovies,
         _singleMovies = singleMovies,
         _dramaMovies = dramaMovies,
+        _cartoonMovies = cartoonMovies,
+        _tvShowsMovies = tvShowsMovies,
         _categoryMovies = categoryMovies;
 
   @override
@@ -430,6 +483,24 @@ class _MovieHomeState implements MovieHomeState {
     return EqualUnmodifiableListView(_dramaMovies);
   }
 
+  final List<MovieEntity> _cartoonMovies;
+  @override
+  @JsonKey()
+  List<MovieEntity> get cartoonMovies {
+    if (_cartoonMovies is EqualUnmodifiableListView) return _cartoonMovies;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_cartoonMovies);
+  }
+
+  final List<MovieEntity> _tvShowsMovies;
+  @override
+  @JsonKey()
+  List<MovieEntity> get tvShowsMovies {
+    if (_tvShowsMovies is EqualUnmodifiableListView) return _tvShowsMovies;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_tvShowsMovies);
+  }
+
   final List<MovieEntity> _categoryMovies;
   @override
   @JsonKey()
@@ -445,6 +516,9 @@ class _MovieHomeState implements MovieHomeState {
   @override
   @JsonKey()
   final int currentPage;
+  @override
+  @JsonKey()
+  final bool isCategoryLoading;
   @override
   final String? errorMessage;
 
@@ -471,11 +545,17 @@ class _MovieHomeState implements MovieHomeState {
             const DeepCollectionEquality()
                 .equals(other._dramaMovies, _dramaMovies) &&
             const DeepCollectionEquality()
+                .equals(other._cartoonMovies, _cartoonMovies) &&
+            const DeepCollectionEquality()
+                .equals(other._tvShowsMovies, _tvShowsMovies) &&
+            const DeepCollectionEquality()
                 .equals(other._categoryMovies, _categoryMovies) &&
             (identical(other.selectedCategorySlug, selectedCategorySlug) ||
                 other.selectedCategorySlug == selectedCategorySlug) &&
             (identical(other.currentPage, currentPage) ||
                 other.currentPage == currentPage) &&
+            (identical(other.isCategoryLoading, isCategoryLoading) ||
+                other.isCategoryLoading == isCategoryLoading) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage));
   }
@@ -488,14 +568,17 @@ class _MovieHomeState implements MovieHomeState {
       const DeepCollectionEquality().hash(_newlyUpdatedMovies),
       const DeepCollectionEquality().hash(_singleMovies),
       const DeepCollectionEquality().hash(_dramaMovies),
+      const DeepCollectionEquality().hash(_cartoonMovies),
+      const DeepCollectionEquality().hash(_tvShowsMovies),
       const DeepCollectionEquality().hash(_categoryMovies),
       selectedCategorySlug,
       currentPage,
+      isCategoryLoading,
       errorMessage);
 
   @override
   String toString() {
-    return 'MovieHomeState(status: $status, heroCarousel: $heroCarousel, newlyUpdatedMovies: $newlyUpdatedMovies, singleMovies: $singleMovies, dramaMovies: $dramaMovies, categoryMovies: $categoryMovies, selectedCategorySlug: $selectedCategorySlug, currentPage: $currentPage, errorMessage: $errorMessage)';
+    return 'MovieHomeState(status: $status, heroCarousel: $heroCarousel, newlyUpdatedMovies: $newlyUpdatedMovies, singleMovies: $singleMovies, dramaMovies: $dramaMovies, cartoonMovies: $cartoonMovies, tvShowsMovies: $tvShowsMovies, categoryMovies: $categoryMovies, selectedCategorySlug: $selectedCategorySlug, currentPage: $currentPage, isCategoryLoading: $isCategoryLoading, errorMessage: $errorMessage)';
   }
 }
 
@@ -513,9 +596,12 @@ abstract mixin class _$MovieHomeStateCopyWith<$Res>
       List<MovieEntity> newlyUpdatedMovies,
       List<MovieEntity> singleMovies,
       List<MovieEntity> dramaMovies,
+      List<MovieEntity> cartoonMovies,
+      List<MovieEntity> tvShowsMovies,
       List<MovieEntity> categoryMovies,
       String selectedCategorySlug,
       int currentPage,
+      bool isCategoryLoading,
       String? errorMessage});
 }
 
@@ -537,9 +623,12 @@ class __$MovieHomeStateCopyWithImpl<$Res>
     Object? newlyUpdatedMovies = null,
     Object? singleMovies = null,
     Object? dramaMovies = null,
+    Object? cartoonMovies = null,
+    Object? tvShowsMovies = null,
     Object? categoryMovies = null,
     Object? selectedCategorySlug = null,
     Object? currentPage = null,
+    Object? isCategoryLoading = null,
     Object? errorMessage = freezed,
   }) {
     return _then(_MovieHomeState(
@@ -563,6 +652,14 @@ class __$MovieHomeStateCopyWithImpl<$Res>
           ? _self._dramaMovies
           : dramaMovies // ignore: cast_nullable_to_non_nullable
               as List<MovieEntity>,
+      cartoonMovies: null == cartoonMovies
+          ? _self._cartoonMovies
+          : cartoonMovies // ignore: cast_nullable_to_non_nullable
+              as List<MovieEntity>,
+      tvShowsMovies: null == tvShowsMovies
+          ? _self._tvShowsMovies
+          : tvShowsMovies // ignore: cast_nullable_to_non_nullable
+              as List<MovieEntity>,
       categoryMovies: null == categoryMovies
           ? _self._categoryMovies
           : categoryMovies // ignore: cast_nullable_to_non_nullable
@@ -575,6 +672,10 @@ class __$MovieHomeStateCopyWithImpl<$Res>
           ? _self.currentPage
           : currentPage // ignore: cast_nullable_to_non_nullable
               as int,
+      isCategoryLoading: null == isCategoryLoading
+          ? _self.isCategoryLoading
+          : isCategoryLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
       errorMessage: freezed == errorMessage
           ? _self.errorMessage
           : errorMessage // ignore: cast_nullable_to_non_nullable

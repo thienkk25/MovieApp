@@ -13,9 +13,12 @@ abstract class MovieHomeState with _$MovieHomeState {
     @Default([]) List<MovieEntity> newlyUpdatedMovies,
     @Default([]) List<MovieEntity> singleMovies,
     @Default([]) List<MovieEntity> dramaMovies,
+    @Default([]) List<MovieEntity> cartoonMovies,
+    @Default([]) List<MovieEntity> tvShowsMovies,
     @Default([]) List<MovieEntity> categoryMovies,
     @Default('hanh-dong') String selectedCategorySlug,
     @Default(1) int currentPage,
+    @Default(false) bool isCategoryLoading,
     String? errorMessage,
   }) = _MovieHomeState;
 }
