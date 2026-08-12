@@ -156,13 +156,15 @@ class _LoginScreenState extends State<LoginScreen> {
             _buildGlassDecoration(),
             SafeArea(
               child: Center(
-                child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: SingleChildScrollView(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                       const SizedBox(height: 10),
                       Center(
                         child: Column(
@@ -485,9 +487,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
+    ),
+  );
   }
 }

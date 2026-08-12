@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movie_app/src/core/di/injection_container.dart';
 import 'package:movie_app/src/core/theme/app_colors.dart';
+import 'package:movie_app/src/core/theme/app_dimensions.dart';
 import 'package:movie_app/src/core/widgets/card_movie.dart';
 import 'package:movie_app/src/core/widgets/shimmer_loading.dart';
 import 'package:movie_app/src/features/movie/domain/entities/movie_entity.dart';
@@ -141,9 +142,9 @@ class _ViewMoreScreenState extends State<ViewMoreScreen> {
                     padding: const EdgeInsets.all(16),
                     itemCount: movies.length,
                     gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisExtent: 250,
+                        SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: context.responsiveColumnCount,
+                      mainAxisExtent: AppDimensions.movieCardHeight,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),

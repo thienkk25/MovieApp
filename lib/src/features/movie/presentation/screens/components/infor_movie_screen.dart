@@ -290,8 +290,10 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
   // ─── Media Section ──────────────────────────────────────
   Widget _buildMediaSection(BuildContext context, MovieDetailState state,
       MovieDetailEntity detail, String imageUrl, AppColors colors) {
+    Widget mediaChild;
+
     if (isWatching && detail.episodes.isNotEmpty) {
-      return AspectRatio(
+      mediaChild = AspectRatio(
         aspectRatio: 16 / 9,
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -313,77 +315,84 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
           ),
         ),
       );
-    }
-
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.12),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.6),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+    } else {
+      mediaChild = AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.12),
             ),
-          ],
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.2),
-                    Colors.black.withValues(alpha: 0.65),
-                  ],
-                ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.6),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
-            ),
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() => isWatching = true);
-                  _saveToWatchHistory(context);
-                },
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        colors.accentPrimary,
-                        colors.accentSecondary,
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors.accentGlow,
-                        blurRadius: 25,
-                        spreadRadius: 6,
-                      ),
+            ],
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.2),
+                      Colors.black.withValues(alpha: 0.65),
                     ],
                   ),
-                  child: Icon(
-                    Icons.play_arrow_rounded,
-                    color: colors.accentOnAccent,
-                    size: 46,
+                ),
+              ),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() => isWatching = true);
+                    _saveToWatchHistory(context);
+                  },
+                  child: Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          colors.accentPrimary,
+                          colors.accentSecondary,
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colors.accentGlow,
+                          blurRadius: 25,
+                          spreadRadius: 6,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: colors.accentOnAccent,
+                      size: 46,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      );
+    }
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 860),
+        child: mediaChild,
       ),
     );
   }

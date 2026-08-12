@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 /// Centralized spacing, radius, and sizing tokens.
 ///
 /// Usage: `AppDimensions.md` for 16px spacing,
@@ -55,4 +57,18 @@ abstract final class AppDimensions {
   static const double sheetRadius = 24;
   static const double sheetHandleWidth = 40;
   static const double sheetHandleHeight = 4;
+}
+
+/// Extension for responsive screen size calculations (Phone, iPad, Tablet, Desktop)
+extension ResponsiveContext on BuildContext {
+  bool get isTablet => MediaQuery.of(this).size.width >= 600;
+  bool get isDesktop => MediaQuery.of(this).size.width >= 1024;
+
+  int get responsiveColumnCount {
+    final width = MediaQuery.of(this).size.width;
+    if (width < 600) return 2;
+    if (width < 900) return 4;
+    if (width < 1200) return 5;
+    return 6;
+  }
 }

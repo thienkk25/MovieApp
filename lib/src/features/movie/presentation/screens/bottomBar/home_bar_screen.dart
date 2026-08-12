@@ -563,8 +563,8 @@ class _HomeBarScreenState extends State<HomeBarScreen> {
           },
           childCount: state.categoryMovies.length,
         ),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: context.responsiveColumnCount,
           mainAxisExtent: AppDimensions.movieCardHeight,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,

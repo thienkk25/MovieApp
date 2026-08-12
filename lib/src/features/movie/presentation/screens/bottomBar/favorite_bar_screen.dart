@@ -105,8 +105,8 @@ class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
                         ),
                         itemCount: sortedMovies.length,
                         gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: context.responsiveColumnCount,
                           mainAxisExtent: AppDimensions.movieCardHeight,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
