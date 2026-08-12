@@ -344,8 +344,12 @@ class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
                         Navigator.pop(contextDialog);
                         context.read<MovieFavoriteBloc>().add(
                             MovieFavoriteEvent.removeFavorite(slug));
-                        OverlayScreen().showOverlay(context,
-                            'Đã xóa khỏi danh sách yêu thích', colors.success);
+                        OverlayScreen().showOverlay(
+                          context,
+                          'Đã xóa khỏi danh sách yêu thích',
+                          colors.error,
+                          duration: 2,
+                        );
                       },
                       child: const Text('Xóa',
                           style: TextStyle(color: Colors.white)),

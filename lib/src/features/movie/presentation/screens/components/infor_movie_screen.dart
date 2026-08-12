@@ -269,10 +269,22 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                 context
                     .read<MovieFavoriteBloc>()
                     .add(MovieFavoriteEvent.removeFavorite(movie.slug));
+                OverlayScreen().showOverlay(
+                  context,
+                  'Đã xóa khỏi danh sách yêu thích',
+                  colors.error,
+                  duration: 2,
+                );
               } else {
                 context
                     .read<MovieFavoriteBloc>()
                     .add(MovieFavoriteEvent.addFavorite(movie));
+                OverlayScreen().showOverlay(
+                  context,
+                  'Đã thêm vào danh sách yêu thích!',
+                  colors.success,
+                  duration: 2,
+                );
               }
             } catch (_) {}
           },
