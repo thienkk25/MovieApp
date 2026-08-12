@@ -52,19 +52,41 @@ class MovieDetailBloc extends Bloc<MovieDetailEvent, MovieDetailState> {
 
     // Fetch Related Movies by Category / Type
     List<MovieEntity> relatedList = [];
-    final categoryType = detail.movie.categories.isNotEmpty
-        ? detail.movie.categories.first
-        : (detail.movie.quality.contains('Bộ') ? 'Phim Bộ' : 'Phim Lẻ');
+    String categoryType = 'phim-le';
+    final isSeries = detail.movie.quality.contains('Bộ') ||
+        detail.movie.episodeCurrent.toLowerCase().contains('tập');
 
-    final relatedRes = await getCategoryMoviesUseCase(CategoryMoviesParams(
+    if (detail.movie.categories.isNotEmpty) {
+      categoryType = _slugifyCategory(detail.movie.categories.first);
+    } else if (isSeries) {
+      categoryType = 'phim-bo';
+    }
+
+    var relatedRes = await getCategoryMoviesUseCase(CategoryMoviesParams(
       type: categoryType,
-      limit: 10,
+      limit: 12,
     ));
+
     if (relatedRes.isRight()) {
       relatedList = relatedRes
           .getOrElse(() => [])
           .where((m) => m.slug != event.slug)
           .toList();
+    }
+
+    // Fallback if category slug returned empty
+    if (relatedList.isEmpty) {
+      final fallbackType = isSeries ? 'phim-bo' : 'phim-le';
+      relatedRes = await getCategoryMoviesUseCase(CategoryMoviesParams(
+        type: fallbackType,
+        limit: 12,
+      ));
+      if (relatedRes.isRight()) {
+        relatedList = relatedRes
+            .getOrElse(() => [])
+            .where((m) => m.slug != event.slug)
+            .toList();
+      }
     }
 
     emit(state.copyWith(
@@ -75,6 +97,20 @@ class MovieDetailBloc extends Bloc<MovieDetailEvent, MovieDetailState> {
       selectedServerIndex: 0,
       selectedEpisodeIndex: 0,
     ));
+  }
+
+  String _slugifyCategory(String text) {
+    var str = text.trim().toLowerCase();
+    str = str.replaceAll(RegExp(r'[àáạảãâầấậẩẫăằắặẳẵ]'), 'a');
+    str = str.replaceAll(RegExp(r'[èéẹẻẽêềếệểễ]'), 'e');
+    str = str.replaceAll(RegExp(r'[ìíịỉĩ]'), 'i');
+    str = str.replaceAll(RegExp(r'[òóọỏõôồốộổỗơờớợởỡ]'), 'o');
+    str = str.replaceAll(RegExp(r'[ùúụủũưừứựửữ]'), 'u');
+    str = str.replaceAll(RegExp(r'[ỳýỵỷỹ]'), 'y');
+    str = str.replaceAll(RegExp(r'[đ]'), 'd');
+    str = str.replaceAll(RegExp(r'[^a-z0-9\s-]'), '');
+    str = str.replaceAll(RegExp(r'\s+'), '-');
+    return str.isEmpty ? 'phim-le' : str;
   }
 
   Future<void> _onToggleFavorite(
