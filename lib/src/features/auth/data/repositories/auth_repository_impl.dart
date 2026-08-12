@@ -1,7 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:movie_app/src/features/auth/data/datasources/auth_remote_data_source.dart';
-import 'package:movie_app/src/features/auth/data/datasources/user_firestore_data_source.dart';
-import 'package:movie_app/src/features/auth/domain/repositories/auth_repository.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../core/error/failures.dart';
+import '../datasources/auth_remote_data_source.dart';
+import '../datasources/user_firestore_data_source.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource authRemoteDataSource;
@@ -13,93 +15,126 @@ class AuthRepositoryImpl implements AuthRepository {
   });
 
   @override
-  Future<bool> login(String email, String password) async {
+  Future<Either<Failure, UserEntity>> login(
+      String email, String password) async {
     try {
-      await authRemoteDataSource.login(email, password);
-      return true;
+      final credential = await authRemoteDataSource.login(email, password);
+      final user = credential.user;
+      if (user != null) {
+        return Right(UserEntity(
+          uid: user.uid,
+          email: user.email ?? email,
+          displayName: user.displayName,
+          photoUrl: user.photoURL,
+        ));
+      }
+      return const Left(AuthFailure('Đăng nhập thất bại, không tìm thấy thông tin tài khoản'));
     } catch (e) {
-      return false;
+      return Left(AuthFailure(e.toString().replaceAll('Exception: ', '')));
     }
   }
 
   @override
-  Future<bool> register(String email, String password) async {
+  Future<Either<Failure, UserEntity>> register(
+      String email, String password) async {
     try {
       final credential = await authRemoteDataSource.register(email, password);
-      final uid = credential.user?.uid;
-      if (uid != null) {
-        await userFirestoreDataSource.createUserDoc(uid, email);
+      final user = credential.user;
+      if (user != null) {
+        await userFirestoreDataSource.createUserDoc(user.uid, email);
+        return Right(UserEntity(
+          uid: user.uid,
+          email: user.email ?? email,
+          displayName: user.displayName,
+          photoUrl: user.photoURL,
+        ));
       }
-      return true;
+      return const Left(AuthFailure('Đăng ký thất bại'));
     } catch (e) {
-      return false;
+      return Left(AuthFailure(e.toString().replaceAll('Exception: ', '')));
     }
   }
 
   @override
-  Future<bool> forgot(String email) async {
+  Future<Either<Failure, void>> forgotPassword(String email) async {
     try {
       await authRemoteDataSource.sendPasswordResetEmail(email);
-      return true;
+      return const Right(null);
     } catch (e) {
-      return false;
+      return Left(AuthFailure(e.toString().replaceAll('Exception: ', '')));
     }
   }
 
   @override
-  Future<bool> signOut() async {
+  Future<Either<Failure, void>> signOut() async {
     try {
       await authRemoteDataSource.signOut();
-      return true;
+      return const Right(null);
     } catch (e) {
-      return false;
+      return Left(AuthFailure(e.toString().replaceAll('Exception: ', '')));
     }
   }
 
   @override
-  bool isUser() {
+  Future<Either<Failure, UserEntity>> signInWithGoogle() async {
+    try {
+      final credential = await authRemoteDataSource.signInWithGoogle();
+      final user = credential.user;
+      if (user != null) {
+        try {
+          await userFirestoreDataSource.createUserDoc(user.uid, user.email ?? '');
+        } catch (_) {}
+        return Right(UserEntity(
+          uid: user.uid,
+          email: user.email ?? '',
+          displayName: user.displayName,
+          photoUrl: user.photoURL,
+        ));
+      }
+      return const Left(AuthFailure('Đăng nhập Google thất bại'));
+    } catch (e) {
+      return Left(AuthFailure(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInWithFacebook() async {
+    try {
+      final credential = await authRemoteDataSource.signInWithFacebook();
+      final user = credential.user;
+      if (user != null) {
+        try {
+          await userFirestoreDataSource.createUserDoc(user.uid, user.email ?? '');
+        } catch (_) {}
+        return Right(UserEntity(
+          uid: user.uid,
+          email: user.email ?? '',
+          displayName: user.displayName,
+          photoUrl: user.photoURL,
+        ));
+      }
+      return const Left(AuthFailure('Đăng nhập Facebook thất bại'));
+    } catch (e) {
+      return Left(AuthFailure(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
+
+  @override
+  bool isUserLoggedIn() {
     return authRemoteDataSource.isUser();
   }
 
   @override
-  User? user() {
-    return authRemoteDataSource.getCurrentUser();
-  }
-
-  @override
-  Future<String> updateInforUser(
-    String displayName,
-    PhoneAuthCredential phoneNumber,
-    String photoURL,
-  ) async {
-    try {
-      await authRemoteDataSource.updateDisplayName(displayName);
-      await authRemoteDataSource.updatePhoneNumber(phoneNumber);
-      await authRemoteDataSource.updatePhotoURL(photoURL);
-      await authRemoteDataSource.reloadUser();
-      return "Cập nhật thành công";
-    } catch (e) {
-      return "Cập nhật thất bại";
+  UserEntity? getCurrentUser() {
+    final user = authRemoteDataSource.getCurrentUser();
+    if (user != null) {
+      return UserEntity(
+        uid: user.uid,
+        email: user.email ?? '',
+        displayName: user.displayName,
+        photoUrl: user.photoURL,
+      );
     }
-  }
-
-  @override
-  Future<bool> signInWithGoogle() async {
-    try {
-      await authRemoteDataSource.signInWithGoogle();
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  @override
-  Future<bool> signInWithFacebook() async {
-    try {
-      await authRemoteDataSource.signInWithFacebook();
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return null;
   }
 }

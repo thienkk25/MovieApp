@@ -1,262 +1,145 @@
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:movie_app/src/core/theme/app_colors.dart';
-import 'package:movie_app/src/features/movie/presentation/providers/movie_providers.dart';
-import 'package:movie_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 
-class MyProfileScreen extends ConsumerStatefulWidget {
+class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
 
   @override
-  ConsumerState<MyProfileScreen> createState() => _MyProfileScreenState();
+  State<MyProfileScreen> createState() => _MyProfileScreenState();
 }
 
-class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
-  late User? user;
-  late String uid;
-  late String email;
-  late String name;
-  late String photo;
-  bool isEditing = false;
-  final TextEditingController nameController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    final currentUser = ref.read(getCurrentUserUseCaseProvider).call();
-    user = currentUser;
-    uid = currentUser?.uid ?? "";
-    email = currentUser?.email ?? "";
-    name = currentUser?.displayName ?? "";
-    photo = currentUser?.photoURL ?? "";
-    nameController.text = name;
-  }
-
-  Future<void> _saveName() async {
-    final newName = nameController.text.trim();
-    if (newName.isEmpty || user == null) return;
-    await user!.updateDisplayName(newName);
-    await user!.reload();
-    setState(() {
-      name = FirebaseAuth.instance.currentUser?.displayName ?? newName;
-      isEditing = false;
-      ref.read(currentNameUser.notifier).state = name;
-    });
-  }
-
+class _MyProfileScreenState extends State<MyProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
+
     return Scaffold(
       backgroundColor: colors.scaffoldBg,
       appBar: AppBar(
-        elevation: 0,
         backgroundColor: Colors.transparent,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [colors.headerGradientStart, colors.headerGradientEnd],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: colors.iconSecondary, size: 20),
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'profileScreen.title'.tr(),
-          style: const TextStyle(
+          'Hồ sơ cá nhân',
+          style: TextStyle(
             fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(
+      body: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          final user = state.user;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
               children: [
-                Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        colors.headerGradientStart,
-                        colors.headerGradientEnd
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(30),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                    child: Container(color: Colors.black.withValues(alpha: .2)),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
-                  child: Row(
+                // Header Avatar Card
+                Center(
+                  child: Column(
                     children: [
-                      Hero(
-                        tag: 'profileAvatar',
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(50),
-                          child: CachedNetworkImage(
-                            imageUrl: photo,
-                            height: 80,
-                            width: 80,
-                            fit: BoxFit.cover,
-                            errorWidget: (context, url, error) =>
-                                const CircleAvatar(
-                              radius: 40,
-                              backgroundColor: Colors.white10,
-                              child: Icon(Icons.person,
-                                  color: Colors.white, size: 40),
-                            ),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Colors.amber, Colors.orangeAccent],
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (isEditing)
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: nameController,
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                      decoration: const InputDecoration(
-                                        isDense: true,
-                                        contentPadding:
-                                            EdgeInsets.symmetric(vertical: 8),
-                                        border: UnderlineInputBorder(
-                                          borderSide:
-                                              BorderSide(color: Colors.white30),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: Colors.blueAccent),
-                                        ),
-                                      ),
-                                      onSubmitted: (_) async => _saveName(),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () async => _saveName(),
-                                    icon: const Icon(Icons.check,
-                                        color: Colors.lightGreenAccent),
-                                  ),
-                                  IconButton(
-                                    onPressed: () =>
-                                        setState(() => isEditing = false),
-                                    icon: const Icon(Icons.close,
-                                        color: Colors.redAccent),
-                                  ),
-                                ],
-                              )
-                            else
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      name.isNotEmpty ? name : "-",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () =>
-                                        setState(() => isEditing = true),
-                                    icon: const Icon(Icons.edit,
-                                        color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                            const SizedBox(height: 4),
-                            Text(
-                              email,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: .8),
-                                fontSize: 14,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.amber.withValues(alpha: 0.3),
+                              blurRadius: 20,
+                              spreadRadius: 4,
                             ),
                           ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: colors.cardBg,
+                          backgroundImage: (user?.photoUrl != null &&
+                                  user!.photoUrl!.isNotEmpty)
+                              ? CachedNetworkImageProvider(user.photoUrl!)
+                              : null,
+                          child: (user?.photoUrl == null ||
+                                  user!.photoUrl!.isEmpty)
+                              ? const Icon(Icons.person,
+                                  size: 50, color: Colors.amber)
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        user?.displayName ?? 'Thành viên',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        user?.email ?? '',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: colors.textTertiary,
                         ),
                       ),
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 32),
+
+                // Info Tiles
+                _buildInfoTile('UID', user?.uid ?? '—'),
+                _buildInfoTile('Tên người dùng', user?.displayName ?? 'Chưa đặt'),
+                _buildInfoTile('Email', user?.email ?? '—'),
               ],
             ),
-            const SizedBox(height: 25),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  _infoTile("UID", uid),
-                  _infoTile('profileScreen.name'.tr(), name),
-                  _infoTile('profileScreen.email'.tr(), email),
-                ],
-              ),
-            ),
-            const SizedBox(height: 40),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _infoTile(String title, String value) {
+  Widget _buildInfoTile(String title, String value) {
     final colors = context.appColors;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: LinearGradient(
-          colors: [colors.infoTileGradientStart, colors.infoTileGradientEnd],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: colors.infoTileBorder),
+        color: colors.cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title,
-              style: TextStyle(color: colors.textSecondary, fontSize: 15)),
+          Text(
+            title,
+            style: TextStyle(color: colors.textSecondary, fontSize: 14),
+          ),
           Flexible(
             child: Text(
-              value.isNotEmpty ? value : "—",
+              value,
               textAlign: TextAlign.right,
               style: TextStyle(
                 color: colors.textPrimary,
-                fontWeight: FontWeight.w500,
-                fontSize: 15,
-                overflow: TextOverflow.ellipsis,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

@@ -1,83 +1,107 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:movie_app/src/features/auth/domain/repositories/auth_repository.dart';
+import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/usecase/usecase.dart';
+import '../entities/user_entity.dart';
+import '../repositories/auth_repository.dart';
 
-class LoginUseCase {
-  final AuthRepository _repository;
-  LoginUseCase(this._repository);
+class LoginParams extends Equatable {
+  final String email;
+  final String password;
+  const LoginParams({required this.email, required this.password});
+  @override
+  List<Object?> get props => [email, password];
+}
 
-  Future<bool> call(String email, String password) {
-    return _repository.login(email, password);
+class RegisterParams extends Equatable {
+  final String email;
+  final String password;
+  const RegisterParams({required this.email, required this.password});
+  @override
+  List<Object?> get props => [email, password];
+}
+
+class ForgotPasswordParams extends Equatable {
+  final String email;
+  const ForgotPasswordParams({required this.email});
+  @override
+  List<Object?> get props => [email];
+}
+
+class LoginUseCase implements UseCase<UserEntity, LoginParams> {
+  final AuthRepository repository;
+  LoginUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, UserEntity>> call(LoginParams params) {
+    return repository.login(params.email, params.password);
   }
 }
 
-class RegisterUseCase {
-  final AuthRepository _repository;
-  RegisterUseCase(this._repository);
+class RegisterUseCase implements UseCase<UserEntity, RegisterParams> {
+  final AuthRepository repository;
+  RegisterUseCase(this.repository);
 
-  Future<bool> call(String email, String password) {
-    return _repository.register(email, password);
+  @override
+  Future<Either<Failure, UserEntity>> call(RegisterParams params) {
+    return repository.register(params.email, params.password);
   }
 }
 
-class ForgotUseCase {
-  final AuthRepository _repository;
-  ForgotUseCase(this._repository);
+class ForgotPasswordUseCase implements UseCase<void, ForgotPasswordParams> {
+  final AuthRepository repository;
+  ForgotPasswordUseCase(this.repository);
 
-  Future<bool> call(String email) {
-    return _repository.forgot(email);
+  @override
+  Future<Either<Failure, void>> call(ForgotPasswordParams params) {
+    return repository.forgotPassword(params.email);
   }
 }
 
-class SignOutUseCase {
-  final AuthRepository _repository;
-  SignOutUseCase(this._repository);
+class SignOutUseCase implements UseCase<void, NoParams> {
+  final AuthRepository repository;
+  SignOutUseCase(this.repository);
 
-  Future<bool> call() {
-    return _repository.signOut();
+  @override
+  Future<Either<Failure, void>> call(NoParams params) {
+    return repository.signOut();
   }
 }
 
-class IsUserUseCase {
-  final AuthRepository _repository;
-  IsUserUseCase(this._repository);
+class SignInWithGoogleUseCase implements UseCase<UserEntity, NoParams> {
+  final AuthRepository repository;
+  SignInWithGoogleUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, UserEntity>> call(NoParams params) {
+    return repository.signInWithGoogle();
+  }
+}
+
+class SignInWithFacebookUseCase implements UseCase<UserEntity, NoParams> {
+  final AuthRepository repository;
+  SignInWithFacebookUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, UserEntity>> call(NoParams params) {
+    return repository.signInWithFacebook();
+  }
+}
+
+class CheckAuthStatusUseCase {
+  final AuthRepository repository;
+  CheckAuthStatusUseCase(this.repository);
 
   bool call() {
-    return _repository.isUser();
+    return repository.isUserLoggedIn();
   }
 }
 
 class GetCurrentUserUseCase {
-  final AuthRepository _repository;
-  GetCurrentUserUseCase(this._repository);
+  final AuthRepository repository;
+  GetCurrentUserUseCase(this.repository);
 
-  User? call() {
-    return _repository.user();
-  }
-}
-
-class UpdateInforUserUseCase {
-  final AuthRepository _repository;
-  UpdateInforUserUseCase(this._repository);
-
-  Future<String> call(String displayName, PhoneAuthCredential phoneNumber, String photoURL) {
-    return _repository.updateInforUser(displayName, phoneNumber, photoURL);
-  }
-}
-
-class SignInWithGoogleUseCase {
-  final AuthRepository _repository;
-  SignInWithGoogleUseCase(this._repository);
-
-  Future<bool> call() {
-    return _repository.signInWithGoogle();
-  }
-}
-
-class SignInWithFacebookUseCase {
-  final AuthRepository _repository;
-  SignInWithFacebookUseCase(this._repository);
-
-  Future<bool> call() {
-    return _repository.signInWithFacebook();
+  UserEntity? call() {
+    return repository.getCurrentUser();
   }
 }

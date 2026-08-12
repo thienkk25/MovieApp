@@ -1,217 +1,331 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:movie_app/src/core/theme/app_colors.dart';
-import 'package:movie_app/src/features/movie/data/models/movie_model.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_dimensions.dart';
+import '../theme/app_text_styles.dart';
+import '../../features/movie/domain/entities/movie_entity.dart';
 
-class CardMovie extends StatelessWidget {
-  final Function() onTap;
-  final Function()? removeFavorite;
-  final MovieData movie;
-  final bool isLink;
+class CardMovie extends StatefulWidget {
+  final VoidCallback onTap;
+  final VoidCallback? removeFavorite;
+  final MovieEntity movie;
   final bool? isNewMovie;
-  const CardMovie(
-      {super.key,
-      required this.onTap,
-      required this.movie,
-      required this.isLink,
-      this.removeFavorite,
-      this.isNewMovie});
+
+  const CardMovie({
+    super.key,
+    required this.onTap,
+    required this.movie,
+    this.removeFavorite,
+    this.isNewMovie,
+  });
+
+  static String resolveImageUrl(String url) {
+    if (url.isEmpty) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('/')) return 'https://phimimg.com$url';
+    return 'https://phimimg.com/$url';
+  }
+
+  @override
+  State<CardMovie> createState() => _CardMovieState();
+}
+
+class _CardMovieState extends State<CardMovie>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 200),
+      lowerBound: 0.0,
+      upperBound: 0.04,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+    final colors = context.appColors;
+    final movie = widget.movie;
+    final imageUrl = CardMovie.resolveImageUrl(
+        movie.posterUrl.isNotEmpty ? movie.posterUrl : movie.thumbUrl);
+
+    return GestureDetector(
+      onTapDown: (_) => _scaleController.forward(),
+      onTapUp: (_) {
+        _scaleController.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _scaleController.reverse(),
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          );
+        },
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius:
+                BorderRadius.circular(AppDimensions.movieCardRadius),
+            color: colors.cardBg,
+            border: Border.all(
+              color: colors.borderLight,
+              width: AppDimensions.borderWidth,
             ),
-          ],
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              context.appColors.headerGradientStart,
-              context.appColors.headerGradientMid,
-              context.appColors.headerGradientEnd,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 14,
+                spreadRadius: 1,
+                offset: const Offset(0, 7),
+              ),
+            ],
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Poster Image
+              _buildPosterImage(imageUrl, colors),
+
+              // Top Dark Shadow for Badges
+              _buildTopShadow(),
+
+              // Quality & Episode Badges
+              _buildBadges(colors),
+
+              // Bottom Gradient with Title
+              _buildBottomInfo(colors),
+
+              // NEW badge
+              if (widget.isNewMovie == true) _buildNewBadge(colors),
+
+              // Remove Favorite Button
+              if (widget.removeFavorite != null)
+                _buildRemoveFavoriteButton(colors),
             ],
           ),
         ),
-        child: Stack(
-          children: [
-            CachedNetworkImage(
-              imageUrl: _resolveImageUrl(movie.posterUrl ?? ''),
-              progressIndicatorBuilder: (context, url, progress) =>
-                  const Center(
-                child: CircularProgressIndicator(color: Colors.orangeAccent),
-              ),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-              height: double.infinity,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              memCacheHeight: 400,
+      ),
+    );
+  }
+
+  Widget _buildPosterImage(String imageUrl, AppColors colors) {
+    if (imageUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        progressIndicatorBuilder: (context, url, progress) => Container(
+          color: colors.cardBg,
+          child: Center(
+            child: CircularProgressIndicator(
+              color: colors.accentPrimary,
+              strokeWidth: 2,
             ),
-            Positioned(
-              top: 6,
-              left: 6,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Colors.orangeAccent, Colors.deepOrange],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(6),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: .3),
-                          offset: const Offset(1, 1),
-                          blurRadius: 3,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.language,
-                            size: 11, color: Colors.white),
-                        const SizedBox(width: 4),
-                        Text(
-                          movie.lang ?? '',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: .6),
-                      borderRadius: BorderRadius.circular(6),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: .3),
-                          offset: const Offset(1, 1),
-                          blurRadius: 3,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.tv, size: 11, color: Colors.white),
-                        const SizedBox(width: 4),
-                        Text(
-                          movie.episodeCurrent ?? '',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: colors.cardBg,
+          child: Icon(Icons.movie_filter_rounded,
+              color: colors.iconInactive, size: 40),
+        ),
+      );
+    }
+    return Container(
+      color: colors.cardBg,
+      child: Icon(Icons.movie_filter_rounded,
+          color: colors.iconInactive, size: 40),
+    );
+  }
+
+  Widget _buildTopShadow() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 50,
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xB3000000),
+              Colors.transparent,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBadges(AppColors colors) {
+    final movie = widget.movie;
+    return Positioned(
+      top: 8,
+      left: 8,
+      right: 8,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (movie.quality.isNotEmpty)
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [colors.accentPrimary, colors.accentSecondary],
+                ),
+                borderRadius:
+                    BorderRadius.circular(AppDimensions.radiusXs),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.accentGlow,
+                    blurRadius: 6,
                   ),
                 ],
               ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.0),
-                      Colors.black.withValues(alpha: 0.85),
-                    ],
-                  ),
-                ),
-                child: Text(
-                  movie.name ?? '',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+              child: Text(
+                movie.quality,
+                style: AppTextStyles.badge.copyWith(
+                  color: colors.accentOnAccent,
                 ),
               ),
             ),
-            if (removeFavorite != null)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: GestureDetector(
-                  onTap: removeFavorite,
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: .4),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.favorite,
-                      color: Colors.orange,
-                      size: 26,
-                    ),
-                  ),
+          if (movie.episodeCurrent.isNotEmpty)
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.8),
+                borderRadius:
+                    BorderRadius.circular(AppDimensions.radiusXs),
+                border: Border.all(
+                  color: colors.borderLight,
                 ),
               ),
-            if (isNewMovie != null && isNewMovie == true)
-              Positioned(
-                top: -5,
-                right: 0,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(50),
-                  ),
-                  child: Image.asset(
-                    "assets/imgs/new-blinking.gif",
-                    height: 30,
-                    width: 30,
-                    fit: BoxFit.cover,
-                  ),
+              child: Text(
+                movie.episodeCurrent,
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 9,
                 ),
               ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomInfo(AppColors colors) {
+    final movie = widget.movie;
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(10, 28, 10, 10),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              Color(0xA6000000),
+              Color(0xF2000000),
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              movie.name,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                height: 1.25,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (movie.originName.isNotEmpty) ...[
+              const SizedBox(height: 3),
+              Text(
+                movie.originName,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w400,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  /// Auto-detect if URL is absolute or relative and resolve accordingly.
-  static String resolveImageUrl(String url) {
-    if (url.isEmpty) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return 'https://phimimg.com/$url';
+  Widget _buildNewBadge(AppColors colors) {
+    return Positioned(
+      top: 8,
+      left: 8,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: colors.newBadgeColor,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusXs),
+        ),
+        child: Text(
+          'NEW',
+          style: AppTextStyles.badge.copyWith(color: Colors.white),
+        ),
+      ),
+    );
   }
 
-  String _resolveImageUrl(String url) => resolveImageUrl(url);
+  Widget _buildRemoveFavoriteButton(AppColors colors) {
+    return Positioned(
+      top: 8,
+      right: 8,
+      child: GestureDetector(
+        onTap: widget.removeFavorite,
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.7),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: colors.borderLight,
+            ),
+          ),
+          child: Icon(
+            Icons.favorite_rounded,
+            color: colors.error,
+            size: 18,
+          ),
+        ),
+      ),
+    );
+  }
 }

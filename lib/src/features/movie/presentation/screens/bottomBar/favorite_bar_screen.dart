@@ -1,247 +1,294 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:movie_app/src/core/theme/app_colors.dart';
-import 'package:movie_app/src/features/movie/data/models/movie_model.dart';
-import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_app/src/core/configs/overlay_screen.dart';
+import 'package:movie_app/src/core/theme/app_colors.dart';
+import 'package:movie_app/src/core/theme/app_dimensions.dart';
+import 'package:movie_app/src/core/theme/app_text_styles.dart';
 import 'package:movie_app/src/core/widgets/card_movie.dart';
-import 'package:movie_app/src/features/movie/presentation/providers/movie_providers.dart';
+import 'package:movie_app/src/features/movie/domain/entities/movie_entity.dart';
+import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_bloc.dart';
+import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_event.dart';
+import 'package:movie_app/src/features/movie/presentation/bloc/movie_favorite/movie_favorite_state.dart';
+import 'package:movie_app/src/features/movie/presentation/screens/components/infor_movie_screen.dart';
 
-class FavoriteBarScreen extends ConsumerStatefulWidget {
+enum FavoriteSortType {
+  newest,
+  nameAZ,
+  year,
+}
+
+class FavoriteBarScreen extends StatefulWidget {
   const FavoriteBarScreen({super.key});
 
   @override
-  ConsumerState<FavoriteBarScreen> createState() => _FavoriteBarScreenState();
+  State<FavoriteBarScreen> createState() => _FavoriteBarScreenState();
 }
 
-class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
+class _FavoriteBarScreenState extends State<FavoriteBarScreen> {
+  FavoriteSortType _sortType = FavoriteSortType.newest;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => loadData());
+    context
+        .read<MovieFavoriteBloc>()
+        .add(const MovieFavoriteEvent.fetchFavorites());
   }
 
-  Future<void> loadData() async {
-    final data = await ref.read(getFavoriteMoviesUseCaseProvider).call();
-    if (!mounted) return;
-    ref.read(getFavoriteMoviesNotifierProvider.notifier).initState(data);
+  List<MovieEntity> _sortMovies(List<MovieEntity> movies) {
+    final sorted = List<MovieEntity>.from(movies);
+    switch (_sortType) {
+      case FavoriteSortType.newest:
+        return sorted; // Already sorted by add time from Firestore
+      case FavoriteSortType.nameAZ:
+        sorted.sort((a, b) => a.name.compareTo(b.name));
+        return sorted;
+      case FavoriteSortType.year:
+        sorted.sort((a, b) => b.year.compareTo(a.year));
+        return sorted;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final data = ref.watch(getFavoriteMoviesNotifierProvider);
-    final dataFavorites = data.values.toList();
-    final sizeWidth = MediaQuery.of(context).size.width;
     final colors = context.appColors;
 
-    int columnCount = sizeWidth < 600
-        ? 2
-        : sizeWidth <= 900
-            ? 3
-            : sizeWidth <= 1300
-                ? 4
-                : 5;
-
     return Scaffold(
+      backgroundColor: colors.scaffoldBg,
       appBar: AppBar(
-        elevation: 0,
         backgroundColor: Colors.transparent,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                colors.appBarBg,
-                colors.appBarBgSecondary,
-              ],
-            ),
-          ),
-        ),
+        elevation: 0,
         title: Text(
-          'favoritesScreen.title'.tr(),
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.8,
-            color: colors.textPrimary,
-          ),
+          'Phim yêu thích',
+          style: AppTextStyles.appBarTitle.copyWith(color: colors.textPrimary),
         ),
         centerTitle: true,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [colors.gradientStart, colors.gradientMid, colors.gradientEnd],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Glassmorphic Search Anchor Bar
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.orangeAccent.withValues(alpha: 0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.md, vertical: 12),
+          child: BlocBuilder<MovieFavoriteBloc, MovieFavoriteState>(
+            builder: (context, state) {
+              if (state.status == MovieFavoriteStatus.loading &&
+                  state.favoriteMovies.isEmpty) {
+                return Center(
+                  child: CircularProgressIndicator(
+                      color: colors.accentPrimary),
+                );
+              }
+
+              if (state.favoriteMovies.isEmpty) {
+                return _buildEmptyState(colors);
+              }
+
+              final sortedMovies = _sortMovies(state.favoriteMovies);
+
+              return RefreshIndicator(
+                color: colors.accentPrimary,
+                onRefresh: () async {
+                  context
+                      .read<MovieFavoriteBloc>()
+                      .add(const MovieFavoriteEvent.fetchFavorites());
+                },
+                child: Column(
+                  children: [
+                    // Sort Options Bar
+                    _buildSortBar(colors, state.favoriteMovies.length),
+                    const SizedBox(height: 14),
+
+                    // Movie Grid
+                    Expanded(
+                      child: GridView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
+                        itemCount: sortedMovies.length,
+                        gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: context.responsiveColumnCount,
+                          mainAxisExtent: AppDimensions.movieCardHeight,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
+                        itemBuilder: (context, index) {
+                          final movie = sortedMovies[index];
+                          return CardMovie(
+                            movie: movie,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => InforMovieScreen(
+                                      slugMovie: movie.slug),
+                                ),
+                              );
+                            },
+                            removeFavorite: () =>
+                                _confirmRemove(context, movie.slug),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
-                child: SearchAnchor.bar(
-                  isFullScreen: false,
-                  barHintText: 'search.hint'.tr(),
-                  barElevation: const WidgetStatePropertyAll(0),
-                  barBackgroundColor: WidgetStatePropertyAll(colors.inputFill),
-                  barOverlayColor: WidgetStatePropertyAll(
-                      colors.inputFill.withValues(alpha: 0.8)),
-                  barTextStyle: WidgetStatePropertyAll(
-                    TextStyle(color: colors.inputText, fontSize: 16),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Sort Bar ───────────────────────────────────────────
+  Widget _buildSortBar(AppColors colors, int count) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          '$count phim đã lưu',
+          style: AppTextStyles.labelLarge.copyWith(color: colors.textPrimary),
+        ),
+        PopupMenuButton<FavoriteSortType>(
+          initialValue: _sortType,
+          color: colors.sheetBg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          ),
+          onSelected: (type) => setState(() => _sortType = type),
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: colors.cardBg,
+              borderRadius:
+                  BorderRadius.circular(AppDimensions.radiusMd),
+              border: Border.all(color: colors.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.sort_rounded,
+                    size: 16, color: colors.accentPrimary),
+                const SizedBox(width: 6),
+                Text(
+                  _sortLabel,
+                  style: AppTextStyles.labelSmall
+                      .copyWith(color: colors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: FavoriteSortType.newest,
+              child: Row(
+                children: [
+                  Icon(Icons.schedule_rounded,
+                      size: 16, color: colors.textSecondary),
+                  const SizedBox(width: 8),
+                  Text('Mới thêm',
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: colors.textPrimary)),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: FavoriteSortType.nameAZ,
+              child: Row(
+                children: [
+                  Icon(Icons.sort_by_alpha_rounded,
+                      size: 16, color: colors.textSecondary),
+                  const SizedBox(width: 8),
+                  Text('Tên A-Z',
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: colors.textPrimary)),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: FavoriteSortType.year,
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_today_rounded,
+                      size: 16, color: colors.textSecondary),
+                  const SizedBox(width: 8),
+                  Text('Năm sản xuất',
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: colors.textPrimary)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String get _sortLabel {
+    switch (_sortType) {
+      case FavoriteSortType.newest:
+        return 'Mới thêm';
+      case FavoriteSortType.nameAZ:
+        return 'Tên A-Z';
+      case FavoriteSortType.year:
+        return 'Năm';
+    }
+  }
+
+  // ─── Empty State ────────────────────────────────────────
+  Widget _buildEmptyState(AppColors colors) {
+    return RefreshIndicator(
+      color: colors.accentPrimary,
+      onRefresh: () async {
+        context
+            .read<MovieFavoriteBloc>()
+            .add(const MovieFavoriteEvent.fetchFavorites());
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.65,
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      colors.accentGlow,
+                      colors.accentPrimary.withValues(alpha: 0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  barHintStyle: WidgetStatePropertyAll(
-                    TextStyle(color: colors.inputHint),
-                  ),
-                  barShape: WidgetStatePropertyAll(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: colors.inputBorder,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  barLeading:
-                      const Icon(Icons.search, color: Colors.orangeAccent),
-                  suggestionsBuilder: (context, controller) {
-                    final search = controller.text.toLowerCase();
-                    final results = dataFavorites
-                        .where((e) => e['name'].toLowerCase().contains(search))
-                        .toList();
-                    if (results.isEmpty) {
-                      return [
-                        ListTile(
-                          title: Text(
-                            'search.noResult'.tr(),
-                            style: TextStyle(color: colors.textSecondary),
-                          ),
-                        )
-                      ];
-                    }
-                    return results.map((movie) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: colors.divider,
-                            ),
-                          ),
-                        ),
-                        child: ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: CachedNetworkImage(
-                              imageUrl: CardMovie.resolveImageUrl(movie['poster_url'] ?? ''),
-                              width: 45,
-                              height: 60,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          title: Text(
-                            movie['name'],
-                            style: TextStyle(
-                              color: colors.textPrimary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => InforMovieScreen(
-                                slugMovie: movie['slug'],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList();
-                  },
+                ),
+                child: Icon(
+                  Icons.favorite_border_rounded,
+                  color: colors.accentPrimary,
+                  size: 54,
                 ),
               ),
-              const SizedBox(height: 18),
-              Expanded(
-                child: dataFavorites.isNotEmpty
-                    ? GridView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: dataFavorites.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: columnCount,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                          mainAxisExtent: 260,
-                        ),
-                        itemBuilder: (context, index) {
-                          final movie = dataFavorites[index];
-                          return CardMovie(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => InforMovieScreen(
-                                  slugMovie: movie['slug'],
-                                ),
-                              ),
-                            ),
-                            removeFavorite: () => _confirmRemove(movie['slug']),
-                            movie: MovieData.fromJson(movie),
-                            isLink: true,
-                          );
-                        },
-                      )
-                    : Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color:
-                                    Colors.orangeAccent.withValues(alpha: 0.1),
-                              ),
-                              child: const Icon(
-                                Icons.favorite_border_rounded,
-                                color: Colors.orangeAccent,
-                                size: 54,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'favoritesScreen.emptyMessage'.tr(),
-                              style: TextStyle(
-                                color: colors.textSecondary,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'search.hint'.tr(),
-                              style: TextStyle(
-                                color: colors.textTertiary,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+              const SizedBox(height: 20),
+              Text(
+                'Danh sách yêu thích trống',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  'Nhấn biểu tượng trái tim ở phim để lưu lại xem sau',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.bodySmall
+                      .copyWith(color: colors.textTertiary),
+                ),
               ),
             ],
           ),
@@ -250,99 +297,62 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
     );
   }
 
-  void _confirmRemove(String slug) {
+  // ─── Remove Confirm Dialog ──────────────────────────────
+  void _confirmRemove(BuildContext context, String slug) {
     final colors = context.appColors;
     showDialog(
       context: context,
-      barrierDismissible: true,
-      builder: (context) => Dialog(
+      builder: (contextDialog) => Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: colors.dialogBg,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: colors.border,
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
+            border: Border.all(color: colors.border),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.redAccent.withValues(alpha: 0.15),
-                ),
-                child: const Icon(
-                  Icons.delete_outline_rounded,
-                  color: Colors.redAccent,
-                  size: 36,
-                ),
-              ),
-              const SizedBox(height: 16),
+              Icon(Icons.delete_outline_rounded,
+                  color: colors.error, size: 40),
+              const SizedBox(height: 12),
               Text(
-                'settingsScreen.notifications.title'.tr(),
-                style: TextStyle(
-                  fontSize: 20,
+                'Bỏ yêu thích phim này?',
+                style: AppTextStyles.bodyLarge.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colors.textPrimary,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 10),
-              Text(
-                'dialog.confirmFavorite'.tr(),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: colors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: colors.textSecondary,
-                        side: BorderSide(
-                          color: colors.border,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('navigation.cancel'.tr()),
+                      onPressed: () =>
+                          Navigator.pop(contextDialog),
+                      child: const Text('Hủy'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: colors.error,
                       ),
                       onPressed: () {
-                        Navigator.pop(context);
-                        removeFavoriteMovie(slug);
+                        Navigator.pop(contextDialog);
+                        context.read<MovieFavoriteBloc>().add(
+                            MovieFavoriteEvent.removeFavorite(slug));
+                        OverlayScreen().showOverlay(
+                          context,
+                          'Đã xóa khỏi danh sách yêu thích',
+                          colors.error,
+                          duration: 2,
+                        );
                       },
-                      child: Text('navigation.confirm'.tr()),
+                      child: const Text('Xóa',
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
@@ -352,21 +362,5 @@ class _FavoriteBarScreenState extends ConsumerState<FavoriteBarScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> removeFavoriteMovie(String slug) async {
-    final result =
-        await ref.read(removeFavoriteMovieUseCaseProvider).call(slug);
-    if (!mounted) return;
-    if (result) {
-      ref.read(getFavoriteMoviesNotifierProvider.notifier).removeState(slug);
-      OverlayScreen().showOverlay(
-          context, 'success.removeFavorite'.tr(), Colors.green,
-          duration: 3);
-    } else {
-      OverlayScreen().showOverlay(
-          context, 'errors.removeFavorite'.tr(), Colors.red,
-          duration: 3);
-    }
   }
 }
