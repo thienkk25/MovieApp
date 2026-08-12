@@ -5,6 +5,7 @@ import 'package:movie_app/src/core/theme/app_colors.dart';
 import 'package:movie_app/src/core/theme/app_dimensions.dart';
 import 'package:movie_app/src/core/theme/app_text_styles.dart';
 import 'package:movie_app/src/core/widgets/card_movie.dart';
+import 'package:movie_app/src/features/movie/data/models/search_filter.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_search/movie_search_bloc.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_search/movie_search_event.dart';
 import 'package:movie_app/src/features/movie/presentation/bloc/movie_search/movie_search_state.dart';
@@ -35,6 +36,21 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
     _TrendingTag('Hoạt Hình', Icons.animation_rounded),
     _TrendingTag('Chiến Tranh', Icons.shield_rounded),
     _TrendingTag('Tâm Lý', Icons.psychology_rounded),
+  ];
+
+  final List<_QuickFilterOption> _quickFilters = const [
+    _QuickFilterOption(label: 'Tất cả', category: null, sortLang: null, country: null),
+    _QuickFilterOption(label: 'Phim Lẻ', category: 'phim-le'),
+    _QuickFilterOption(label: 'Phim Bộ', category: 'phim-bo'),
+    _QuickFilterOption(label: 'Hoạt Hình', category: 'hoat-hinh'),
+    _QuickFilterOption(label: 'Vietsub', sortLang: 'vietsub'),
+    _QuickFilterOption(label: 'Thuyết Minh', sortLang: 'thuyet-minh'),
+    _QuickFilterOption(label: 'Hàn Quốc', country: 'han-quoc'),
+    _QuickFilterOption(label: 'Trung Quốc', country: 'trung-quoc'),
+    _QuickFilterOption(label: 'Âu Mỹ', country: 'au-my'),
+    _QuickFilterOption(label: 'Hành Động', category: 'hanh-dong'),
+    _QuickFilterOption(label: 'Tình Cảm', category: 'tinh-cam'),
+    _QuickFilterOption(label: 'Kinh Dị', category: 'kinh-di'),
   ];
 
   @override
@@ -88,6 +104,16 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
     context.read<MovieSearchBloc>().add(const MovieSearchEvent.executeSearch());
   }
 
+  int _countActiveFilters(SearchFilter filter) {
+    int count = 0;
+    if (filter.category != null && filter.category!.isNotEmpty) count++;
+    if (filter.country != null && filter.country!.isNotEmpty) count++;
+    if (filter.sortLang != null && filter.sortLang!.isNotEmpty) count++;
+    if (filter.year != null) count++;
+    if (filter.sortField != 'modified.time' || filter.sortType != 'desc') count++;
+    return count;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
@@ -98,7 +124,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'Tìm kiếm phim',
+          'Tìm kiếm & Lọc phim',
           style: AppTextStyles.appBarTitle.copyWith(color: colors.textPrimary),
         ),
         centerTitle: true,
@@ -106,18 +132,24 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.md, vertical: 12),
+              horizontal: AppDimensions.md, vertical: 8),
           child: Column(
             children: [
               // Search Input Bar
               _buildSearchBar(colors),
 
+              const SizedBox(height: 12),
+
+              // Quick Filter Pills Row (Horizontal Scroll)
+              _buildQuickFilterBar(colors),
+
               const SizedBox(height: 14),
 
-              // Filter Action Row
+              // Results Header & Advanced Filter Button Row
               BlocBuilder<MovieSearchBloc, MovieSearchState>(
                 builder: (context, state) {
-                  final hasFilter = state.filter.isNotEmpty;
+                  final activeCount = _countActiveFilters(state.filter);
+                  final hasFilter = activeCount > 0;
 
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -133,7 +165,8 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                       ),
                       GestureDetector(
                         onTap: () => _showFilterModal(context),
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
@@ -145,7 +178,17 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                               color: hasFilter
                                   ? colors.accentPrimary
                                   : colors.border,
+                              width: hasFilter ? 1.5 : 1.0,
                             ),
+                            boxShadow: hasFilter
+                                ? [
+                                    BoxShadow(
+                                      color: colors.accentGlow,
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]
+                                : null,
                           ),
                           child: Row(
                             children: [
@@ -158,11 +201,14 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Bộ lọc',
+                                hasFilter ? 'Bộ lọc ($activeCount)' : 'Bộ lọc nâng cao',
                                 style: AppTextStyles.labelMedium.copyWith(
                                   color: hasFilter
                                       ? colors.accentPrimary
                                       : colors.textSecondary,
+                                  fontWeight: hasFilter
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                                 ),
                               ),
                             ],
@@ -176,13 +222,13 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
 
               const SizedBox(height: 14),
 
-              // Content Area
+              // Main Results / Discovery Content Area
               Expanded(
                 child: BlocBuilder<MovieSearchBloc, MovieSearchState>(
                   builder: (context, state) {
-                    // Show recent + trending when search is empty
                     if (searchController.text.isEmpty &&
-                        state.searchResults.isEmpty) {
+                        state.searchResults.isEmpty &&
+                        !state.filter.isNotEmpty) {
                       return _buildDiscoveryView(colors);
                     }
 
@@ -234,10 +280,10 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
     );
   }
 
-  // ─── Search Bar ─────────────────────────────────────────
+  // ─── Search Bar Widget ──────────────────────────────────
   Widget _buildSearchBar(AppColors colors) {
     return Container(
-      height: 52,
+      height: 50,
       decoration: BoxDecoration(
         color: colors.inputFill,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
@@ -245,7 +291,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
       ),
       child: Row(
         children: [
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Icon(Icons.search_rounded, color: colors.accentPrimary, size: 22),
           const SizedBox(width: 10),
           Expanded(
@@ -261,7 +307,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
                 isDense: true,
               ),
               onChanged: (val) {
-                setState(() {}); // Rebuild for clear button
+                setState(() {});
                 if (timer?.isActive ?? false) timer?.cancel();
                 timer = Timer(const Duration(milliseconds: 400), () {
                   if (val.trim().isNotEmpty) {
@@ -299,6 +345,103 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
             ),
         ],
       ),
+    );
+  }
+
+  // ─── Horizontal Quick-Filter Bar ────────────────────────
+  Widget _buildQuickFilterBar(AppColors colors) {
+    return BlocBuilder<MovieSearchBloc, MovieSearchState>(
+      builder: (context, state) {
+        final currentFilter = state.filter;
+
+        return SizedBox(
+          height: 36,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: _quickFilters.length,
+            itemBuilder: (context, index) {
+              final opt = _quickFilters[index];
+
+              bool isSelected = false;
+              if (opt.category == null &&
+                  opt.sortLang == null &&
+                  opt.country == null) {
+                isSelected = currentFilter.category == null &&
+                    currentFilter.sortLang == null &&
+                    currentFilter.country == null;
+              } else {
+                if (opt.category != null &&
+                    currentFilter.category == opt.category) {
+                  isSelected = true;
+                }
+                if (opt.sortLang != null &&
+                    currentFilter.sortLang == opt.sortLang) {
+                  isSelected = true;
+                }
+                if (opt.country != null &&
+                    currentFilter.country == opt.country) {
+                  isSelected = true;
+                }
+              }
+
+              return GestureDetector(
+                onTap: () {
+                  SearchFilter newFilter;
+                  if (opt.category == null &&
+                      opt.sortLang == null &&
+                      opt.country == null) {
+                    newFilter = currentFilter.copyWith(
+                      category: null,
+                      sortLang: null,
+                      country: null,
+                    );
+                  } else {
+                    newFilter = currentFilter.copyWith(
+                      category: opt.category,
+                      sortLang: opt.sortLang,
+                      country: opt.country,
+                    );
+                  }
+
+                  context
+                      .read<MovieSearchBloc>()
+                      .add(MovieSearchEvent.filterChanged(newFilter));
+                  context
+                      .read<MovieSearchBloc>()
+                      .add(const MovieSearchEvent.executeSearch());
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? colors.accentPrimary
+                        : colors.cardBg,
+                    borderRadius:
+                        BorderRadius.circular(AppDimensions.pillRadius),
+                    border: Border.all(
+                      color: isSelected ? colors.accentPrimary : colors.border,
+                    ),
+                  ),
+                  child: Text(
+                    opt.label,
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: isSelected
+                          ? colors.accentOnAccent
+                          : colors.textSecondary,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -436,7 +579,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Thử tìm với từ khóa khác',
+            'Thử thay đổi từ khóa hoặc cài đặt bộ lọc',
             style: AppTextStyles.bodySmall.copyWith(color: colors.textTertiary),
           ),
         ],
@@ -466,6 +609,7 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
   }
 }
 
+// ─── Advanced Filter BottomSheet Modal ─────────────────────
 class FilterModalWidget extends StatefulWidget {
   const FilterModalWidget({super.key});
 
@@ -474,25 +618,83 @@ class FilterModalWidget extends StatefulWidget {
 }
 
 class _FilterModalWidgetState extends State<FilterModalWidget> {
-  String? selectedCategory;
-  String? selectedCountry;
-  int? selectedYear;
+  late String? selectedCategory;
+  late String? selectedCountry;
+  late String? selectedSortLang;
+  late int? selectedYear;
+  late String selectedSortField;
+  late String selectedSortType;
+
+  final Map<String, String> _categories = const {
+    'phim-le': 'Phim Lẻ',
+    'phim-bo': 'Phim Bộ',
+    'hoat-hinh': 'Hoạt Hình',
+    'hanh-dong': 'Hành Động',
+    'tinh-cam': 'Tình Cảm',
+    'hai-huoc': 'Hài Hước',
+    'kinh-di': 'Kinh Dị',
+    'co-trang': 'Cổ Trang',
+    'vien-tuong': 'Viễn Tưởng',
+    'tam-ly': 'Tâm Lý',
+    'vo-thuat': 'Võ Thuật',
+    'hinh-su': 'Hình Sự',
+    'bi-an': 'Bí Ẩn',
+  };
+
+  final Map<String, String> _countries = const {
+    'trung-quoc': 'Trung Quốc',
+    'han-quoc': 'Hàn Quốc',
+    'au-my': 'Âu Mỹ',
+    'nhat-ban': 'Nhật Bản',
+    'viet-nam': 'Việt Nam',
+    'thai-lan': 'Thái Lan',
+    'an-do': 'Ấn Độ',
+    'hong-kong': 'Hồng Kông',
+  };
+
+  final Map<String, String> _languages = const {
+    'vietsub': 'Vietsub',
+    'thuyet-minh': 'Thuyết Minh',
+    'long-tieng': 'Lồng Tiếng',
+  };
+
+  final List<Map<String, String>> _sortOptions = const [
+    {'field': 'modified.time', 'type': 'desc', 'label': 'Mới cập nhật'},
+    {'field': 'year', 'type': 'desc', 'label': 'Năm phát hành mới nhất'},
+    {'field': 'view', 'type': 'desc', 'label': 'Nhiều lượt xem nhất'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final filter = context.read<MovieSearchBloc>().state.filter;
+    selectedCategory = filter.category;
+    selectedCountry = filter.country;
+    selectedSortLang = filter.sortLang;
+    selectedYear = filter.year;
+    selectedSortField = filter.sortField;
+    selectedSortType = filter.sortType;
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
-    return Padding(
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       padding: EdgeInsets.only(
         left: 20,
         right: 20,
-        top: 20,
+        top: 16,
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Drag Handle
           Center(
             child: Container(
               width: AppDimensions.sheetHandleWidth,
@@ -503,44 +705,186 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Lọc phim nâng cao',
-            style: AppTextStyles.h3.copyWith(color: colors.textPrimary),
-          ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
 
-          // Year Dropdown
-          DropdownButtonFormField<int>(
-            initialValue: selectedYear,
-            dropdownColor: colors.sheetBg,
-            style: AppTextStyles.bodyMedium.copyWith(color: colors.textPrimary),
-            decoration: InputDecoration(
-              labelText: 'Năm phát hành',
-              labelStyle: TextStyle(color: colors.accentPrimary),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                borderSide: BorderSide(color: colors.border),
+          // Modal Title & Reset Button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Bộ lọc phim nâng cao 🎬',
+                style: AppTextStyles.h3.copyWith(
+                  color: colors.textPrimary,
+                  fontSize: 20,
+                ),
               ),
-            ),
-            items: [
-              const DropdownMenuItem<int>(
-                value: null,
-                child: Text('Tất cả năm'),
-              ),
-              ...List.generate(
-                15,
-                (i) => DropdownMenuItem<int>(
-                  value: DateTime.now().year - i,
-                  child: Text('${DateTime.now().year - i}'),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedCategory = null;
+                    selectedCountry = null;
+                    selectedSortLang = null;
+                    selectedYear = null;
+                    selectedSortField = 'modified.time';
+                    selectedSortType = 'desc';
+                  });
+                },
+                child: Text(
+                  'Đặt lại',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: colors.accentPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
-            onChanged: (val) => setState(() => selectedYear = val),
+          ),
+          const SizedBox(height: 16),
+
+          // Scrollable Filter Sections
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Thể loại
+                  _buildSectionHeader('Thể loại phim', colors),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildChip('Tất cả', selectedCategory == null, () {
+                        setState(() => selectedCategory = null);
+                      }, colors),
+                      ..._categories.entries.map((e) {
+                        return _buildChip(e.value, selectedCategory == e.key, () {
+                          setState(() => selectedCategory =
+                              selectedCategory == e.key ? null : e.key);
+                        }, colors);
+                      }),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // 2. Quốc gia
+                  _buildSectionHeader('Quốc gia phát hành', colors),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildChip('Tất cả', selectedCountry == null, () {
+                        setState(() => selectedCountry = null);
+                      }, colors),
+                      ..._countries.entries.map((e) {
+                        return _buildChip(e.value, selectedCountry == e.key, () {
+                          setState(() => selectedCountry =
+                              selectedCountry == e.key ? null : e.key);
+                        }, colors);
+                      }),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // 3. Bản dịch / Ngôn ngữ
+                  _buildSectionHeader('Định dạng âm thanh', colors),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildChip('Tất cả', selectedSortLang == null, () {
+                        setState(() => selectedSortLang = null);
+                      }, colors),
+                      ..._languages.entries.map((e) {
+                        return _buildChip(e.value, selectedSortLang == e.key, () {
+                          setState(() => selectedSortLang =
+                              selectedSortLang == e.key ? null : e.key);
+                        }, colors);
+                      }),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // 4. Năm phát hành & Sắp xếp
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionHeader('Năm sản xuất', colors),
+                            const SizedBox(height: 10),
+                            DropdownButtonFormField<int>(
+                              initialValue: selectedYear,
+                              dropdownColor: colors.sheetBg,
+                              style: AppTextStyles.bodyMedium
+                                  .copyWith(color: colors.textPrimary),
+                              decoration: InputDecoration(
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(AppDimensions.radiusMd),
+                                  borderSide: BorderSide(color: colors.border),
+                                ),
+                              ),
+                              items: [
+                                const DropdownMenuItem<int>(
+                                  value: null,
+                                  child: Text('Tất cả năm'),
+                                ),
+                                ...List.generate(
+                                  16,
+                                  (i) => DropdownMenuItem<int>(
+                                    value: DateTime.now().year - i,
+                                    child: Text('${DateTime.now().year - i}'),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (val) =>
+                                  setState(() => selectedYear = val),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // 5. Sắp xếp theo
+                  _buildSectionHeader('Sắp xếp theo', colors),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _sortOptions.map((opt) {
+                      final isSelected = selectedSortField == opt['field'] &&
+                          selectedSortType == opt['type'];
+                      return _buildChip(opt['label']!, isSelected, () {
+                        setState(() {
+                          selectedSortField = opt['field']!;
+                          selectedSortType = opt['type']!;
+                        });
+                      }, colors);
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
           ),
 
-          const SizedBox(height: 24),
-
+          // Bottom Action Buttons
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -549,6 +893,9 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
                     context
                         .read<MovieSearchBloc>()
                         .add(const MovieSearchEvent.resetFilter());
+                    context
+                        .read<MovieSearchBloc>()
+                        .add(const MovieSearchEvent.executeSearch());
                     Navigator.pop(context);
                   },
                   style: OutlinedButton.styleFrom(
@@ -559,7 +906,7 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
                           BorderRadius.circular(AppDimensions.radiusLg),
                     ),
                   ),
-                  child: Text('Đặt lại',
+                  child: Text('Bỏ lọc',
                       style: TextStyle(color: colors.accentPrimary)),
                 ),
               ),
@@ -572,7 +919,12 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
                     context.read<MovieSearchBloc>().add(
                           MovieSearchEvent.filterChanged(
                             currentFilter.copyWith(
+                              category: selectedCategory,
+                              country: selectedCountry,
+                              sortLang: selectedSortLang,
                               year: selectedYear,
+                              sortField: selectedSortField,
+                              sortType: selectedSortType,
                             ),
                           ),
                         );
@@ -589,15 +941,53 @@ class _FilterModalWidgetState extends State<FilterModalWidget> {
                           BorderRadius.circular(AppDimensions.radiusLg),
                     ),
                   ),
-                  child: Text('Áp dụng',
-                      style: AppTextStyles.buttonSmall.copyWith(
-                        color: colors.accentOnAccent,
-                      )),
+                  child: Text(
+                    'Áp dụng bộ lọc',
+                    style: AppTextStyles.buttonSmall.copyWith(
+                      color: colors.accentOnAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, AppColors colors) {
+    return Text(
+      title,
+      style: AppTextStyles.labelLarge.copyWith(
+        color: colors.textPrimary,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildChip(
+      String label, bool isSelected, VoidCallback onTap, AppColors colors) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.accentPrimary : colors.cardBg,
+          borderRadius: BorderRadius.circular(AppDimensions.pillRadius),
+          border: Border.all(
+            color: isSelected ? colors.accentPrimary : colors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.labelSmall.copyWith(
+            color: isSelected ? colors.accentOnAccent : colors.textSecondary,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
       ),
     );
   }
@@ -609,4 +999,19 @@ class _TrendingTag {
   final IconData icon;
 
   const _TrendingTag(this.label, this.icon);
+}
+
+/// Helper model for quick filter bar options
+class _QuickFilterOption {
+  final String label;
+  final String? category;
+  final String? sortLang;
+  final String? country;
+
+  const _QuickFilterOption({
+    required this.label,
+    this.category,
+    this.sortLang,
+    this.country,
+  });
 }
