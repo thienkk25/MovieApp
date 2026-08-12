@@ -124,8 +124,8 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                           const SizedBox(height: 10),
 
                           // Media Player or Hero Poster
-                          _buildMediaSection(context, state, detail,
-                              imageUrl, colors),
+                          _buildMediaSection(
+                              context, state, detail, imageUrl, colors),
 
                           const SizedBox(height: 22),
 
@@ -136,8 +136,8 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
 
                           // Episode List
                           if (detail.episodes.isNotEmpty)
-                            _buildEpisodeSection(context, state, detail,
-                                colors),
+                            _buildEpisodeSection(
+                                context, state, detail, colors),
 
                           // Related Movies
                           if (state.relatedMovies.isNotEmpty) ...[
@@ -167,8 +167,8 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.white),
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -176,8 +176,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline_rounded,
-                color: colors.error, size: 54),
+            Icon(Icons.error_outline_rounded, color: colors.error, size: 54),
             const SizedBox(height: 14),
             Text(
               state.errorMessage ?? 'Không thể tải thông tin phim',
@@ -203,8 +202,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.5),
             shape: BoxShape.circle,
-            border:
-                Border.all(color: Colors.white.withValues(alpha: 0.15)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
           ),
           child: const Icon(Icons.arrow_back_ios_new_rounded,
               color: Colors.white, size: 16),
@@ -226,15 +224,13 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.5),
               shape: BoxShape.circle,
-              border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.15)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
             ),
-            child: const Icon(Icons.share_rounded,
-                color: Colors.white, size: 18),
+            child:
+                const Icon(Icons.share_rounded, color: Colors.white, size: 18),
           ),
           onPressed: () {
-            final shareUrl =
-                'https://phimapi.com/phim/${movie.slug}';
+            final shareUrl = 'https://phimapi.com/phim/${movie.slug}';
             Clipboard.setData(ClipboardData(text: shareUrl));
             OverlayScreen().showOverlay(
               context,
@@ -251,16 +247,13 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.5),
               shape: BoxShape.circle,
-              border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.15)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
             ),
             child: Icon(
               state.isFavorite
                   ? Icons.favorite_rounded
                   : Icons.favorite_border_rounded,
-              color: state.isFavorite
-                  ? colors.error
-                  : Colors.white,
+              color: state.isFavorite ? colors.error : Colors.white,
               size: 20,
             ),
           ),
@@ -374,8 +367,8 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
   }
 
   // ─── Info Card ──────────────────────────────────────────
-  Widget _buildInfoCard(BuildContext context, MovieDetailEntity detail,
-      AppColors colors) {
+  Widget _buildInfoCard(
+      BuildContext context, MovieDetailEntity detail, AppColors colors) {
     final movie = detail.movie;
 
     return Container(
@@ -428,8 +421,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
               if (movie.lang.isNotEmpty)
                 _buildBadge(movie.lang, colors.success, colors),
               if (movie.episodeCurrent.isNotEmpty)
-                _buildBadge(
-                    movie.episodeCurrent, Colors.purpleAccent, colors),
+                _buildBadge(movie.episodeCurrent, Colors.purpleAccent, colors),
             ],
           ),
 
@@ -441,12 +433,11 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
               runSpacing: 6,
               children: movie.categories.map((cat) {
                 return Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: colors.inputFill,
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusSm),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                     border: Border.all(color: colors.border),
                   ),
                   child: Text(
@@ -460,12 +451,10 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
           ],
 
           // Cast & Director
-          if (detail.actors.isNotEmpty ||
-              detail.directors.isNotEmpty) ...[
+          if (detail.actors.isNotEmpty || detail.directors.isNotEmpty) ...[
             const SizedBox(height: 16),
             Divider(color: colors.border.withValues(alpha: 0.5)),
             const SizedBox(height: 12),
-
             if (detail.directors.isNotEmpty) ...[
               Row(
                 children: [
@@ -487,7 +476,6 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
               ),
               const SizedBox(height: 6),
             ],
-
             if (detail.actors.isNotEmpty) ...[
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,8 +520,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
 
   // ─── Expandable Synopsis ────────────────────────────────
   Widget _buildExpandableSynopsis(String content, AppColors colors) {
-    final cleanContent =
-        content.replaceAll(RegExp(r'<[^>]*>'), '').trim();
+    final cleanContent = content.replaceAll(RegExp(r'<[^>]*>'), '').trim();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -579,8 +566,8 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
   // ─── Episode Section ────────────────────────────────────
   Widget _buildEpisodeSection(BuildContext context, MovieDetailState state,
       MovieDetailEntity detail, AppColors colors) {
-    final episodeCount = detail
-        .episodes[state.selectedServerIndex].serverData.length;
+    final episodeCount =
+        detail.episodes[state.selectedServerIndex].serverData.length;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -607,12 +594,11 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
               ),
               if (detail.episodes.length > 1)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: colors.accentGlow,
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusSm),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                   ),
                   child: Text(
                     '${detail.episodes.length} Nguồn chiếu',
@@ -631,19 +617,17 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children:
-                    List.generate(detail.episodes.length, (sIdx) {
-                  final serverName =
-                      detail.episodes[sIdx].serverName.isNotEmpty
-                          ? detail.episodes[sIdx].serverName
-                          : 'Nguồn ${sIdx + 1}';
-                  final isSelected =
-                      state.selectedServerIndex == sIdx;
+                children: List.generate(detail.episodes.length, (sIdx) {
+                  final serverName = detail.episodes[sIdx].serverName.isNotEmpty
+                      ? detail.episodes[sIdx].serverName
+                      : 'Nguồn ${sIdx + 1}';
+                  final isSelected = state.selectedServerIndex == sIdx;
 
                   return GestureDetector(
                     onTap: () {
-                      context.read<MovieDetailBloc>().add(
-                          MovieDetailEvent.selectEpisode(
+                      context
+                          .read<MovieDetailBloc>()
+                          .add(MovieDetailEvent.selectEpisode(
                             serverIndex: sIdx,
                             episodeIndex: 0,
                           ));
@@ -656,8 +640,8 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                         color: isSelected
                             ? colors.accentPrimary
                             : colors.inputFill,
-                        borderRadius: BorderRadius.circular(
-                            AppDimensions.radiusMd),
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusMd),
                       ),
                       child: Text(
                         serverName,
@@ -686,8 +670,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
                 scrollDirection: Axis.horizontal,
                 itemCount: episodeCount,
                 itemBuilder: (context, idx) {
-                  return _buildEpisodeChip(
-                      context, state, detail, idx, colors);
+                  return _buildEpisodeChip(context, state, detail, idx, colors);
                 },
               ),
             )
@@ -697,8 +680,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
               spacing: 10,
               runSpacing: 10,
               children: List.generate(episodeCount, (idx) {
-                return _buildEpisodeChip(
-                    context, state, detail, idx, colors);
+                return _buildEpisodeChip(context, state, detail, idx, colors);
               }),
             ),
         ],
@@ -708,14 +690,12 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
 
   Widget _buildEpisodeChip(BuildContext context, MovieDetailState state,
       MovieDetailEntity detail, int idx, AppColors colors) {
-    final ep = detail
-        .episodes[state.selectedServerIndex].serverData[idx];
+    final ep = detail.episodes[state.selectedServerIndex].serverData[idx];
     final isSelected = state.selectedEpisodeIndex == idx;
 
     return GestureDetector(
       onTap: () {
-        context.read<MovieDetailBloc>().add(
-            MovieDetailEvent.selectEpisode(
+        context.read<MovieDetailBloc>().add(MovieDetailEvent.selectEpisode(
               serverIndex: state.selectedServerIndex,
               episodeIndex: idx,
             ));
@@ -753,9 +733,7 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
         child: Text(
           ep.name.isNotEmpty ? ep.name : 'Tập ${idx + 1}',
           style: AppTextStyles.labelMedium.copyWith(
-            color: isSelected
-                ? colors.accentOnAccent
-                : colors.textPrimary,
+            color: isSelected ? colors.accentOnAccent : colors.textPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -764,51 +742,149 @@ class __InforMovieScreenContentState extends State<_InforMovieScreenContent> {
   }
 
   // ─── Related Movies ─────────────────────────────────────
-  Widget _buildRelatedMovies(BuildContext context,
-      List<MovieEntity> movies, AppColors colors) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'Phim tương tự',
-            style: AppTextStyles.sectionTitle
-                .copyWith(color: colors.textPrimary),
-          ),
+  Widget _buildRelatedMovies(
+      BuildContext context, List<MovieEntity> movies, AppColors colors) {
+    if (movies.isEmpty) return const SizedBox();
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: colors.cardBg.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colors.border.withValues(alpha: 0.6),
         ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 240,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: movies.length,
-            itemBuilder: (context, index) {
-              final relMovie = movies[index];
-              return Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: SizedBox(
-                  width: 135,
-                  child: CardMovie(
-                    movie: relMovie,
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => InforMovieScreen(
-                              slugMovie: relMovie.slug),
-                        ),
-                      );
-                    },
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colors.accentPrimary,
+                        colors.accentSecondary,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.accentGlow,
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.auto_awesome_rounded,
+                    color: colors.accentOnAccent,
+                    size: 18,
                   ),
                 ),
-              );
-            },
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Phim tương tự đề xuất',
+                        style: AppTextStyles.sectionTitle.copyWith(
+                          color: colors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Dành riêng cho bạn dựa trên thể loại này',
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: colors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: colors.accentGlow,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: colors.accentPrimary.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    '${movies.length} phim',
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: colors.accentPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+
+          // Horizontal Movie Cards List
+          SizedBox(
+            height: 245,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: movies.length,
+              itemBuilder: (context, index) {
+                final relMovie = movies[index];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 14),
+                  child: SizedBox(
+                    width: 140,
+                    child: CardMovie(
+                      movie: relMovie,
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => InforMovieScreen(
+                              slugMovie: relMovie.slug,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                )
+                    .animate()
+                    .fade(
+                      delay: Duration(milliseconds: 50 * index),
+                      duration: const Duration(milliseconds: 350),
+                    )
+                    .slideX(
+                      begin: 0.2,
+                      end: 0,
+                      curve: Curves.easeOutCubic,
+                    );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
