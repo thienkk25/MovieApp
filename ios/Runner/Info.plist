@@ -51,7 +51,8 @@
 			<dict>
 				<key>CFBundleURLSchemes</key>
 				<array>
-					<string>fbAPP-ID</string>
+					<string>fb755773767308667</string>
+					<string>com.googleusercontent.apps.374460320009-albrkn4tp2497tvkmmh4a8csnusoe6km</string>
 				</array>
 			</dict>
 		</array>
@@ -62,10 +63,10 @@
 			<string>en</string>
 		</array>
 
-		<key></key>
-		<string>APP-ID</string>
+		<key>FacebookAppID</key>
+		<string>755773767308667</string>
 		<key>FacebookClientToken</key>
-		<string></string>
+		<string>cbfec9de01bcf6e9c6900565f9ae6f86</string>
 		<key>FacebookDisplayName</key>
 		<string>Movie App</string>
 

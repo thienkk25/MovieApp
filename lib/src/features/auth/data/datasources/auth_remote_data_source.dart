@@ -137,10 +137,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       await _initGoogleSignIn();
 
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {}
+
       final GoogleSignInAccount googleUser =
           await _googleSignIn.authenticate();
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+      if (googleAuth.idToken == null || googleAuth.idToken!.isEmpty) {
+        throw Exception('Không thể lấy mã thông báo xác thực từ Google');
+      }
 
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
@@ -154,18 +162,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (errStr.contains('cancel') || errStr.contains('canceled') || errStr.contains('hủy')) {
         throw Exception('Đã hủy đăng nhập Google');
       }
-      rethrow;
+      if (e is Exception) rethrow;
+      throw Exception(e.toString());
     }
   }
 
   @override
   Future<UserCredential> signInWithFacebook() async {
     try {
+      try {
+        await _facebookAuth.logOut();
+      } catch (_) {}
+
       final LoginResult result = await _facebookAuth.login(
         permissions: ['email', 'public_profile'],
       );
 
-      if (result.status == LoginStatus.success) {
+      if (result.status == LoginStatus.success && result.accessToken != null) {
         final OAuthCredential credential =
             FacebookAuthProvider.credential(result.accessToken!.tokenString);
         return await _firebaseAuth.signInWithCredential(credential);
@@ -175,23 +188,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Đã hủy đăng nhập Facebook');
       }
 
-      // Native login failed (e.g. key hash issue or no FB app installed), try web login
-      final LoginResult webResult = await _facebookAuth.login(
-        permissions: ['email', 'public_profile'],
-        loginBehavior: LoginBehavior.webOnly,
-      );
+      // If native login fails (e.g., key hash issue or app not installed), try web login
+      if (result.status == LoginStatus.failed) {
+        try {
+          final LoginResult webResult = await _facebookAuth.login(
+            permissions: ['email', 'public_profile'],
+            loginBehavior: LoginBehavior.webOnly,
+          );
 
-      if (webResult.status == LoginStatus.success) {
-        final OAuthCredential credential =
-            FacebookAuthProvider.credential(webResult.accessToken!.tokenString);
-        return await _firebaseAuth.signInWithCredential(credential);
+          if (webResult.status == LoginStatus.success &&
+              webResult.accessToken != null) {
+            final OAuthCredential credential = FacebookAuthProvider.credential(
+                webResult.accessToken!.tokenString);
+            return await _firebaseAuth.signInWithCredential(credential);
+          }
+
+          if (webResult.status == LoginStatus.cancelled) {
+            throw Exception('Đã hủy đăng nhập Facebook');
+          }
+        } catch (_) {}
       }
 
-      if (webResult.status == LoginStatus.cancelled) {
-        throw Exception('Đã hủy đăng nhập Facebook');
-      }
-
-      throw Exception(webResult.message ?? 'Đăng nhập Facebook thất bại');
+      throw Exception(result.message ?? 'Đăng nhập Facebook thất bại');
     } on FirebaseAuthException catch (e) {
       throw Exception(_mapFirebaseAuthExceptionMessage(e));
     } catch (e) {
@@ -199,7 +217,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (errStr.contains('cancel') || errStr.contains('canceled') || errStr.contains('hủy')) {
         throw Exception('Đã hủy đăng nhập Facebook');
       }
-      rethrow;
+      if (e is Exception) rethrow;
+      throw Exception(e.toString());
     }
   }
 
